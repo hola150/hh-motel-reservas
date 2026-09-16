@@ -19,7 +19,7 @@ class PaymentService
 {
     public function register(Booking $booking, PaymentMethod $method, int $amount, ?string $externalId, ?string $notes, ?int $registeredBy, ?string $voucherNumber = null, ?string $receiptNumber = null): Payment
     {
-        return DB::transaction(function () use ($booking, $method, $amount, $externalId, $notes, $registeredBy) {
+        return DB::transaction(function () use ($booking, $method, $amount, $externalId, $notes, $registeredBy, $voucherNumber, $receiptNumber) {
             // Bloqueo de fila: sin esto, dos pagos enviados casi al mismo
             // tiempo (doble clic, dos pestañas) podrían leer el mismo saldo
             // pendiente y pasar los dos la validación, sumando más de lo que
