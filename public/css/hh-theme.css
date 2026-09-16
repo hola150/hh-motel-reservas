@@ -46,7 +46,12 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .hh-subnav { background: #ececed !important; border-bottom-color: #dadbdd !important; gap: 6px !important; }
 .hh-subnav a { color: #515257 !important; }
 .hh-subnav a.hh-active, .hh-subnav a:hover { background: #292a2c !important; color: #fff !important; }
-.page-inner, body > .wrap { width: 100%; max-width: 1800px; padding: 25px 28px 60px; }
+/* Sin max-width acá a propósito: cada página define el suyo en su propio
+   <style> (520px para un formulario angosto, 1700px para el tablero,
+   880px para el panel admin, etc.) -- esta regla compartida se carga
+   despues en el documento, asi que si tambien fijara un max-width le
+   ganaria en el cascade al de la pagina sin importar cual sea. */
+.page-inner, body > .wrap { width: 100%; padding: 25px 28px 60px; }
 h1 { font-size: 25px; letter-spacing: -.035em; line-height: 1.25; }
 .sub, .sidebar-hint, .section-empty, .sidebar-empty { color: #62656c !important; }
 .sub a, a.link, .page-inner > .code { color: #a74600 !important; }

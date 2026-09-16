@@ -36,16 +36,20 @@
 
     @if ($room->operational_status === 'aseo')
         <div class="eta">Esperando aseo — no vuelve a disponibles hasta que recepción la marque</div>
-        <form method="POST" action="{{ route('rooms.aseo_ready', $room) }}" class="aseo-ready-form">
-            @csrf
-            <select name="cleaned_by" class="aseo-cleaner-input" required>
-                <option value="" selected disabled>¿Quién hizo el aseo?</option>
-                @foreach (\App\Support\AseoStaff::NAMES as $name)
-                    <option value="{{ $name }}">{{ $name }}</option>
-                @endforeach
-            </select>
-            <button type="submit" class="aseo-ready-btn">Marcar aseo listo — reactivar</button>
-        </form>
+        @if (($cleaningStaff ?? collect())->isNotEmpty())
+            <form method="POST" action="{{ route('rooms.aseo_ready', $room) }}" class="aseo-ready-form">
+                @csrf
+                <select name="cleaned_by" class="aseo-cleaner-input" required>
+                    <option value="" selected disabled>¿Quién hizo el aseo?</option>
+                    @foreach ($cleaningStaff as $name)
+                        <option value="{{ $name }}">{{ $name }}</option>
+                    @endforeach
+                </select>
+                <button type="submit" class="aseo-ready-btn">Marcar aseo listo — reactivar</button>
+            </form>
+        @else
+            <div class="eta" style="color:#e88a9a;">No hay mucamas activas cargadas en <a href="{{ route('admin.staff.index') }}" style="color:#e88a9a;">Personal</a> — agrega al menos una para poder marcar el aseo.</div>
+        @endif
     @elseif ($room->operational_status !== 'activa')
         @if ($room->operational_note)
             <div class="eta">{{ $room->operational_note }}</div>

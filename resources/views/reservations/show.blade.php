@@ -27,8 +27,11 @@
         .pill { display:inline-block; font-size:11px; font-family: ui-monospace, monospace; padding:3px 9px; border-radius:20px; background:#2a2a2a; color:#ccc; }
         .balance { color:#ff7918; }
         a.back { display:block; text-align:center; margin-top: 14px; color:#999; font-size: 13px; text-decoration:none; }
-        a.board-btn { display:block; text-align:center; background:#ff7918; color:#fff; padding:14px; border-radius:8px; font-size:15px; font-weight:700; text-decoration:none; margin-top:24px; }
-        a.board-btn:hover { background:#df6209; }
+        /* Secundario a propósito: "Finalizar" (arriba) es naranja porque es
+           la acción principal de esta pantalla -- volver al tablero es solo
+           navegación, no debería competir visualmente con eso. */
+        a.board-btn { display:block; text-align:center; background:#2a2a2a; border:1px solid #444; color:#eee; padding:13px; border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; margin-top:24px; }
+        a.board-btn:hover { border-color:#ff7918; color:#ff7918; }
         a.pay-btn { display:block; text-align:center; background:#ff7918; color:#fff; padding:13px; border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; }
         a.pay-btn-inline { margin-top:14px; }
         table.payments { width:100%; border-collapse: collapse; font-size: 13px; }

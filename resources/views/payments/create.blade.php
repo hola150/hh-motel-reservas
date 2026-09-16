@@ -62,14 +62,14 @@
         <input type="text" inputmode="numeric" id="amount-display" placeholder="0" required>
         <input type="hidden" name="amount" id="amount-input" value="{{ old('amount', $suggestedAmount) }}">
 
-        <label for="payment-reference">Referencia / N° de operación (opcional)</label>
+        <label for="payment-reference">Referencia / N° de operación (opcional — si la dejas vacía, generamos una)</label>
         <input id="payment-reference" type="text" name="external_id" value="{{ old('external_id') }}">
 
-        <label for="voucher-number">N° voucher</label>
-        <input id="voucher-number" type="text" name="voucher_number" value="{{ old('voucher_number') }}" required placeholder="Ej. 146">
+        <label for="voucher-number">N° voucher <span style="color:#777; font-weight:400;">(uno de los dos)</span></label>
+        <input id="voucher-number" type="text" name="voucher_number" value="{{ old('voucher_number') }}" placeholder="Ej. 146">
 
-        <label for="receipt-number">N° boleta</label>
-        <input id="receipt-number" type="text" name="receipt_number" value="{{ old('receipt_number') }}" required placeholder="Ej. 96302">
+        <label for="receipt-number">N° boleta <span style="color:#777; font-weight:400;">(uno de los dos)</span></label>
+        <input id="receipt-number" type="text" name="receipt_number" value="{{ old('receipt_number') }}" placeholder="Ej. 96302">
 
         <label for="payment-notes">Observaciones (opcional)</label>
         <input id="payment-notes" type="text" name="notes" value="{{ old('notes') }}">

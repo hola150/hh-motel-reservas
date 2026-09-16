@@ -8,6 +8,7 @@ use App\Models\PaymentMethod;
 use App\Services\Booking\PaymentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class PaymentController extends Controller
@@ -42,26 +43,35 @@ class PaymentController extends Controller
             'payment_method_id' => ['required', 'exists:payment_methods,id'],
             'amount' => ['required', 'integer', 'min:1', 'max:'.max($booking->balanceDue(), 1)],
             'external_id' => ['nullable', 'string', 'max:255'],
-            'voucher_number' => ['required', 'string', 'max:100'],
-            'receipt_number' => ['required', 'string', 'max:100'],
+            // Basta con uno de los dos — no siempre hay voucher Y boleta para
+            // el mismo pago (ej. una transferencia solo trae comprobante).
+            'voucher_number' => ['nullable', 'required_without:receipt_number', 'string', 'max:100'],
+            'receipt_number' => ['nullable', 'required_without:voucher_number', 'string', 'max:100'],
             'notes' => ['nullable', 'string', 'max:255'],
             'after' => ['nullable', 'in:board'],
         ], [
             'amount.max' => 'El monto no puede superar el saldo pendiente ($'.number_format($booking->balanceDue(), 0, ',', '.').').',
+            'voucher_number.required_without' => 'Ingresa el N° de voucher o el N° de boleta (al menos uno de los dos).',
+            'receipt_number.required_without' => 'Ingresa el N° de voucher o el N° de boleta (al menos uno de los dos).',
         ]);
 
         $method = PaymentMethod::findOrFail($validated['payment_method_id']);
+
+        // Si recepción no anota una referencia propia (ej. N° de operación de
+        // una transferencia), generamos una nosotros -- así todo pago manual
+        // queda igual de rastreable, sin depender de que alguien la tipee.
+        $externalId = $validated['external_id'] ?: 'REC-'.now()->format('ymdHis').'-'.strtoupper(Str::random(4));
 
         try {
             $paymentService->register(
                 $booking,
                 $method,
                 (int) $validated['amount'],
-                $validated['external_id'] ?? null,
+                $externalId,
                 $validated['notes'] ?? null,
                 auth()->id(),
-                $validated['voucher_number'],
-                $validated['receipt_number'],
+                $validated['voucher_number'] ?? null,
+                $validated['receipt_number'] ?? null,
             );
         } catch (PaymentExceedsBalanceException $e) {
             return back()->withInput()->withErrors(['amount' => $e->getMessage()]);

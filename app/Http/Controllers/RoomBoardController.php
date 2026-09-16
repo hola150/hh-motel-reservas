@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Booking;
 use App\Models\Coupon;
 use App\Models\Room;
+use App\Models\Staff;
 use App\Services\Booking\RoomBoardService;
 use App\Services\Pricing\RateRuleResolver;
 use App\Support\TimeFormat;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class RoomBoardController extends Controller
@@ -49,6 +51,7 @@ class RoomBoardController extends Controller
             'tariff' => $tariff,
             'closesLabel' => $tariff ? $this->formatCountdown($now, $tariff['closes_at']) : null,
             'nextOpeningLabel' => $nextOpening ? $this->formatCountdown($now, $nextOpening) : null,
+            'cleaningStaff' => $this->cleaningStaffNames(),
         ]);
     }
 
@@ -162,10 +165,22 @@ class RoomBoardController extends Controller
      * habitación. Único camino de vuelta a disponibles después de un
      * check-out (o de un envío a aseo manual).
      */
+    /**
+     * Nombres del personal de mucamas activo, para el selector de "¿quién
+     * hizo el aseo?" -- antes era una lista fija (App\Support\AseoStaff)
+     * porque no existía un padrón real; ahora sale directo de /admin/personal.
+     */
+    private function cleaningStaffNames(): \Illuminate\Support\Collection
+    {
+        return Staff::where('role', 'Mucama')->where('is_active', true)->orderBy('name')->pluck('name');
+    }
+
     public function markAseoReady(Request $request, Room $room): RedirectResponse
     {
+        $names = $this->cleaningStaffNames();
+
         $validated = $request->validate([
-            'cleaned_by' => ['required', 'string', 'in:'.implode(',', \App\Support\AseoStaff::NAMES)],
+            'cleaned_by' => ['required', 'string', Rule::in($names)],
         ], [
             'cleaned_by.required' => 'Falta indicar quién hizo el aseo.',
             'cleaned_by.in' => 'Elegí una persona de aseo válida.',
