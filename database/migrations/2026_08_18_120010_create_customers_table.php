@@ -1,0 +1,29 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('customers', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('phone_e164', 20)->unique(); // identidad primaria
+            $table->string('email')->nullable();
+            $table->string('rut', 15)->nullable();
+            $table->string('ghl_contact_id')->nullable()->index(); // vínculo con el contacto en GHL
+            $table->timestamp('ghl_synced_at')->nullable();
+            $table->timestamps();
+
+            $table->index('email');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('customers');
+    }
+};

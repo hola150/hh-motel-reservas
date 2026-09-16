@@ -1,0 +1,75 @@
+<?php
+
+namespace App\Services\Booking;
+
+use App\Exceptions\PaymentExceedsBalanceException;
+use App\Models\AuditLog;
+use App\Models\Booking;
+use App\Models\Payment;
+use App\Models\PaymentMethod;
+use Illuminate\Support\Facades\DB;
+
+/**
+ * El "pagado" de una reserva nunca es un campo suelto — se recalcula siempre
+ * a partir de la suma de pagos aprobados en payments (sección 17 del
+ * documento de arquitectura). Registrar un pago y recalcular el estado
+ * financiero ocurre siempre junto, en la misma transacción.
+ */
+class PaymentService
+{
+    public function register(Booking $booking, PaymentMethod $method, int $amount, ?string $externalId, ?string $notes, ?int $registeredBy): Payment
+    {
+        return DB::transaction(function () use ($booking, $method, $amount, $externalId, $notes, $registeredBy) {
+            // Bloqueo de fila: sin esto, dos pagos enviados casi al mismo
+            // tiempo (doble clic, dos pestañas) podrían leer el mismo saldo
+            // pendiente y pasar los dos la validación, sumando más de lo que
+            // realmente se debe. El saldo se vuelve a comprobar acá adentro,
+            // con la fila bloqueada, no solo en el controller.
+            $locked = Booking::whereKey($booking->id)->lockForUpdate()->first();
+
+            if ($amount > $locked->balanceDue()) {
+                throw new PaymentExceedsBalanceException(
+                    'El saldo pendiente cambió justo antes de registrar este pago (probablemente por otro pago simultáneo) — el monto ya no corresponde. Revisa la reserva y volvé a intentar.'
+                );
+            }
+
+            $payment = Payment::create([
+                'booking_id' => $booking->id,
+                'payment_method_id' => $method->id,
+                'amount' => $amount,
+                'status' => 'aprobado', // registro manual: el staff ya verificó el dinero/transferencia
+                'external_id' => $externalId,
+                'registered_by' => $registeredBy,
+                'notes' => $notes,
+            ]);
+
+            $this->recalculateStatus($booking->fresh());
+
+            AuditLog::record($registeredBy, 'pago.registrar', 'Payment', $payment->id, null, $payment->toArray());
+
+            return $payment;
+        });
+    }
+
+    public function recalculateStatus(Booking $booking): void
+    {
+        $paid = $booking->paidAmount();
+        $totalDue = $booking->price_final + $booking->addonsTotal();
+
+        $paymentStatus = match (true) {
+            $paid <= 0 => 'NO_PAGADA',
+            $paid < $totalDue => 'PARCIALMENTE_PAGADA',
+            default => 'PAGADA',
+        };
+
+        $bookingStatus = $booking->booking_status;
+        if ($paid > 0 && in_array($booking->booking_status, ['PENDIENTE_PAGO', 'RETENIDA', 'BORRADOR'], true)) {
+            $bookingStatus = 'CONFIRMADA';
+        }
+
+        $booking->update([
+            'payment_status' => $paymentStatus,
+            'booking_status' => $bookingStatus,
+        ]);
+    }
+}
