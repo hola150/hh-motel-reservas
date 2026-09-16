@@ -18,7 +18,7 @@
                     <small style="display:block;color:#888;margin:3px 0 10px;">{{ $room->category->name }}</small>
                     <div style="display:flex;flex-wrap:wrap;gap:6px;">
                         @foreach($room->furniture->where('pivot.quantity','>',0) as $equipment)
-                            <span style="padding:5px 8px;background:#f1f1f1;border-radius:6px;font-size:12px;">{{ $equipment->icon ?? '✦' }} {{ $equipment->name }} ×{{ $equipment->pivot->quantity }}</span>
+                            <span style="padding:5px 8px;background:#2a2a2a;color:#eee;border-radius:6px;font-size:12px;">{{ $equipment->icon ?? '✦' }} {{ $equipment->name }} ×{{ $equipment->pivot->quantity }}</span>
                         @endforeach
                     </div>
                 </div>
