@@ -23,6 +23,7 @@ class StaffController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:100'],
             'role' => ['required', 'string', 'max:50'],
+            'legal_hours_per_week' => ['nullable', 'integer', 'min:0', 'max:100'],
         ]);
 
         $person = Staff::create($validated);
@@ -36,6 +37,7 @@ class StaffController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:100'],
             'role' => ['required', 'string', 'max:50'],
+            'legal_hours_per_week' => ['nullable', 'integer', 'min:0', 'max:100'],
             'is_active' => ['sometimes', 'boolean'],
         ]);
         $validated['is_active'] = $request->boolean('is_active');

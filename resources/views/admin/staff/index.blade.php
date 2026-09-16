@@ -2,7 +2,7 @@
 @section('title', 'Personal')
 @section('content')
     <h1>Personal</h1>
-    <p class="sub">Anfitriones, mucamas y cualquier otro rol -- se usa para armar los turnos.</p>
+    <p class="sub">Anfitriones, mucamas y cualquier otro rol -- se usa para armar los turnos y calcular horas extra.</p>
 
     <div class="card">
         <h2>Agregar persona</h2>
@@ -22,6 +22,10 @@
                         @endforeach
                     </datalist>
                 </div>
+                <div>
+                    <label>Horas legales por semana</label>
+                    <input type="number" name="legal_hours_per_week" min="0" max="100" placeholder="Ej. 45">
+                </div>
             </div>
             <div class="actions" style="margin-top:16px;"><button class="btn" type="submit">Agregar</button></div>
         </form>
@@ -29,12 +33,13 @@
 
     <div class="card">
         <table>
-            <thead><tr><th>Nombre</th><th>Rol</th><th>Estado</th><th></th></tr></thead>
+            <thead><tr><th>Nombre</th><th>Rol</th><th>Horas legales/semana</th><th>Estado</th><th></th></tr></thead>
             <tbody>
                 @forelse ($staff as $person)
                     <tr>
                         <td>{{ $person->name }}</td>
                         <td>{{ $person->role }}</td>
+                        <td>{{ $person->legal_hours_per_week ?? '—' }}</td>
                         <td><span class="pill">{{ $person->is_active ? 'ACTIVO' : 'INACTIVO' }}</span></td>
                         <td>
                             <details>
@@ -43,6 +48,7 @@
                                     @csrf @method('PUT')
                                     <input name="name" value="{{ $person->name }}" maxlength="100" required>
                                     <input name="role" value="{{ $person->role }}" maxlength="50" required>
+                                    <input type="number" name="legal_hours_per_week" value="{{ $person->legal_hours_per_week }}" min="0" max="100" placeholder="Horas legales/semana">
                                     <select name="is_active">
                                         <option value="1" @selected($person->is_active)>Activo</option>
                                         <option value="0" @selected(!$person->is_active)>Inactivo</option>
@@ -53,7 +59,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="4" style="color:#666;">Todavía no hay nadie cargado.</td></tr>
+                    <tr><td colspan="5" style="color:#666;">Todavía no hay nadie cargado.</td></tr>
                 @endforelse
             </tbody>
         </table>

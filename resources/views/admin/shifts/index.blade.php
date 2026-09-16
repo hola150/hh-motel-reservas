@@ -22,6 +22,14 @@
         .add-shift-card { margin-top:14px; }
         .add-shift-card form { display:grid; grid-template-columns:repeat(5, 1fr) auto; gap:10px; align-items:end; }
         @media (max-width: 900px) { .add-shift-card form { grid-template-columns:1fr 1fr; } }
+        table.hours-table { width:100%; border-collapse:collapse; font-size:13px; }
+        table.hours-table th, table.hours-table td { padding:8px 10px; text-align:left; border-bottom:1px solid #292929; }
+        table.hours-table th { color:#999; font-weight:600; font-size:11px; text-transform:uppercase; }
+        table.hours-table td.num { text-align:right; font-family: ui-monospace, monospace; }
+        .extra-pill { display:inline-block; padding:2px 9px; border-radius:20px; font-size:11.5px; font-weight:700; }
+        .extra-pill.none { background:#1c3a2a; color:#6fd39a; }
+        .extra-pill.some { background:#3a1c22; color:#e88a9a; }
+        .extra-pill.unknown { background:#2a2a2a; color:#888; }
     </style>
 
     <h1>Turnos</h1>
@@ -33,6 +41,35 @@
         @if ($isCurrentWeek)<span class="today-pill">semana actual</span>@endif
         <a class="navbtn" href="{{ route('admin.shifts.index', ['date' => $nextWeek]) }}">Semana siguiente →</a>
     </div>
+
+    @if ($hoursSummary->isNotEmpty())
+        <div class="card">
+            <h2 style="font-size:14px;">Horas de la semana</h2>
+            <p class="sub" style="margin:2px 0 10px;">Horas asignadas contra las horas legales de cada persona -- lo que pasa de ahí es hora extra. Cargá las horas legales desde <a class="link" href="{{ route('admin.staff.index') }}">Personal</a>.</p>
+            <table class="hours-table">
+                <thead><tr><th>Persona</th><th>Rol</th><th style="text-align:right;">Asignadas</th><th style="text-align:right;">Legales</th><th>Extra</th></tr></thead>
+                <tbody>
+                    @foreach ($hoursSummary as $row)
+                        <tr>
+                            <td>{{ $row['staff']->name }}</td>
+                            <td>{{ $row['staff']->role }}</td>
+                            <td class="num">{{ $row['assigned'] }} h</td>
+                            <td class="num">{{ $row['legal'] !== null ? $row['legal'].' h' : '—' }}</td>
+                            <td>
+                                @if ($row['extra'] === null)
+                                    <span class="extra-pill unknown">sin dato</span>
+                                @elseif ($row['extra'] > 0)
+                                    <span class="extra-pill some">+{{ $row['extra'] }} h extra</span>
+                                @else
+                                    <span class="extra-pill none">sin extra</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    @endif
 
     @forelse ($roleTables as $role => $rows)
         <div class="card">

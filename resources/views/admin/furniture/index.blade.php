@@ -3,6 +3,30 @@
 @section('content')
     <h1>Mobiliario y equipamiento</h1>
     <p class="sub">Organiza el catálogo por categorías. Asigna después los elementos a cada habitación desde su ficha.</p>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 24px;">
+        @foreach([['Tipos de mobiliario',$summary['types']],['Unidades asignadas',$summary['units']],['Habitaciones con mobiliario',$summary['rooms']],['Elementos sin asignar',$summary['unassigned']]] as [$label,$value])
+            <div class="card" style="padding:14px 16px;"><small style="display:block;color:#777;text-transform:uppercase;font-size:10px;letter-spacing:.06em;">{{ $label }}</small><strong style="display:block;font-size:25px;margin-top:5px;">{{ $value }}</strong></div>
+        @endforeach
+    </div>
+    <h2>Equipamiento por habitación</h2>
+    <p class="sub">Vista rápida de lo que encontrará recepción en cada habitación. Estos mismos íconos aparecen en el tablero.</p>
+    @if($roomSummary->isNotEmpty())
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:0 0 26px;">
+            @foreach($roomSummary as $room)
+                <div class="card" style="padding:14px 16px;">
+                    <strong style="font-size:16px;">{{ $room->name }}</strong>
+                    <small style="display:block;color:#888;margin:3px 0 10px;">{{ $room->category->name }}</small>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                        @foreach($room->furniture->where('pivot.quantity','>',0) as $equipment)
+                            <span style="padding:5px 8px;background:#f1f1f1;border-radius:6px;font-size:12px;">{{ $equipment->icon ?? '✦' }} {{ $equipment->name }} ×{{ $equipment->pivot->quantity }}</span>
+                        @endforeach
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    @else
+        <p class="hh-empty-equipment">Todavía no hay mobiliario asignado a habitaciones.</p>
+    @endif
     <div class="hh-catalog-forms">
         <form class="card" method="POST" action="{{ route('admin.furniture.categories.store') }}">
             @csrf
@@ -29,7 +53,11 @@
     <h2>Catálogo por categoría</h2>
     @forelse ($categories as $category)
         <section class="card">
-            <h3>{{ $category->name }} <span class="pill">{{ $category->items->count() }} elementos</span></h3>
+            <h3>{{ $category->name }} <span class="pill">{{ $category->items->count() }} elementos</span>
+                @if($category->items->isEmpty())
+                    <form method="POST" action="{{ route('admin.furniture.categories.destroy', $category) }}" style="display:inline" onsubmit="return confirm('¿Eliminar esta categoría?')">@csrf @method('DELETE')<button class="btn secondary" type="submit">Eliminar categoría</button></form>
+                @endif
+            </h3>
             <details>
                 <summary>Renombrar categoría</summary>
                 <form method="POST" action="{{ route('admin.furniture.categories.update', $category) }}">
@@ -41,6 +69,18 @@
             @foreach ($category->items as $item)
                 <details class="hh-equipment-edit">
                     <summary><span class="equipment-icon">{{ $item->icon ?? '✦' }}</span> {{ $item->name }} · Editar</summary>
+                    <div style="margin:8px 0 12px;padding:10px 12px;background:#f5f5f5;border-radius:8px;color:#555;font-size:13px;">
+                        <strong>Total registrado: {{ $item->rooms->sum(fn($room) => (int) $room->pivot->quantity) }}</strong>
+                        @if($item->rooms->isNotEmpty())
+                            <div style="margin-top:5px;">Asignado en:
+                                @foreach($item->rooms as $room)
+                                    <span style="display:inline-block;margin:3px 4px 0 0;padding:3px 7px;background:#e7e7e7;border-radius:5px;">{{ $room->name }} ×{{ $room->pivot->quantity }}</span>
+                                @endforeach
+                            </div>
+                        @else
+                            <div style="margin-top:5px;color:#888;">Sin habitaciones asignadas</div>
+                        @endif
+                    </div>
                     <form method="POST" action="{{ route('admin.furniture.items.update', $item) }}">
                         @csrf @method('PUT')
                         <label>Nombre <input name="name" value="{{ $item->name }}" maxlength="100" required></label>
@@ -50,6 +90,11 @@
                         </select></label>
                         <button class="btn" type="submit">Guardar elemento</button>
                     </form>
+                    @if($item->rooms()->count() === 0)
+                        <form method="POST" action="{{ route('admin.furniture.items.destroy', $item) }}" onsubmit="return confirm('¿Eliminar este elemento?')">@csrf @method('DELETE')<button class="btn secondary" type="submit">Eliminar elemento</button></form>
+                    @else
+                        <small>Está asignado a una habitación y no se puede eliminar.</small>
+                    @endif
                 </details>
             @endforeach
         </section>

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'role', 'is_active'])]
+#[Fillable(['name', 'role', 'legal_hours_per_week', 'is_active'])]
 class Staff extends Model
 {
     protected function casts(): array

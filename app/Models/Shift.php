@@ -60,4 +60,9 @@ class Shift extends Model
 
         return $this->crossesMidnight() ? $ends->addDay() : $ends;
     }
+
+    public function durationHours(): float
+    {
+        return $this->startsAt()->diffInMinutes($this->endsAt()) / 60;
+    }
 }

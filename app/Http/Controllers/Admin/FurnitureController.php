@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\FurnitureCategory;
 use App\Models\FurnitureItem;
+use App\Models\Room;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,8 +17,17 @@ class FurnitureController extends Controller
 {
     public function index(): View
     {
+        $categories = FurnitureCategory::with(['items' => fn ($q) => $q->with('rooms')->orderBy('name')])->orderBy('name')->get();
+        $items = $categories->flatMap->items;
         return view('admin.furniture.index', [
-            'categories' => FurnitureCategory::with(['items' => fn ($q) => $q->orderBy('name')])->orderBy('name')->get(),
+            'categories' => $categories,
+            'summary' => [
+                'types' => $items->count(),
+                'units' => $items->sum(fn ($item) => $item->rooms->sum(fn ($room) => (int) $room->pivot->quantity)),
+                'rooms' => $items->flatMap->rooms->unique('id')->count(),
+                'unassigned' => $items->filter(fn ($item) => $item->rooms->isEmpty())->count(),
+            ],
+            'roomSummary' => Room::with(['category', 'furniture'])->get()->filter(fn ($room) => $room->furniture->isNotEmpty())->sortBy('name')->values(),
         ]);
     }
 
@@ -47,5 +57,27 @@ class FurnitureController extends Controller
             AuditLog::record(auth()->id(), 'mobiliario.elemento_guardar', 'FurnitureItem', $item->id, $old, $item->toArray());
         });
         return redirect()->route('admin.furniture.index')->with('status', 'Elemento guardado. Ya puedes asignarlo a las habitaciones.');
+    }
+
+    public function destroyCategory(FurnitureCategory $category): RedirectResponse
+    {
+        if ($category->items()->exists()) {
+            return back()->withErrors(['category' => 'No se puede eliminar esta categoría porque todavía tiene elementos. Elimina primero sus elementos.']);
+        }
+        $old = $category->toArray();
+        $category->delete();
+        AuditLog::record(auth()->id(), 'mobiliario.categoria_eliminar', 'FurnitureCategory', $category->id, $old, null);
+        return back()->with('status', 'Categoría de mobiliario eliminada.');
+    }
+
+    public function destroyItem(FurnitureItem $item): RedirectResponse
+    {
+        if ($item->rooms()->exists()) {
+            return back()->withErrors(['item' => 'No se puede eliminar este elemento porque está asignado a una habitación.']);
+        }
+        $old = $item->toArray();
+        $item->delete();
+        AuditLog::record(auth()->id(), 'mobiliario.elemento_eliminar', 'FurnitureItem', $item->id, $old, null);
+        return back()->with('status', 'Elemento eliminado.');
     }
 }

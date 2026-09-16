@@ -54,10 +54,30 @@ class ShiftController extends Controller
                     ->values();
             });
 
+        // Horas asignadas esta semana por persona, contra sus horas legales
+        // -- para ver de un vistazo quién quedó con horas extra. Solo se
+        // calcula para quien tiene horas legales cargadas.
+        $hoursSummary = $shifts->groupBy('staff_id')
+            ->map(function ($personShifts) {
+                $staff = $personShifts->first()->staff;
+                $assigned = round($personShifts->sum(fn (Shift $s) => $s->durationHours()), 1);
+                $legal = $staff->legal_hours_per_week;
+
+                return [
+                    'staff' => $staff,
+                    'assigned' => $assigned,
+                    'legal' => $legal,
+                    'extra' => $legal !== null ? round(max(0, $assigned - $legal), 1) : null,
+                ];
+            })
+            ->sortBy(fn (array $row) => $row['staff']->role.$row['staff']->name)
+            ->values();
+
         return view('admin.shifts.index', [
             'weekStart' => $weekStart,
             'weekEnd' => $weekEnd,
             'roleTables' => $roleTables,
+            'hoursSummary' => $hoursSummary,
             'staffByRole' => Staff::where('is_active', true)->orderBy('role')->orderBy('name')->get()->groupBy('role'),
             'prevWeek' => $weekStart->copy()->subWeek()->toDateString(),
             'nextWeek' => $weekStart->copy()->addWeek()->toDateString(),
