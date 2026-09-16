@@ -96,9 +96,16 @@
         .chart-tooltip b { display:block; font-size:12px; margin-bottom:3px; }
         .chart-tooltip .tt-row { display:flex; justify-content:space-between; gap:14px; color:#bbb; }
         .chart-tooltip .tt-row span:last-child { color:#eee; font-family: ui-monospace, monospace; }
-        .chart-table { width:100%; border-collapse:collapse; font-size:12px; margin-top:2px; }
+        .chart-table { width:100%; border-collapse:collapse; font-size:12px; margin-top:8px; }
         .chart-table td { padding:4px 6px; color:#aaa; border-top:1px solid #232323; }
         .chart-table td.v { text-align:right; color:#ddd; font-family: ui-monospace, monospace; }
+        .chart-detail { margin-top:10px; }
+        .chart-detail summary { cursor:pointer; list-style:none; font-size:11.5px; color:#888; padding:6px 0; border-top:1px solid #232323; }
+        .chart-detail summary::-webkit-details-marker { display:none; }
+        .chart-detail summary::before { content:'▸ '; color:#666; }
+        .chart-detail[open] summary::before { content:'▾ '; }
+        .chart-detail summary:hover { color:#ccc; }
+        .chart-detail[open] summary { color:#ccc; }
         .chart-table tr:first-child td { border-top:none; }
     </style>
 
@@ -235,21 +242,24 @@
                 </svg>
                 <div class="chart-tooltip"></div>
             </div>
-            <table class="chart-table">
-                @foreach ($monthlyArr as $m)
-                    <tr>
-                        <td>{{ $m['label'] }} <span style="color:#555;">· {{ $m['count'] }} {{ Str::plural('reserva', $m['count']) }}</span></td>
-                        <td class="v">{{ $metricVal($m['value']) }}</td>
-                        <td class="v" style="width:70px; color:{{ $m['delta_pct'] === null ? '#777' : ($m['delta_pct'] > 0 ? '#6fd39a' : ($m['delta_pct'] < 0 ? '#e88a9a' : '#777')) }};">
-                            @if ($m['delta_pct'] === null) —
-                            @elseif ($m['delta_pct'] > 0) ▲{{ $m['delta_pct'] }}%
-                            @elseif ($m['delta_pct'] < 0) ▼{{ abs($m['delta_pct']) }}%
-                            @else 0%
-                            @endif
-                        </td>
-                    </tr>
-                @endforeach
-            </table>
+            <details class="chart-detail">
+                <summary>Ver detalle mes a mes</summary>
+                <table class="chart-table">
+                    @foreach ($monthlyArr as $m)
+                        <tr>
+                            <td>{{ $m['label'] }} <span style="color:#555;">· {{ $m['count'] }} {{ Str::plural('reserva', $m['count']) }}</span></td>
+                            <td class="v">{{ $metricVal($m['value']) }}</td>
+                            <td class="v" style="width:70px; color:{{ $m['delta_pct'] === null ? '#777' : ($m['delta_pct'] > 0 ? '#6fd39a' : ($m['delta_pct'] < 0 ? '#e88a9a' : '#777')) }};">
+                                @if ($m['delta_pct'] === null) —
+                                @elseif ($m['delta_pct'] > 0) ▲{{ $m['delta_pct'] }}%
+                                @elseif ($m['delta_pct'] < 0) ▼{{ abs($m['delta_pct']) }}%
+                                @else 0%
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </table>
+            </details>
         @else
             <p class="empty">Sin datos.</p>
         @endif
@@ -307,15 +317,18 @@
             </svg>
             <div class="chart-tooltip"></div>
         </div>
-        <table class="chart-table">
-            @foreach ($byWeekday as $e)
-                <tr>
-                    <td>{{ $e['label'] }}</td>
-                    <td class="v">{{ $metricVal($e['value']) }}</td>
-                    <td class="v" style="color:#888;">{{ $e['prev'] > 0 ? 'ant. '.$metricVal($e['prev']) : '—' }}</td>
-                </tr>
-            @endforeach
-        </table>
+        <details class="chart-detail">
+            <summary>Ver detalle por día</summary>
+            <table class="chart-table">
+                @foreach ($byWeekday as $e)
+                    <tr>
+                        <td>{{ $e['label'] }}</td>
+                        <td class="v">{{ $metricVal($e['value']) }}</td>
+                        <td class="v" style="color:#888;">{{ $e['prev'] > 0 ? 'ant. '.$metricVal($e['prev']) : '—' }}</td>
+                    </tr>
+                @endforeach
+            </table>
+        </details>
     </div>
 
     <div class="card">
