@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\RoomCategory;
+use App\Models\Customer;
+use App\Models\PaymentMethod;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -28,7 +30,7 @@ class AnalyticsController extends Controller
         $prevStart = $start->copy()->subDays($spanDays);
         $prevEnd = $start->copy()->subSecond();
 
-        $all = Booking::with(['room.category', 'addons'])
+        $all = Booking::with(['room.category', 'addons.product', 'addons.combo', 'payments.paymentMethod'])
             ->where('booking_status', '!=', 'CANCELADA')
             ->when($categoryId, fn ($q) => $q->whereHas('room', fn ($r) => $r->where('room_category_id', $categoryId)))
             ->whereBetween('starts_at', [$prevStart->copy()->timezone('UTC'), $end->copy()->timezone('UTC')])
@@ -63,6 +65,11 @@ class AnalyticsController extends Controller
 
             'monthly' => $this->monthlyComparison($metric, $categoryId),
             'projection' => $this->monthProjection($categoryId),
+            'operations' => $this->operations($current),
+            'paymentMethods' => $this->paymentMethods($current),
+            'bookingStatuses' => $current->groupBy('booking_status')->map->count()->sortDesc(),
+            'segments' => $this->segments(),
+            'extras' => $current->flatMap->addons->groupBy('description')->map(fn ($rows) => ['quantity' => (int) $rows->sum('quantity'), 'value' => (int) $rows->sum('amount')])->sortByDesc('value'),
         ]));
     }
 
@@ -82,6 +89,8 @@ class AnalyticsController extends Controller
         $now = now($tz);
 
         return match ($preset) {
+            'today' => [$now->copy()->startOfDay(), $now->copy()->endOfDay(), 'today'],
+            'week' => [$now->copy()->startOfWeek(Carbon::MONDAY), $now->copy()->endOfWeek(Carbon::SUNDAY), 'week'],
             '7d' => [$now->copy()->subDays(6)->startOfDay(), $now->copy()->endOfDay(), '7d'],
             '30d' => [$now->copy()->subDays(29)->startOfDay(), $now->copy()->endOfDay(), '30d'],
             '90d' => [$now->copy()->subDays(89)->startOfDay(), $now->copy()->endOfDay(), '90d'],
@@ -258,5 +267,34 @@ class AnalyticsController extends Controller
             'days_elapsed' => $daysElapsed,
             'days_in_month' => $daysInMonth,
         ];
+    }
+
+    private function operations(Collection $bookings): array
+    {
+        $revenue = (int) $bookings->sum(fn (Booking $b) => $b->price_final + $b->addons->sum('amount'));
+        $collected = (int) $bookings->sum(fn (Booking $b) => $b->payments->where('status', 'aprobado')->sum('amount'));
+
+        return [
+            'revenue' => $revenue,
+            'collected' => $collected,
+            'balance' => max(0, $revenue - $collected),
+            'addons' => (int) $bookings->sum(fn (Booking $b) => $b->addons->sum('amount')),
+            'cancelled' => 0,
+        ];
+    }
+
+    private function paymentMethods(Collection $bookings): Collection
+    {
+        $totals = $bookings->flatMap->payments->where('status', 'aprobado')->groupBy(fn ($payment) => $payment->paymentMethod?->name ?? 'Sin método')->map(fn ($rows) => (int) $rows->sum('amount'));
+        $methods = PaymentMethod::where('is_active', true)->orderBy('name')->pluck('name');
+
+        return $methods->mapWithKeys(fn ($name) => [$name => (int) ($totals[$name] ?? 0)])->sortDesc();
+    }
+
+    private function segments(): array
+    {
+        $counts = ['nuevo' => 0, 'frecuente' => 0, 'ocasional' => 0, 'esporadico' => 0];
+        Customer::query()->get()->each(function (Customer $customer) use (&$counts) { $counts[$customer->segment()['type']]++; });
+        return $counts;
     }
 }

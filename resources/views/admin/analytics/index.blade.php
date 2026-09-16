@@ -2,6 +2,13 @@
 @section('title', 'Analytics')
 @section('content')
     <style>
+        .wrap { max-width:1500px !important; }
+        .wrap > .card { display:inline-block; vertical-align:top; width:calc(50% - 10px); margin-right:16px; }
+        .wrap > .card:nth-of-type(even) { margin-right:0; }
+        .wrap > .card:nth-of-type(odd) { border-top:3px solid #ff7918; }
+        .wrap > .card:nth-of-type(even) { border-top:3px solid #6fd39a; }
+        .wrap > .flt, .wrap > .proj, .wrap > .kpis { width:100%; }
+        @media(max-width:850px){.wrap > .card{display:block;width:100%;margin-right:0}}
         .flt { background:#1c1c1c; border:1px solid #333; border-radius:10px; padding:14px 16px; margin-bottom:18px; }
         .flt-row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
         .flt-row:last-child { margin-bottom:0; }
@@ -75,7 +82,7 @@
 
     <form class="flt" method="GET" action="{{ route('admin.analytics.index') }}">
         <div class="flt-row">
-            @foreach (['7d' => '7 días', '30d' => '30 días', '90d' => '90 días', 'this_month' => 'Este mes', 'last_month' => 'Mes pasado', 'this_year' => 'Este año', 'all' => 'Todo'] as $k => $lbl)
+            @foreach (['today' => 'Hoy', 'week' => 'Semana', 'this_month' => 'Mes', '7d' => '7 días', '30d' => '30 días', '90d' => '90 días', 'last_month' => 'Mes pasado', 'this_year' => 'Este año', 'all' => 'Todo'] as $k => $lbl)
                 <a class="chip {{ $preset === $k ? 'active' : '' }}" href="{{ route('admin.analytics.index', $qs(['preset' => $k, 'from' => null, 'to' => null])) }}">{{ $lbl }}</a>
             @endforeach
         </div>
@@ -129,6 +136,32 @@
             <div class="big"><span>Proyección fin de mes</span><b>{{ $money($projection['projected']) }}</b></div>
         </div>
         <p class="hint">Ritmo actual: {{ $money((int) round($projection['so_far'] / $projection['days_elapsed'])) }}/día · día {{ $projection['days_elapsed'] }} de {{ $projection['days_in_month'] }}.</p>
+    </div>
+
+    <div class="kpis">
+        @foreach (['collected' => 'Cobrado', 'balance' => 'Saldo pendiente', 'addons' => 'Venta de extras'] as $key => $label)
+            <div class="kpi"><div class="k-label">{{ $label }}</div><div class="k-value">{{ $money($operations[$key]) }}</div><div class="k-delta flat">Periodo seleccionado</div></div>
+        @endforeach
+        <div class="kpi"><div class="k-label">Clientes por recurrencia</div><div class="k-value">{{ $segments['frecuente'] }}</div><div class="k-delta flat">Alta recurrencia</div></div>
+    </div>
+
+    <div class="card">
+        <h3>Estado de las reservas</h3>
+        @foreach ($bookingStatuses as $status => $count)<div class="bar-row"><div class="name">{{ str_replace('_',' ', $status) }}</div><div class="bar-track"><div class="bar-fill" style="width:{{ $kpis['reservas']['value'] ? round($count/$kpis['reservas']['value']*100) : 0 }}%"></div></div><div class="val">{{ $count }}</div></div>@endforeach
+    </div>
+
+    <div class="card">
+        <h3>Medios de pago cobrados</h3>
+        @forelse ($paymentMethods as $method => $amount)<div class="bar-row"><div class="name">{{ $method }}</div><div class="bar-track"><div class="bar-fill alt" style="width:{{ $paymentMethods->max() ? round($amount/$paymentMethods->max()*100) : 0 }}%"></div></div><div class="val">{{ $money($amount) }}</div></div>@empty<p class="empty">Sin pagos aprobados en el rango.</p>@endforelse
+    </div>
+
+    <div class="card">
+        <h3>Extras vendidos</h3>
+        @forelse ($extras as $description => $extra)
+            <div class="bar-row"><div class="name">{{ $description }}</div><div class="bar-track"><div class="bar-fill" style="width:{{ $extras->max('value') ? round($extra['value']/$extras->max('value')*100) : 0 }}%"></div></div><div class="val">{{ $money($extra['value']) }} <small>· {{ $extra['quantity'] }} u.</small></div></div>
+        @empty
+            <p class="empty">Sin extras vendidos en el periodo.</p>
+        @endforelse
     </div>
 
     <div class="card">
@@ -187,7 +220,7 @@
     </div>
 
     <div class="card">
-        <h3>Horarios de inicio ({{ $metricLabel }})</h3>
+        <h3>Ventas por hora de inicio ({{ $metricLabel }})</h3>
         @php $maxH = max(1, $byHour->max('value')); @endphp
         @if ($byHour->sum('value') > 0)
             <div class="hour-grid">

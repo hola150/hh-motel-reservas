@@ -39,7 +39,7 @@ class FurnitureController extends Controller
         $data = $request->validate([
             'furniture_category_id' => ['required', 'integer', 'exists:furniture_categories,id'],
             'name' => ['required', 'string', 'max:100', Rule::unique('furniture_items')->where('furniture_category_id', $request->input('furniture_category_id'))->ignore($item->id)],
-            'icon' => ['required', 'string', 'max:12'],
+            'icon' => ['nullable', 'string', 'max:12'],
         ]);
         DB::transaction(function () use ($item, $data) {
             $old = $item->exists ? $item->toArray() : null;

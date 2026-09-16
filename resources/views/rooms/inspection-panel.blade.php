@@ -29,8 +29,8 @@
 <body>
     @include('partials.navbar')
     <div class="page-inner">
-    <h1>Panel de mantención</h1>
-    <p class="sub">Última inspección de cada habitación — para saber de un vistazo cuál necesita revisión.</p>
+    <h1>Rondas e inspecciones</h1>
+    <p class="sub">Revisión de habitaciones y mobiliario — registra fallas, observaciones y evidencia.</p>
 
     <div class="sec-label warn">Necesitan mantención <span class="count">{{ $needsMaintenance->count() }}</span></div>
     @if ($needsMaintenance->isEmpty())

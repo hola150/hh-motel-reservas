@@ -7,13 +7,14 @@ use App\Models\Room;
 use App\Models\RoomInspection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class RoomInspectionController extends Controller
 {
     public function create(Room $room): View
     {
-        $room->load('category');
+        $room->load(['category', 'furniture.category']);
         $lastInspection = $room->inspections()->latest()->first();
 
         return view('rooms.inspection', ['room' => $room, 'lastInspection' => $lastInspection]);
@@ -25,9 +26,13 @@ class RoomInspectionController extends Controller
 
         $validated = $request->validate([
             'inspected_by' => ['required', 'string', 'max:100'],
+            'shift' => ['required', 'in:Mañana,Tarde,Noche,Madrugada'],
             'checklist' => ['required', 'array'],
             'checklist.*' => ['required', 'in:ok,falla'],
             'notes' => ['nullable', 'string', 'max:500'],
+            'defects' => ['nullable', 'string', 'max:1000'],
+            'photos' => ['nullable', 'array', 'max:6'],
+            'photos.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
         // Cada ítem del checklist fijo tiene que venir marcado -- si falta
@@ -36,16 +41,24 @@ class RoomInspectionController extends Controller
         $checklist = collect($itemKeys)->mapWithKeys(
             fn (string $key) => [$key => $validated['checklist'][$key] ?? 'falla']
         )->all();
+        $checklist['furniture'] = collect($room->furniture)->mapWithKeys(fn ($item) => [
+            (string) $item->id => $validated['checklist']['furniture'][$item->id] ?? 'falla',
+        ])->all();
 
-        $needsMaintenance = in_array('falla', $checklist, true);
+        $needsMaintenance = in_array('falla', $checklist, true) || in_array('falla', $checklist['furniture'], true);
+        $photos = collect($request->file('photos', []))->map(fn ($photo) => $photo->store('inspections', 'public'))->values()->all();
 
-        $inspection = RoomInspection::create([
+        $data = [
             'room_id' => $room->id,
             'inspected_by' => $validated['inspected_by'],
             'checklist' => $checklist,
             'needs_maintenance' => $needsMaintenance,
             'notes' => $validated['notes'] ?? null,
-        ]);
+        ];
+        if (Schema::hasColumn('room_inspections', 'shift')) $data['shift'] = $validated['shift'];
+        if (Schema::hasColumn('room_inspections', 'defects')) $data['defects'] = $validated['defects'] ?? null;
+        if (Schema::hasColumn('room_inspections', 'photos')) $data['photos'] = $photos;
+        $inspection = RoomInspection::create($data);
 
         AuditLog::record(auth()->id(), 'habitacion.inspeccionar', 'Room', $room->id, null, $inspection->toArray());
 

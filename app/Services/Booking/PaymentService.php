@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
  */
 class PaymentService
 {
-    public function register(Booking $booking, PaymentMethod $method, int $amount, ?string $externalId, ?string $notes, ?int $registeredBy): Payment
+    public function register(Booking $booking, PaymentMethod $method, int $amount, ?string $externalId, ?string $notes, ?int $registeredBy, ?string $voucherNumber = null, ?string $receiptNumber = null): Payment
     {
         return DB::transaction(function () use ($booking, $method, $amount, $externalId, $notes, $registeredBy) {
             // Bloqueo de fila: sin esto, dos pagos enviados casi al mismo
@@ -39,6 +39,8 @@ class PaymentService
                 'amount' => $amount,
                 'status' => 'aprobado', // registro manual: el staff ya verificó el dinero/transferencia
                 'external_id' => $externalId,
+                'voucher_number' => $voucherNumber,
+                'receipt_number' => $receiptNumber,
                 'registered_by' => $registeredBy,
                 'notes' => $notes,
             ]);

@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\RateRuleController;
 use App\Http\Controllers\Admin\RoomCategoryController;
 use App\Http\Controllers\Admin\RoomController as AdminRoomController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ShiftController;
+use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\BookingAddonController;
 use App\Http\Controllers\BookingCancelController;
 use App\Http\Controllers\BookingCheckInController;
@@ -136,4 +138,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/clientes/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
 
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+
+    Route::get('/personal', [StaffController::class, 'index'])->name('staff.index');
+    Route::post('/personal', [StaffController::class, 'store'])->name('staff.store');
+    Route::put('/personal/{staff}', [StaffController::class, 'update'])->name('staff.update');
+
+    Route::get('/turnos', [ShiftController::class, 'index'])->name('shifts.index');
+    Route::post('/turnos', [ShiftController::class, 'store'])->name('shifts.store');
+    Route::put('/turnos/{shift}', [ShiftController::class, 'update'])->name('shifts.update');
+    Route::delete('/turnos/{shift}', [ShiftController::class, 'destroy'])->name('shifts.destroy');
 });

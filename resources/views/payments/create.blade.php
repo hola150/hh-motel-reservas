@@ -65,6 +65,12 @@
         <label for="payment-reference">Referencia / N° de operación (opcional)</label>
         <input id="payment-reference" type="text" name="external_id" value="{{ old('external_id') }}">
 
+        <label for="voucher-number">N° voucher</label>
+        <input id="voucher-number" type="text" name="voucher_number" value="{{ old('voucher_number') }}" required placeholder="Ej. 146">
+
+        <label for="receipt-number">N° boleta</label>
+        <input id="receipt-number" type="text" name="receipt_number" value="{{ old('receipt_number') }}" required placeholder="Ej. 96302">
+
         <label for="payment-notes">Observaciones (opcional)</label>
         <input id="payment-notes" type="text" name="notes" value="{{ old('notes') }}">
 

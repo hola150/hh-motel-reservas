@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * ofrecerla. Cada fila es una inspección puntual, no un estado editable: el
  * historial completo queda a la vista por habitación.
  */
-#[Fillable(['room_id', 'inspected_by', 'checklist', 'needs_maintenance', 'notes'])]
+#[Fillable(['room_id', 'inspected_by', 'shift', 'checklist', 'needs_maintenance', 'notes', 'defects', 'photos'])]
 class RoomInspection extends Model
 {
     /**
@@ -23,19 +23,24 @@ class RoomInspection extends Model
      * @var array<string, string>
      */
     public const ITEMS = [
-        'sabanas_toallas' => 'Sábanas y toallas limpias',
-        'bano' => 'Baño limpio y sin fugas',
-        'iluminacion' => 'Iluminación funcionando',
-        'clima' => 'Aire acondicionado / calefacción OK',
-        'tv_control' => 'TV y control remoto OK',
-        'cerradura_llave' => 'Cerradura y llave OK',
-        'olor_danos' => 'Sin olores raros ni daños visibles',
+        'toallas' => 'Toallas',
+        'estufa' => 'Estufa',
+        'espejos' => 'Espejos',
+        'flogger' => 'Flogger',
+        'confort_ropa_cama' => 'Confort / ropa de cama',
+        'jabon_shampoo' => 'Jabón / shampoo',
+        'luces' => 'Luces',
+        'olor' => 'Olor',
+        'ceniceros' => 'Ceniceros',
+        'pilas_chapa' => 'Pilas de chapa',
+        'reponer_aseo' => 'Reponer artículos de aseo',
     ];
 
     protected function casts(): array
     {
         return [
             'checklist' => 'array',
+            'photos' => 'array',
             'needs_maintenance' => 'boolean',
         ];
     }

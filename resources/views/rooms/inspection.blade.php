@@ -8,7 +8,7 @@
         :root { color-scheme: dark; }
         * { box-sizing: border-box; }
         body { background:#111; color:#eee; font-family: -apple-system, "Segoe UI", sans-serif; margin: 0; }
-        .page-inner { max-width: 560px; margin: 0; padding: 24px 24px 60px; }
+        .page-inner { max-width: 980px; margin: 0; padding: 24px 24px 60px; }
         h1 { font-size: 18px; margin-bottom:2px; }
         .sub { color:#999; font-size: 13px; margin-bottom: 22px; }
         a.back-btn { display:inline-block; background:#1c1c1c; border:1px solid #333; color:#ccc; text-decoration:none; padding:8px 13px; border-radius:7px; font-size:12.5px; font-weight:600; margin-bottom:16px; }
@@ -26,6 +26,12 @@
         input[type=text], textarea { width:100%; background:#111; border:1px solid #333; color:#eee; padding:9px 11px; border-radius:8px; font-size:14px; font-family:inherit; }
         input[type=text]:focus, textarea:focus { outline:none; border-color:#ff7918; }
         .field { margin-bottom:16px; }
+        .top-fields { display:grid; grid-template-columns:1fr 180px 150px; gap:14px; }
+        .section-title { color:#ff9a4a; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin:22px 0 8px; }
+        input[type=file], select { width:100%; background:#111; border:1px solid #333; color:#eee; padding:10px 11px; border-radius:8px; font-size:14px; }
+        .photo-help { color:#888; font-size:12px; margin-top:5px; }
+        .date-readonly { background:#242424!important; color:#aaa!important; }
+        @media(max-width:680px){ .top-fields{grid-template-columns:1fr;} }
         .checklist { border-top:1px solid #292929; padding-top:14px; margin-bottom:16px; }
         .check-row { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid #242424; gap:12px; }
         .check-row:last-child { border-bottom:none; }
@@ -46,7 +52,7 @@
     <div class="page-inner">
     <a class="back-btn" href="{{ route('rooms.board') }}">← Volver al tablero</a>
     <h1>Inspeccionar {{ $room->name }}</h1>
-    <p class="sub">Categoría {{ $room->category->name }} · revisá cada ítem antes de dejar la pieza disponible.</p>
+    <p class="sub">Categoría {{ $room->category->name }} · completa la pauta real de habitación y mobiliario antes de liberarla.</p>
 
     @if ($errors->any())
         <div class="errors">
@@ -67,12 +73,15 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('rooms.inspections.store', $room) }}">
+    <form method="POST" enctype="multipart/form-data" action="{{ route('rooms.inspections.store', $room) }}">
         @csrf
-        <div class="field">
-            <label class="field-label">¿Quién inspecciona?</label>
-            <input type="text" name="inspected_by" value="{{ old('inspected_by') }}" required>
+        <div class="top-fields">
+            <div class="field"><label class="field-label">Recepcionista</label><input type="text" name="inspected_by" value="{{ old('inspected_by') }}" placeholder="Nombre de quien revisa" required></div>
+            <div class="field"><label class="field-label">Turno</label><select name="shift" required><option value="">Seleccionar</option>@foreach(['Mañana','Tarde','Noche','Madrugada'] as $shift)<option value="{{ $shift }}" @selected(old('shift') === $shift)>{{ $shift }}</option>@endforeach</select></div>
+            <div class="field"><label class="field-label">Fecha</label><input class="date-readonly" type="text" value="{{ now()->timezone('America/Santiago')->format('d/m/Y') }}" readonly></div>
         </div>
+
+        <div class="section-title">Revisión de la habitación</div>
 
         <div class="checklist">
             @foreach (\App\Models\RoomInspection::ITEMS as $key => $label)
@@ -89,10 +98,25 @@
             @endforeach
         </div>
 
+        <div class="section-title">Revisión de mobiliario</div>
+        @if($room->furniture->isNotEmpty())
+            <div class="checklist">
+                @foreach($room->furniture as $item)
+                    @php $key = 'furniture.'.$item->id; $old = old('checklist.'.$key); @endphp
+                    <div class="check-row"><span>{{ $item->icon }} {{ $item->name }} <small style="color:#888">×{{ $item->pivot->quantity }}</small></span><div class="toggle"><input type="radio" name="checklist[furniture][{{ $item->id }}]" value="ok" id="f{{ $item->id }}ok" {{ $old !== 'falla' ? 'checked' : '' }}><label class="opt-ok" for="f{{ $item->id }}ok">OK</label><input type="radio" name="checklist[furniture][{{ $item->id }}]" value="falla" id="f{{ $item->id }}fail" {{ $old === 'falla' ? 'checked' : '' }}><label class="opt-falla" for="f{{ $item->id }}fail">Falla</label></div></div>
+                @endforeach
+            </div>
+        @else
+            <div class="last-panel" style="color:#aaa">No hay mobiliario asignado a esta habitación. Puedes configurarlo desde Administración → Habitaciones.</div>
+        @endif
+
+        <div class="field"><label class="field-label">Desperfectos encontrados</label><textarea name="defects" placeholder="Ej.: espejo quebrado, luz sin funcionar, mobiliario dañado...">{{ old('defects') }}</textarea></div>
+
         <div class="field">
-            <label class="field-label">Notas (opcional)</label>
+            <label class="field-label">Observaciones de la ronda (opcional)</label>
             <textarea name="notes" placeholder="Detalle de lo que falla, si corresponde...">{{ old('notes') }}</textarea>
         </div>
+        <div class="field"><label class="field-label">Fotografías del estado</label><input type="file" name="photos[]" accept="image/jpeg,image/png,image/webp" multiple><div class="photo-help">Puedes adjuntar hasta 6 fotos. Se guardan junto a esta inspección.</div></div>
 
         <button type="submit" class="submit-btn">Guardar inspección</button>
     </form>

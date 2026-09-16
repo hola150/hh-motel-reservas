@@ -15,7 +15,24 @@ class RateRuleController extends Controller
 {
     public function index(): View
     {
-        return view('admin.rates.index', ['rateRules' => RateRule::orderByDesc('priority')->get()]);
+        $categories = RoomCategory::orderBy('display_order')->get();
+        $rateRules = RateRule::with('prices.roomCategory')->orderByDesc('priority')->get();
+
+        // Grilla categoría x duración por tarifa, para ver los precios de un
+        // vistazo sin entrar a "Editar precios" de cada una.
+        $priceGrids = $rateRules->mapWithKeys(function (RateRule $rule) {
+            $durations = $rule->prices->pluck('duration_minutes')->unique()->sort()->values();
+            $grid = $rule->prices->groupBy('room_category_id')
+                ->map(fn ($prices) => $prices->keyBy('duration_minutes'));
+
+            return [$rule->id => ['durations' => $durations, 'grid' => $grid]];
+        });
+
+        return view('admin.rates.index', [
+            'rateRules' => $rateRules,
+            'categories' => $categories,
+            'priceGrids' => $priceGrids,
+        ]);
     }
 
     public function edit(RateRule $rateRule): View

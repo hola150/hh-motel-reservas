@@ -42,6 +42,8 @@ class PaymentController extends Controller
             'payment_method_id' => ['required', 'exists:payment_methods,id'],
             'amount' => ['required', 'integer', 'min:1', 'max:'.max($booking->balanceDue(), 1)],
             'external_id' => ['nullable', 'string', 'max:255'],
+            'voucher_number' => ['required', 'string', 'max:100'],
+            'receipt_number' => ['required', 'string', 'max:100'],
             'notes' => ['nullable', 'string', 'max:255'],
             'after' => ['nullable', 'in:board'],
         ], [
@@ -58,6 +60,8 @@ class PaymentController extends Controller
                 $validated['external_id'] ?? null,
                 $validated['notes'] ?? null,
                 auth()->id(),
+                $validated['voucher_number'],
+                $validated['receipt_number'],
             );
         } catch (PaymentExceedsBalanceException $e) {
             return back()->withInput()->withErrors(['amount' => $e->getMessage()]);

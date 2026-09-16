@@ -249,12 +249,14 @@
             @if ($booking->payments->isNotEmpty())
                 <div class="card">
                     <table class="payments">
-                        <thead><tr><th>Método</th><th>Monto</th><th>Estado</th></tr></thead>
+                        <thead><tr><th>Método</th><th>Monto</th><th>Voucher</th><th>Boleta</th><th>Estado</th></tr></thead>
                         <tbody>
                             @foreach ($booking->payments as $payment)
                                 <tr>
                                     <td>{{ $payment->paymentMethod->name }}</td>
                                     <td>${{ number_format($payment->amount, 0, ',', '.') }}</td>
+                                    <td>{{ $payment->voucher_number ?? '—' }}</td>
+                                    <td>{{ $payment->receipt_number ?? '—' }}</td>
                                     <td>{{ $payment->status }}</td>
                                 </tr>
                             @endforeach
