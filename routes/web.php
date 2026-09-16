@@ -30,6 +30,19 @@ use App\Http\Controllers\RoomInspectionController;
 use App\Http\Controllers\CalendarController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/_diag', function () {
+    return response()->json([
+        'has_shifts_route' => Route::has('admin.shifts.index'),
+        'has_staff_route' => Route::has('admin.staff.index'),
+        'shift_controller_exists' => class_exists(\App\Http\Controllers\Admin\ShiftController::class),
+        'staff_model_exists' => class_exists(\App\Models\Staff::class),
+        'staff_table_exists' => \Illuminate\Support\Facades\Schema::hasTable('staff'),
+        'shifts_table_exists' => \Illuminate\Support\Facades\Schema::hasTable('shifts'),
+        'route_count' => count(Route::getRoutes()->getRoutes()),
+        'php_version' => PHP_VERSION,
+    ]);
+});
+
 Route::get('/', function () {
     return redirect()->route('rooms.board');
 });
@@ -76,8 +89,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/mobiliario', [\App\Http\Controllers\Admin\FurnitureController::class, 'index'])->name('furniture.index');
     Route::post('/mobiliario/categorias', [\App\Http\Controllers\Admin\FurnitureController::class, 'category'])->name('furniture.categories.store');
     Route::put('/mobiliario/categorias/{category}', [\App\Http\Controllers\Admin\FurnitureController::class, 'category'])->name('furniture.categories.update');
+    Route::delete('/mobiliario/categorias/{category}', [\App\Http\Controllers\Admin\FurnitureController::class, 'destroyCategory'])->name('furniture.categories.destroy');
     Route::post('/mobiliario/elementos', [\App\Http\Controllers\Admin\FurnitureController::class, 'item'])->name('furniture.items.store');
     Route::put('/mobiliario/elementos/{item}', [\App\Http\Controllers\Admin\FurnitureController::class, 'item'])->name('furniture.items.update');
+    Route::delete('/mobiliario/elementos/{item}', [\App\Http\Controllers\Admin\FurnitureController::class, 'destroyItem'])->name('furniture.items.destroy');
     Route::redirect('/', '/admin/categorias');
 
     Route::get('/categorias', [RoomCategoryController::class, 'index'])->name('categories.index');
