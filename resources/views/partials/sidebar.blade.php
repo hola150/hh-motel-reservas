@@ -8,7 +8,7 @@
         ['aseo.daily', 'aseo.*', 'Aseo', 'M8 10l8-8 M6 11l7 7 M3 16l6-6 8 8-6 4z'],
         ['rooms.inspections.panel', 'rooms.inspections.*', 'Rondas', 'M4 5h16v15H4z M8 3v4 M16 3v4 M8 11l2 2 5-5'],
         ['admin.shifts.index', 'admin.shifts.*,admin.staff.*', 'Turnos', 'M12 6v6l4 2 M12 22a10 10 0 1 1 0-20a10 10 0 0 1 0 20'],
-        ['sales.daily', 'sales.*,admin.analytics.*', 'Reportes', 'M4 21V11h4v10 M10 21V6h4v15 M16 21V3h4v18'],
+        ['admin.analytics.index', 'sales.*,admin.analytics.*', 'Analytics', 'M4 21V11h4v10 M10 21V6h4v15 M16 21V3h4v18'],
         ['admin.categories.index', 'admin.categories.*,admin.rooms.*,admin.furniture.*,admin.rates.*,admin.offers.*,admin.upsells.*,admin.coupons.*', 'Administración', 'M12 3v3 M12 18v3 M3 12h3 M18 12h3 M6 6l2 2 M16 16l2 2 M6 18l2-2 M16 8l2-2 M16 12a4 4 0 1 1-8 0a4 4 0 0 1 8 0'],
     ];
 @endphp
