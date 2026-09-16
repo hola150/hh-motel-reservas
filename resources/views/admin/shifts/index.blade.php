@@ -30,7 +30,13 @@
         .shift-block { position:absolute; inset:1px; border-radius:4px; padding:2px 4px; font-size:10px; font-weight:700; color:#111; overflow:hidden; line-height:1.15; box-shadow:0 1px 3px rgba(0,0,0,.4); }
         .shift-block .t { display:block; font-weight:500; font-size:8.5px; opacity:.8; }
         .shift-block.conflict { outline:2px solid #ff3b3b; outline-offset:-2px; }
-        .edit-shift-panel { position:absolute; top:0; left:100%; margin-left:4px; z-index:40; background:#111; border:1px solid #333; border-radius:8px; padding:10px; width:220px; box-shadow:0 8px 24px rgba(0,0,0,.5); }
+        /* Modal centrado en vez de flotar pegado a la celda: en una grilla
+           de 7 columnas angostas, un panel "al lado" del bloque termina
+           tapando los turnos del día vecino -- confuso, sobre todo cerca
+           del borde derecho de la semana. Centrado + fondo oscurecido deja
+           claro que es un dialogo aparte, sin importar qué día se edite. */
+        .edit-shift-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:150; }
+        .edit-shift-panel { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:200; background:#181818; border:1px solid #3a3a3a; border-radius:10px; padding:14px; width:min(260px, 90vw); max-height:85vh; overflow-y:auto; box-shadow:0 16px 48px rgba(0,0,0,.6); }
         .edit-shift-panel form { display:flex; flex-direction:column; gap:6px; margin-bottom:6px; }
         .edit-shift-panel input, .edit-shift-panel select { font-size:12px; padding:5px 6px; }
 
@@ -133,6 +139,7 @@
                                     {{ $shift->staff->name }}
                                     <span class="t">{{ $shift->rangeLabel() }}</span>
                                 </summary>
+                                <div class="edit-shift-backdrop" onclick="this.closest('details').removeAttribute('open')"></div>
                                 <div class="edit-shift-panel">
                                     <form method="POST" action="{{ route('admin.shifts.update', $shift) }}">
                                         @csrf @method('PUT')
