@@ -22,7 +22,27 @@
         a.hero-btn.primary { background:#ff7918; border-color:#ff7918; color:#fff; }
         a.hero-btn.primary:hover { background:#df6209; }
 
-        .cat-card { background:#1a1a1a; border:1px solid #2c2c2c; border-radius: 16px; overflow:hidden; margin-bottom: 28px; }
+        /* Mismo lenguaje visual que las tarjetas del tablero interno (rooms/board.blade.php):
+           borde izquierdo de color por categoría, elevación al hover, título coloreado. */
+        .cat-card { background:#1a1a1a; border:1px solid #2c2c2c; border-left-width:4px; border-radius: 16px; overflow:hidden; margin-bottom: 28px; transition: transform .13s ease, box-shadow .13s ease, border-color .13s ease; }
+        .cat-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,.45); }
+        @media (prefers-reduced-motion: reduce) { .cat-card { transition: none; } .cat-card:hover { transform: none; } }
+        .cat-card.cat-go { border-left-color:#5b9dd9; }
+        .cat-card.cat-go:hover { box-shadow: 0 6px 20px rgba(91,157,217,.22); }
+        .cat-card.cat-lite { border-left-color:#4ecdc4; }
+        .cat-card.cat-lite:hover { box-shadow: 0 6px 20px rgba(78,205,196,.22); }
+        .cat-card.cat-plus { border-left-color:#b088e8; }
+        .cat-card.cat-plus:hover { box-shadow: 0 6px 20px rgba(176,136,232,.22); }
+        .cat-card.cat-max { border-left-color:#f2994a; }
+        .cat-card.cat-max:hover { box-shadow: 0 6px 20px rgba(242,153,74,.22); }
+        .cat-card.cat-new-lite { border-left-width:3px; box-shadow: 0 0 0 1px rgba(232,199,111,.25) inset; }
+        .cat-card.cat-new-lite:hover { box-shadow: 0 6px 20px rgba(232,199,111,.3), 0 0 0 1px rgba(232,199,111,.25) inset; }
+        .cat-go h2 { color:#5b9dd9; }
+        .cat-lite h2 { color:#4ecdc4; }
+        .cat-plus h2 { color:#b088e8; }
+        .cat-max h2 { color:#f2994a; }
+        .cat-new-lite h2 { color:#e8c76f; }
+
         .cat-gallery { display:grid; grid-template-columns: repeat(4, 1fr); gap:2px; background:#111; }
         .cat-gallery a { display:block; aspect-ratio: 4/3; overflow:hidden; }
         .cat-gallery img { width:100%; height:100%; object-fit:cover; display:block; transition: transform .2s ease; }
@@ -34,7 +54,7 @@
         .cat-cap { font-size: 12.5px; color: #6fd39a; font-weight:600; margin-bottom: 12px; }
         .cat-desc { font-size: 14px; color: #ccc; margin-bottom: 14px; }
         .cat-features { display:flex; flex-wrap:wrap; gap: 7px; margin-bottom: 18px; }
-        .cat-features span { background:#262626; border:1px solid #383838; color:#ccc; font-size: 12px; padding: 5px 11px; border-radius: 20px; }
+        .cat-features span { display:inline-block; font-family: ui-monospace, monospace; background:#262626; border:1px solid #383838; color:#ccc; font-size: 11px; font-weight:600; padding: 3px 11px; border-radius: 20px; }
 
         table.price-table { width:100%; border-collapse:collapse; margin-bottom: 20px; font-size: 13.5px; }
         table.price-table th { text-align:left; color:#888; font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.03em; padding: 0 10px 8px 0; }
@@ -76,7 +96,7 @@
 
         @forelse ($categories as $entry)
             @php [$category, $photos, $videos, $prices, $catWhatsapp] = [$entry['category'], $entry['photos'], $entry['videos'], $entry['prices'], $entry['whatsappUrl']]; @endphp
-            <section class="cat-card">
+            <section class="cat-card cat-{{ Str::slug($category->name) }}">
                 @if ($photos->isNotEmpty())
                     <div class="cat-gallery">
                         @foreach ($photos->take(4) as $url)
