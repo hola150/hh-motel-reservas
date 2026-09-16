@@ -59,7 +59,8 @@ class PublicBookingController extends Controller
             'time_minute' => ['required', 'integer', 'min:0', 'max:59'],
             'duration_minutes' => ['required', 'integer'],
             'guests_count' => ['required', 'integer', 'min:1', 'max:10'],
-            'name' => ['required', 'string', 'max:150'],
+            'first_name' => ['required', 'string', 'max:100'],
+            'last_name' => ['required', 'string', 'max:100'],
             'phone' => ['required', 'string', 'max:20'],
             'email' => ['nullable', 'email'],
             // Campo trampa para bots -- invisible para una persona real
@@ -82,9 +83,10 @@ class PublicBookingController extends Controller
         }
 
         $phone = Phone::toE164($validated['phone']);
+        $customerName = trim($validated['first_name'].' '.$validated['last_name']);
         $customer = Customer::firstOrCreate(
             ['phone_e164' => $phone],
-            ['name' => $validated['name'], 'email' => $validated['email'] ?? null]
+            ['name' => $customerName, 'email' => $validated['email'] ?? null]
         );
 
         try {

@@ -75,8 +75,16 @@
             <label for="guests_count">Cantidad de personas</label>
             <input type="number" id="guests_count" name="guests_count" min="1" max="10" value="{{ old('guests_count', 2) }}" required>
 
-            <label for="name">Nombre completo</label>
-            <input type="text" id="name" name="name" value="{{ old('name') }}" required>
+            <div class="row2">
+                <div>
+                    <label for="first_name">Nombre</label>
+                    <input type="text" id="first_name" name="first_name" value="{{ old('first_name') }}" required>
+                </div>
+                <div>
+                    <label for="last_name">Apellido</label>
+                    <input type="text" id="last_name" name="last_name" value="{{ old('last_name') }}" required>
+                </div>
+            </div>
 
             <label for="phone">Teléfono / WhatsApp</label>
             <input type="tel" id="phone" name="phone" value="{{ old('phone') }}" placeholder="+56 9 1234 5678" required>
