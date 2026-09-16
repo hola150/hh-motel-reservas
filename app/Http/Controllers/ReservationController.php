@@ -28,6 +28,7 @@ class ReservationController extends Controller
     {
         $rooms = Room::with('category')
             ->where('operational_status', 'activa')
+            ->wingEnabled(\App\Models\OperationalSetting::current()->ala_sur_enabled)
             ->orderBy('name')
             ->get()
             ->map(function (Room $room) use ($board) {

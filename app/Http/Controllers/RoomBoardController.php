@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Coupon;
+use App\Models\OperationalSetting;
 use App\Models\Room;
 use App\Models\Staff;
 use App\Services\Booking\RoomBoardService;
@@ -22,6 +23,19 @@ class RoomBoardController extends Controller
 
         $isProxima = fn (array $e) => $e['status']['occupancy'] === 'libre' && $e['status']['imminent'];
 
+        $alaSurEnabled = OperationalSetting::current()->ala_sur_enabled;
+
+        $disponibles = $entries->filter(
+            fn (array $e) => $e['room']->operational_status === 'activa' && $e['status']['occupancy'] === 'libre' && ! $isProxima($e)
+        );
+        // El Ala Sur apagada solo saca habitaciones de "Disponibles" -- lo
+        // que ya esta ocupado, por llegar, en aseo o fuera de servicio en
+        // esa ala se sigue viendo igual, no desaparece de la nada.
+        $hiddenSurCount = $alaSurEnabled ? 0 : $disponibles->filter(fn (array $e) => $e['room']->wing === 'sur')->count();
+        if (! $alaSurEnabled) {
+            $disponibles = $disponibles->reject(fn (array $e) => $e['room']->wing === 'sur');
+        }
+
         $grouped = [
             'ocupadas' => $entries->filter(
                 fn (array $e) => $e['room']->operational_status === 'activa' && $e['status']['occupancy'] === 'ocupada'
@@ -29,9 +43,7 @@ class RoomBoardController extends Controller
             'en_aseo' => $entries->filter(
                 fn (array $e) => $e['room']->operational_status === 'aseo'
             )->values(),
-            'disponibles' => $entries->filter(
-                fn (array $e) => $e['room']->operational_status === 'activa' && $e['status']['occupancy'] === 'libre' && ! $isProxima($e)
-            )->values(),
+            'disponibles' => $disponibles->values(),
             'proximas' => $entries->filter(
                 fn (array $e) => $e['room']->operational_status === 'activa' && $isProxima($e)
             )->sortBy(fn (array $e) => $e['status']['minutes_until_next'])->values(),
@@ -53,7 +65,24 @@ class RoomBoardController extends Controller
             'nextOpeningLabel' => $nextOpening ? $this->formatCountdown($now, $nextOpening) : null,
             'cleaningStaff' => $this->cleaningStaffNames(),
             'dailySummary' => $this->dailySummary(),
+            'alaSurEnabled' => $alaSurEnabled,
+            'hiddenSurCount' => $hiddenSurCount,
         ]);
+    }
+
+    /**
+     * Prende/apaga la oferta del Ala Sur -- deja de ofrecerse para reservas
+     * nuevas sin tocar las habitaciones que ya estan ocupadas, por llegar,
+     * en aseo o fuera de servicio ahi.
+     */
+    public function toggleAlaSur(): RedirectResponse
+    {
+        $setting = OperationalSetting::current();
+        $setting->update(['ala_sur_enabled' => ! $setting->ala_sur_enabled]);
+
+        return redirect()->route('rooms.board')->with('status', $setting->ala_sur_enabled
+            ? 'Ala Sur habilitada — vuelve a ofrecerse en el tablero.'
+            : 'Ala Sur deshabilitada — sus habitaciones libres ya no se ofrecen.');
     }
 
     /**

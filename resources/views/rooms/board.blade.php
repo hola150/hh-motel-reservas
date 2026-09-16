@@ -31,6 +31,16 @@
         a.sales-btn { background:#14251c; border-color:#2e6e45; color:#8fe0ad; font-weight:600; }
         a.sales-btn:hover { border-color:#6fd39a; color:#fff; }
 
+        .wing-toggle-row { display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+        .wing-toggle { display:inline-flex; align-items:center; gap:9px; background:#1c1c1c; border:1px solid #333; color:#ccc; border-radius:20px; padding:8px 16px 8px 12px; font-size:12.5px; font-weight:600; cursor:pointer; }
+        .wing-toggle-dot { width:9px; height:9px; border-radius:50%; background:#555; flex:none; }
+        .wing-toggle.on { border-color:#2e6e45; background:#14251c; color:#8fe0ad; }
+        .wing-toggle.on .wing-toggle-dot { background:#6fd39a; }
+        .wing-toggle.off { border-color:#7a2d2d; background:#2a1c1c; color:#e8a2a2; }
+        .wing-toggle.off .wing-toggle-dot { background:#e05252; }
+        .wing-toggle:hover { border-color:#ff7918; }
+        .wing-hidden-note { font-size:12px; color:#888; }
+
         .daily-summary { display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; margin-bottom:30px; }
         @media (max-width: 760px) { .daily-summary { grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); } }
         .dsum-tile { display:flex; flex-direction:column; gap:3px; background:#14251c; border:1px solid #2e6e45; border-radius:9px; padding:10px 12px; text-decoration:none; min-width:0; }
@@ -236,6 +246,19 @@
             <a class="compact-toggle" href="{{ route('calendar.index') }}">Calendario</a>
             <button type="button" class="compact-toggle" id="compact-toggle-btn" onclick="hhToggleCompact()">⊟ Vista compacta</button>
         </div>
+    </div>
+
+    <div class="wing-toggle-row">
+        <form method="POST" action="{{ route('rooms.ala_sur.toggle') }}">
+            @csrf
+            <button type="submit" class="wing-toggle {{ $alaSurEnabled ? 'on' : 'off' }}">
+                <span class="wing-toggle-dot"></span>
+                Ala Sur {{ $alaSurEnabled ? 'habilitada' : 'deshabilitada' }}
+            </button>
+        </form>
+        @if (! $alaSurEnabled && $hiddenSurCount > 0)
+            <span class="wing-hidden-note">{{ $hiddenSurCount }} {{ Str::plural('habitación', $hiddenSurCount) }} libre{{ $hiddenSurCount === 1 ? '' : 's' }} oculta{{ $hiddenSurCount === 1 ? '' : 's' }} de Disponibles</span>
+        @endif
     </div>
 
     <div class="summary">

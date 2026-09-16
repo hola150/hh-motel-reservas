@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-#[Fillable(['room_category_id', 'name', 'photos', 'buffer_minutes', 'operational_status', 'operational_note', 'aseo_override_at', 'aseo_started_at'])]
+#[Fillable(['room_category_id', 'name', 'wing', 'photos', 'buffer_minutes', 'operational_status', 'operational_note', 'aseo_override_at', 'aseo_started_at'])]
 class Room extends Model
 {
     use HasFactory;
@@ -53,6 +53,16 @@ class Room extends Model
     public function isOperational(): bool
     {
         return $this->operational_status === 'activa';
+    }
+
+    /**
+     * Cuando el Ala Sur está apagada (ver OperationalSetting), sus
+     * habitaciones dejan de ofrecerse para reservas nuevas. Las de "siempre
+     * activas" (wing null) y Ala Norte nunca se filtran acá.
+     */
+    public function scopeWingEnabled($query, bool $alaSurEnabled)
+    {
+        return $alaSurEnabled ? $query : $query->where(fn ($q) => $q->whereNull('wing')->orWhere('wing', '!=', 'sur'));
     }
 
     /**
