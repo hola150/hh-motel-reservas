@@ -80,6 +80,7 @@
     @else
         <a class="bookings-btn empty" href="{{ route('rooms.bookings', $room) }}">Sin reservas próximas</a>
     @endif
+    <a class="bookings-btn empty" href="{{ route('catalog.room', $room) }}" target="_blank" rel="noopener">Ficha para compartir ↗</a>
 
     <details>
         <summary>Cambiar estado</summary>

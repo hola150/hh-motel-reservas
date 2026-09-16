@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Room;
 use App\Models\RoomCategory;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class CatalogController extends Controller
@@ -27,21 +29,11 @@ class CatalogController extends Controller
                 $photos = $category->rooms->flatMap(fn ($room) => $room->photos ?? [])->unique()->values();
                 $videos = $category->rooms->flatMap(fn ($room) => $room->videos ?? [])->unique()->values();
 
-                $prices = $category->rateRulePrices
-                    ->groupBy('duration_minutes')
-                    ->map(fn ($rows, $duration) => [
-                        'duration' => (int) $duration,
-                        'hh' => $rows->first(fn ($p) => $p->rateRule->name === 'HH')?->price,
-                        'hot' => $rows->first(fn ($p) => $p->rateRule->name === 'HOT')?->price,
-                    ])
-                    ->sortBy('duration')
-                    ->values();
-
                 return [
                     'category' => $category,
                     'photos' => $photos,
                     'videos' => $videos,
-                    'prices' => $prices,
+                    'prices' => $this->pricesFromRows($category->rateRulePrices),
                     'whatsappUrl' => 'https://wa.me/'.self::WHATSAPP_NUMBER.'?text='.rawurlencode("Hola! Quiero reservar una habitación {$category->name} en HH Motel."),
                 ];
             });
@@ -50,5 +42,39 @@ class CatalogController extends Controller
             'categories' => $categories,
             'whatsappUrl' => 'https://wa.me/'.self::WHATSAPP_NUMBER.'?text='.rawurlencode('Hola! Quiero reservar una habitación en HH Motel.'),
         ]);
+    }
+
+    /**
+     * Ficha pública de una habitación puntual (no toda la categoría) --
+     * pensada para mandar por WhatsApp a un cliente que pregunta por ESA
+     * pieza específica, con sus propias fotos/videos.
+     */
+    public function room(Room $room): View
+    {
+        $room->load('category');
+
+        return view('catalog.room', [
+            'room' => $room,
+            'category' => $room->category,
+            'photos' => collect($room->photos ?? [])->values(),
+            'videos' => collect($room->videos ?? [])->values(),
+            'prices' => $this->pricesFromRows(
+                $room->category->rateRulePrices()->whereHas('rateRule', fn ($r) => $r->where('is_active', true))->with('rateRule')->get()
+            ),
+            'whatsappUrl' => 'https://wa.me/'.self::WHATSAPP_NUMBER.'?text='.rawurlencode("Hola! Quiero reservar la habitación {$room->name} en HH Motel."),
+        ]);
+    }
+
+    private function pricesFromRows(Collection $rows): Collection
+    {
+        return $rows
+            ->groupBy('duration_minutes')
+            ->map(fn ($rows, $duration) => [
+                'duration' => (int) $duration,
+                'hh' => $rows->first(fn ($p) => $p->rateRule->name === 'HH')?->price,
+                'hot' => $rows->first(fn ($p) => $p->rateRule->name === 'HOT')?->price,
+            ])
+            ->sortBy('duration')
+            ->values();
     }
 }
