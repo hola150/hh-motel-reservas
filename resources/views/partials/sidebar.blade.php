@@ -19,7 +19,7 @@
         @foreach ($navigation as [$destination, $patterns, $label, $path])
             @php $active = request()->routeIs(...explode(',', $patterns)); @endphp
             <a href="{{ route($destination) }}" class="hh-rail-link {{ $active ? 'is-active' : '' }}" title="{{ $label }}" @if($active) aria-current="page" @endif>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ $path }}" /></svg>
+                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ $path }}" /></svg>
                 <span>{{ $label }}</span>
             </a>
         @endforeach
