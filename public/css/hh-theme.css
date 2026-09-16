@@ -67,6 +67,9 @@ input:focus, select:focus, textarea:focus { border-color: var(--hh-accent); box-
 .card:hover, .proxima-card:hover { transform: none !important; box-shadow: 0 5px 15px #10111215 !important; }
 .card :is(.muted, .hint, .eta, .code), .card label { color: #c1c3c7; }
 .card .eta.overtime { color: #ffb2b8; }
+.equipment-icons { display:flex; flex-wrap:wrap; align-items:center; gap:5px; min-height:24px; }
+.equipment-icons span { display:inline-flex; align-items:center; justify-content:center; width:28px; height:26px; font-size:17px; line-height:1; font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif; overflow:hidden; }
+.chips .equipment-icons span { width:22px; height:22px; font-size:15px; }
 .card-head b { font-size: 22px; letter-spacing: -.03em; }
 .row, td { border-bottom-color: #505154; }
 th { color: #bbbfc6; }
