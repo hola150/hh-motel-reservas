@@ -32,8 +32,11 @@
         a.back { display:block; text-align:center; margin-top: 14px; color:#999; font-size: 13px; text-decoration:none; }
         /* Secundario a propósito: "Finalizar" (arriba) es naranja porque es
            la acción principal de esta pantalla -- volver al tablero es solo
-           navegación, no debería competir visualmente con eso. */
-        a.board-btn { display:block; text-align:center; background:#2a2a2a; border:1px solid #444; color:#eee; padding:13px; border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; margin-top:24px; }
+           navegación, no debería competir visualmente con eso. Ancho acotado
+           y centrado: al ser un solo botón suelto (no parte del grid de dos
+           columnas de arriba), estirarlo al 100% del ancho de página se veía
+           desproporcionado frente al resto del layout. */
+        a.board-btn { display:block; max-width:320px; text-align:center; background:#2a2a2a; border:1px solid #444; color:#eee; padding:13px; border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; margin:24px auto 0; }
         a.board-btn:hover { border-color:#ff7918; color:#ff7918; }
         a.pay-btn { display:block; text-align:center; background:#ff7918; color:#fff; padding:13px; border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; }
         a.pay-btn-inline { margin-top:14px; }
@@ -117,8 +120,9 @@
                     </span>
                 </div>
                 <div class="row"><span class="muted">Teléfono</span><span>{{ $booking->customer->phone_e164 }}</span></div>
-                <div class="row"><span class="muted">Fecha / hora</span><span>{{ $booking->starts_at->timezone('America/Santiago')->format('d/m/Y H:i') }}</span></div>
+                <div class="row"><span class="muted">Fecha / hora de ingreso</span><span>{{ $booking->starts_at->timezone('America/Santiago')->format('d/m/Y H:i') }}</span></div>
                 <div class="row"><span class="muted">Duración</span><span>{{ $booking->duration_minutes / 60 }} h</span></div>
+                <div class="row"><span class="muted">Reservado el</span><span>{{ $booking->created_at->timezone('America/Santiago')->format('d/m/Y H:i') }}</span></div>
                 <div class="row"><span class="muted">Tarifa aplicada</span><span class="pill">{{ $booking->rate_rule_name_snapshot }}</span></div>
                 @if ($booking->checked_in_at)
                     @php $delay = $booking->checkInDelayMinutes(); @endphp

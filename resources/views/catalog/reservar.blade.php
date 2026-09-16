@@ -1,28 +1,37 @@
 <!doctype html>
-<html lang="es" style="background:#111;color:#eee">
+<html lang="es">
 <head>
     <meta charset="utf-8">
-    <meta name="color-scheme" content="dark">
+    <meta name="color-scheme" content="light">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Reservar — HH Motel</title>
     <style>
-        :root { color-scheme: dark; }
+        :root {
+            color-scheme: light;
+            --hh-accent: #ff7918;
+            --hh-accent-hover: #ee6909;
+            --hh-canvas: #f5f5f4;
+            --hh-surface: #353638;
+            --hh-ink: #202124;
+        }
         * { box-sizing: border-box; }
-        body { background:#111; color:#eee; font-family: -apple-system, "Segoe UI", sans-serif; margin: 0; line-height: 1.45; }
+        body { background:var(--hh-canvas); color:var(--hh-ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; line-height: 1.45; }
         .wrap { max-width: 480px; margin: 0 auto; padding: 32px 20px 60px; }
-        a.back { color:#999; text-decoration:none; font-size:13px; display:inline-block; margin-bottom: 18px; }
-        .brand { font-size: 13px; font-weight: 800; letter-spacing: .1em; color: #ff7918; margin-bottom: 8px; }
-        h1 { font-size: 22px; margin: 0 0 6px; }
-        p.sub { color:#999; font-size: 13.5px; margin: 0 0 24px; }
+        a.back { color:#62656c; text-decoration:none; font-size:13px; display:inline-block; margin-bottom: 18px; }
+        .brand { font-size: 13px; font-weight: 800; letter-spacing: .1em; color: var(--hh-accent); margin-bottom: 8px; }
+        h1 { font-size: 22px; margin: 0 0 6px; letter-spacing: -.02em; }
+        p.sub { color:#62656c; font-size: 13.5px; margin: 0 0 24px; }
+        .card { background:var(--hh-surface); color:#f5f5f5; border-radius:12px; box-shadow: 0 3px 10px #1011120b; padding: 22px 22px 26px; }
         .hint-box { background:#1c2f1c; border:1px solid #2e5a2e; color:#8fe0ad; border-radius:9px; padding:12px 14px; font-size:12.5px; margin-bottom:22px; }
         .errors { background:#3a1c1c; border:1px solid #7a2d2d; color:#f3b8b8; padding:12px 14px; border-radius:8px; margin-bottom: 18px; font-size:14px; }
-        label { display:block; font-size: 12.5px; color:#bbb; margin: 16px 0 6px; }
-        input, select { width:100%; box-sizing:border-box; background:#1c1c1c; border:1px solid #333; color:#fff; padding:11px 12px; border-radius:8px; font-size:15px; }
+        label { display:block; font-size: 12.5px; color:#c1c3c7; margin: 16px 0 6px; }
+        input, select { width:100%; box-sizing:border-box; background:#202123; border:1px solid #62656b; color:#f4f5f7; padding:11px 12px; border-radius:8px; font-size:15px; min-height:46px; }
+        input:focus, select:focus { outline:none; border-color:var(--hh-accent); box-shadow: 0 0 0 3px #ff791833; }
         .row2 { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
         .honey-field { position:absolute; left:-9999px; top:-9999px; }
-        button.submit { width:100%; margin-top:26px; background:#ff7918; color:#fff; border:none; padding:14px; border-radius:9px; font-size:15px; font-weight:700; cursor:pointer; }
-        button.submit:hover { background:#df6209; }
-        .legal { font-size:11.5px; color:#777; margin-top:14px; text-align:center; }
+        button.submit { width:100%; margin-top:26px; background:var(--hh-accent); color:#21170e; border:none; padding:14px; border-radius:9px; font-size:15px; font-weight:750; cursor:pointer; }
+        button.submit:hover { background:var(--hh-accent-hover); }
+        .legal { font-size:11.5px; color:#8a8d93; margin-top:14px; text-align:center; }
     </style>
 </head>
 <body>
@@ -32,8 +41,6 @@
         <h1>Reservá tu habitación</h1>
         <p class="sub">Confirmación inmediata según disponibilidad. El documento de identidad se verifica al llegar.</p>
 
-        <div class="hint-box">Horario: lunes a jueves 10:30 a 03:00 · viernes a domingo 10:30 a 22:30 corrido.</div>
-
         @if ($errors->any())
             <div class="errors">
                 @foreach ($errors->all() as $error)
@@ -41,6 +48,9 @@
                 @endforeach
             </div>
         @endif
+
+        <div class="card">
+        <div class="hint-box">Horario: lunes a jueves 10:30 a 03:00 · viernes a domingo 10:30 a 22:30 corrido.</div>
 
         <form method="POST" action="{{ route('catalog.reserve.store') }}" id="reserve-form">
             @csrf
@@ -95,6 +105,7 @@
             <button class="submit" type="submit">Confirmar reserva</button>
             <p class="legal">Al reservar aceptás presentar tu documento de identidad al llegar. HH Motel se reserva el derecho de admisión.</p>
         </form>
+        </div>
     </div>
     <script>
         const hhDurationsByCategory = @json($durationsByCategory->mapWithKeys(fn ($v, $k) => [(string) $k => $v]));

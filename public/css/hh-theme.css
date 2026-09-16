@@ -213,7 +213,6 @@ body > .wrap .row2 { gap: 22px; }
 .hh-form-card button[type=submit], .hh-checkin-page form > button[type=submit] { min-height: 48px; color: #21170e; font-weight: 750; }
 .hh-checkin-page + * { min-width: 0; }
 .hh-payment-page a.back, .hh-checkin-page a.back { color: #50555e; padding: 12px; font-weight: 600; }
-.hh-checkin-page { max-width: 1300px; }
 .hh-checkin-page .meta { color: #5a6068; margin: 10px 0 20px; }
 .hh-checkin-page .guests-required { padding: 24px; }
 .hh-checkin-page .guests-required p { line-height: 1.6; color: #d5d8de; margin-bottom: 18px; }
