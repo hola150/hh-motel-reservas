@@ -91,8 +91,8 @@
         @media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
         .card-head { display:flex; justify-content:space-between; align-items:baseline; gap:6px; margin-bottom:2px; }
         .card-head b { font-size: 16px; }
-        .offer-badge { font-size:10.5px; font-weight:700; background:#3a1c2a; color:#f5a3c7; border:1px solid #7a3355; border-radius:20px; padding:2px 8px; white-space:nowrap; flex:none; }
-        .compact .offer-badge { font-size:9px; padding:1px 6px; }
+        .offer-badge { font-size:11px; font-weight:800; background:linear-gradient(135deg,#ff8a1f,#e94d13); color:#fff; border:1px solid #ffb15c; border-radius:7px; padding:5px 9px; white-space:nowrap; flex:none; box-shadow:0 3px 10px rgba(255,112,20,.28); letter-spacing:.01em; }
+        .compact .offer-badge { font-size:10px; padding:4px 7px; }
         .maintenance-badge { font-size:10.5px; font-weight:700; background:#3a1c22; color:#e88a9a; border:1px solid #7a2d2d; border-radius:20px; padding:2px 8px; white-space:nowrap; flex:none; }
         .compact .maintenance-badge { font-size:9px; padding:1px 6px; }
         .card.needs-maintenance { box-shadow: 0 0 0 1px rgba(232,138,154,.4) inset; }

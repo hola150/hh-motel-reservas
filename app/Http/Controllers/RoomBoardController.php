@@ -77,7 +77,7 @@ class RoomBoardController extends Controller
             }
 
             $pct = $live->where('discount_type', 'percentage')->max('discount_value');
-            $tag = $pct ? '−'.$pct.'%' : 'OFERTA';
+            $tag = $pct ? 'DESCUENTO '.$pct.'%' : 'OFERTA';
             $result[$room->id] = ['label' => $live->first()->internal_name, 'tag' => $tag];
         }
 
