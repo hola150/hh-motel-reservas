@@ -142,6 +142,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/clientes/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
 
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+    Route::get('/analytics/exportar', [AnalyticsController::class, 'export'])->name('analytics.export');
 
     Route::get('/personal', [StaffController::class, 'index'])->name('staff.index');
     Route::post('/personal', [StaffController::class, 'store'])->name('staff.store');

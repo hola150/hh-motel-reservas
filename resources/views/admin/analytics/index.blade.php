@@ -22,6 +22,8 @@
         .flt label { font-size:11px; color:#888; text-transform:uppercase; letter-spacing:.03em; margin:0; }
         .flt input[type=date], .flt select { background:#111; border:1px solid #333; color:#eee; border-radius:7px; padding:6px 9px; font-size:12.5px; width:auto; }
         .flt .go { background:#ff7918; color:#fff; border:none; border-radius:7px; padding:7px 14px; font-size:12.5px; font-weight:600; cursor:pointer; }
+        .export-btn { background:#14251c; border:1px solid #2e6e45; color:#8fe0ad; border-radius:7px; padding:7px 14px; font-size:12.5px; font-weight:600; text-decoration:none; white-space:nowrap; }
+        .export-btn:hover { border-color:#6fd39a; color:#fff; }
         .flt .metric-toggle { display:inline-flex; border:1px solid #333; border-radius:7px; overflow:hidden; }
         .flt .metric-toggle a { padding:6px 13px; font-size:12px; text-decoration:none; color:#aaa; background:#111; }
         .flt .metric-toggle a.on { background:#ff7918; color:#fff; }
@@ -146,6 +148,8 @@
                     <option value="{{ route('admin.analytics.index', $qs(['category' => $cat->id])) }}" @selected($categoryId === $cat->id)>{{ $cat->name }}</option>
                 @endforeach
             </select>
+
+            <a class="export-btn" href="{{ route('admin.analytics.export', ['preset' => $preset, 'from' => $preset === 'custom' ? $from : null, 'to' => $preset === 'custom' ? $to : null, 'category' => $categoryId]) }}">Exportar a Excel/CSV ↓</a>
         </div>
     </form>
 

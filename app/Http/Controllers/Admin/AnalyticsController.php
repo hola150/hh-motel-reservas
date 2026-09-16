@@ -73,6 +73,64 @@ class AnalyticsController extends Controller
         ]));
     }
 
+    /**
+     * Una fila por reserva, con todas las dimensiones sueltas (habitación,
+     * categoría, ala, cliente, fecha, precios, pago) para que se pueda armar
+     * tablas dinámicas y cruces en Excel/Sheets -- no intentamos adivinar
+     * qué cruce quiere ver el usuario, le damos el detalle crudo.
+     */
+    public function export(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        [$start, $end] = $this->resolveRange($request);
+        $categoryId = (int) $request->query('category', 0) ?: null;
+
+        $bookings = Booking::with(['room.category', 'customer', 'addons', 'payments.paymentMethod'])
+            ->where('booking_status', '!=', 'CANCELADA')
+            ->when($categoryId, fn ($q) => $q->whereHas('room', fn ($r) => $r->where('room_category_id', $categoryId)))
+            ->whereBetween('starts_at', [$start->copy()->timezone('UTC'), $end->copy()->timezone('UTC')])
+            ->orderBy('starts_at')
+            ->get();
+
+        $filename = 'ventas_hh_motel_'.$start->format('Y-m-d').'_a_'.$end->format('Y-m-d').'.csv';
+
+        return response()->streamDownload(function () use ($bookings) {
+            $out = fopen('php://output', 'w');
+            fwrite($out, "\xEF\xBB\xBF"); // BOM -- sin esto Excel rompe las tildes/ñ
+            fputcsv($out, [
+                'Código', 'Fecha', 'Hora', 'Día semana', 'Habitación', 'Categoría', 'Ala',
+                'Duración (min)', 'Cliente', 'Teléfono', 'Tarifa aplicada',
+                'Precio original', 'Descuento', 'Precio final habitación', 'Extras',
+                'Total', 'Métodos de pago', 'Estado reserva', 'Estado pago',
+            ]);
+            foreach ($bookings as $b) {
+                $startsAt = $b->starts_at->timezone('America/Santiago');
+                $extrasTotal = (int) $b->addons->sum('amount');
+                fputcsv($out, [
+                    $b->code,
+                    $startsAt->format('d-m-Y'),
+                    $startsAt->format('H:i'),
+                    ucfirst($startsAt->locale('es')->isoFormat('dddd')),
+                    $b->room->name,
+                    $b->room->category->name,
+                    $b->room->wing ? ucfirst($b->room->wing) : 'Sin ala',
+                    $b->duration_minutes,
+                    $b->customer->name,
+                    $b->customer->phone_e164,
+                    $b->rate_rule_name_snapshot,
+                    $b->price_original,
+                    $b->discount_amount,
+                    $b->price_final,
+                    $extrasTotal,
+                    $b->price_final + $extrasTotal,
+                    $b->payments->where('status', 'aprobado')->pluck('paymentMethod.name')->unique()->implode('; '),
+                    $b->booking_status,
+                    $b->payment_status,
+                ]);
+            }
+            fclose($out);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     /** @return array{0: Carbon, 1: Carbon, 2: string} */
     private function resolveRange(Request $request): array
     {
