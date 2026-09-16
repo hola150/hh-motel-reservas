@@ -2,13 +2,17 @@
 @section('title', 'Analytics')
 @section('content')
     <style>
-        .wrap { max-width:1500px !important; }
-        .wrap > .card { display:inline-block; vertical-align:top; width:calc(50% - 10px); margin-right:16px; }
-        .wrap > .card:nth-of-type(even) { margin-right:0; }
+        /* La grilla usa todo el ancho disponible (antes quedaba fija en
+           1500px pegada a la izquierda, dejando un hueco enorme en
+           monitores anchos). auto-fit reparte 2, 3 o más columnas según
+           el espacio real en vez de un 50%/50% fijo. */
+        .wrap { max-width:1900px !important; margin:0 auto !important; display:grid; grid-template-columns:repeat(auto-fit, minmax(440px, 1fr)); gap:16px; align-items:start; }
+        .wrap > h1, .wrap > .sub, .wrap > .errors { grid-column:1 / -1; }
+        .wrap > .card { margin-bottom:0; }
         .wrap > .card:nth-of-type(odd) { border-top:3px solid #ff7918; }
         .wrap > .card:nth-of-type(even) { border-top:3px solid #6fd39a; }
-        .wrap > .flt, .wrap > .proj, .wrap > .kpis { width:100%; }
-        @media(max-width:850px){.wrap > .card{display:block;width:100%;margin-right:0}}
+        .wrap > .flt, .wrap > .proj, .wrap > .kpis { grid-column:1 / -1; }
+        @media(max-width:850px){ .wrap { grid-template-columns:1fr; } }
         .flt { background:#1c1c1c; border:1px solid #333; border-radius:10px; padding:14px 16px; margin-bottom:18px; }
         .flt-row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
         .flt-row:last-child { margin-bottom:0; }
