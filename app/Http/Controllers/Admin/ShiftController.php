@@ -65,17 +65,30 @@ class ShiftController extends Controller
                 })->values();
             });
 
-        // Marcas de hora en el eje (cada 1h = 4 bloques de 15 min).
+        // Marcas de hora en el eje (cada 1h = 4 bloques de 15 min). El eje va
+        // de 06:00 a 03:00 del día siguiente, así que el último borde (03:00)
+        // queda justo al fondo de la grilla y se muestra aparte como cierre.
         $hourMarks = collect(range(0, self::GRID_TOTAL_SLOTS / 4 - 1))->map(fn ($i) => [
             'slot' => $i * 4,
             'label' => str_pad((self::GRID_START_HOUR + $i) % 24, 2, '0', STR_PAD_LEFT).':00',
         ]);
+        $closingLabel = str_pad((self::GRID_START_HOUR + intdiv(self::GRID_TOTAL_SLOTS, 4)) % 24, 2, '0', STR_PAD_LEFT).':00';
+
+        // Horarios reales de apertura/cierre del motel, para dibujarlos como
+        // líneas de referencia sobre la grilla (10:30 apertura todos los
+        // días, 03:00 cierre entre semana, 22:30 cierre fin de semana/HOT).
+        $businessMarks = [
+            ['label' => '10:30', 'desc' => 'Apertura', 'slot' => $this->slotOffset(10, 30), 'color' => '#6fd39a'],
+            ['label' => '22:30', 'desc' => 'Cierre fin de semana', 'slot' => $this->slotOffset(22, 30), 'color' => '#f2994a'],
+        ];
 
         return view('admin.shifts.index', [
             'weekStart' => $weekStart,
             'weekEnd' => $weekEnd,
             'roleBlocks' => $roleBlocks,
             'hourMarks' => $hourMarks,
+            'closingLabel' => $closingLabel,
+            'businessMarks' => $businessMarks,
             'totalSlots' => self::GRID_TOTAL_SLOTS,
             'hasConflicts' => $conflictIds->isNotEmpty(),
             'conflictShifts' => $shifts->whereIn('id', $conflictIds->all())->sortBy('start_time'),
@@ -89,6 +102,19 @@ class ShiftController extends Controller
             'nextWeek' => $weekStart->copy()->addWeek()->toDateString(),
             'isCurrentWeek' => now('America/Santiago')->between($weekStart, $weekEnd),
         ]);
+    }
+
+    /**
+     * A qué bloque de 15 min (desde GRID_START_HOUR) corresponde una hora
+     * del día. Se usa para ubicar las líneas de apertura/cierre en la
+     * grilla -- las mismas cuentas que gridPosition() pero para una hora
+     * suelta en vez de un turno completo.
+     */
+    private function slotOffset(int $hour, int $minute): int
+    {
+        $gridStartMinutes = self::GRID_START_HOUR * 60;
+
+        return intdiv(($hour * 60 + $minute) - $gridStartMinutes, self::SLOT_MINUTES);
     }
 
     /**

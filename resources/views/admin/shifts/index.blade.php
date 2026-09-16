@@ -11,15 +11,20 @@
         .conflict-banner { background:#3a1c1c; border:1px solid #7a2d2d; color:#f3b8b8; padding:12px 16px; border-radius:9px; margin-bottom:18px; font-size:13.5px; }
         .conflict-banner ul { margin:6px 0 0; padding-left:18px; }
 
-        .time-grid { display:grid; grid-template-columns:46px repeat(7, 1fr); grid-auto-rows:6px; border:1px solid #333; background:#151515; border-radius:8px; overflow:hidden; margin-top:12px; }
+        .time-grid { position:relative; display:grid; grid-template-columns:46px repeat(7, 1fr); grid-auto-rows:6px; border:1px solid #333; background:#151515; border-radius:8px; overflow:hidden; margin-top:12px; }
         .tg-daylabel { grid-row:1; padding:7px 4px; text-align:center; font-size:10.5px; color:#999; text-transform:uppercase; background:#181818; border-left:1px solid #292929; position:sticky; top:0; z-index:5; }
         .tg-daylabel .dnum { display:block; font-size:13px; color:#eee; font-weight:700; }
         .tg-daylabel.today { color:#ff9a4a; background:#241a10; }
         .tg-corner { grid-row:1; grid-column:1; background:#181818; }
         .tg-hourlabel { grid-column:1; font-size:9px; color:#666; text-align:right; padding-right:6px; border-top:1px solid #232323; white-space:nowrap; }
+        .tg-hourlabel-end { font-weight:700; border-top:2px dashed; padding-top:2px; }
         .tg-daybg { border-left:1px solid #232323; position:relative; }
         .tg-daybg.today { background:rgba(255,121,24,.05); }
         .shift-cell { position:relative; }
+        .tg-boundary-line { grid-column:2 / -1; border-top:2px dashed; pointer-events:none; z-index:3; }
+        .tg-boundary-label { grid-column:1; justify-self:end; align-self:start; transform:translateY(-50%); font-size:8.5px; font-weight:700; padding:1px 5px; border-radius:3px; white-space:nowrap; z-index:6; margin-right:2px; }
+        .business-hours-legend { display:flex; gap:14px; flex-wrap:wrap; font-size:11.5px; color:#999; margin:6px 0 2px; }
+        .business-hours-legend span.sw { display:inline-block; width:14px; border-top:2px dashed; margin-right:5px; vertical-align:middle; }
         details.shift-block-details summary { list-style:none; cursor:pointer; }
         details.shift-block-details summary::-webkit-details-marker { display:none; }
         .shift-block { position:absolute; inset:1px; border-radius:4px; padding:2px 4px; font-size:10px; font-weight:700; color:#111; overflow:hidden; line-height:1.15; box-shadow:0 1px 3px rgba(0,0,0,.4); }
@@ -48,6 +53,11 @@
 
     <h1>Turnos</h1>
     <p class="sub">Calendario semanal por rol -- cada bloque dibuja su horario real. <a class="link" href="{{ route('admin.staff.index') }}">Administrar personal →</a></p>
+    <div class="business-hours-legend">
+        <span><span class="sw" style="border-color:#6fd39a;"></span>10:30 apertura</span>
+        <span><span class="sw" style="border-color:#f2994a;"></span>22:30 cierre fin de semana</span>
+        <span><span class="sw" style="border-color:#e88a9a;"></span>03:00 cierre entre semana</span>
+    </div>
 
     <div class="shift-nav">
         <a class="navbtn" href="{{ route('admin.shifts.index', array_filter(['date' => $prevWeek, 'staff_id' => $selectedStaffId])) }}">← Semana anterior</a>
@@ -90,7 +100,7 @@
                 @endforeach
             </div>
             <div style="overflow-x:auto;">
-                <div class="time-grid" style="grid-template-rows: repeat({{ $totalSlots + 1 }}, 6px); min-width:640px;">
+                <div class="time-grid" style="grid-template-rows: repeat({{ $totalSlots + 1 }}, 6px) 16px; min-width:640px;">
                     <div class="tg-corner"></div>
                     @for ($i = 0; $i < 7; $i++)
                         @php $day = $weekStart->copy()->addDays($i); @endphp
@@ -103,11 +113,17 @@
                     @foreach ($hourMarks as $mark)
                         <div class="tg-hourlabel" style="grid-row:{{ $mark['slot'] + 2 }} / span 4;">{{ $mark['label'] }}</div>
                     @endforeach
+                    <div class="tg-hourlabel tg-hourlabel-end" style="grid-row:{{ $totalSlots + 2 }}; border-color:#e88a9a; color:#e88a9a;">{{ $closingLabel }}</div>
 
                     @for ($i = 0; $i < 7; $i++)
                         @php $day = $weekStart->copy()->addDays($i); @endphp
                         <div class="tg-daybg {{ $day->isToday() ? 'today' : '' }}" style="grid-column:{{ $i + 2 }}; grid-row:2 / span {{ $totalSlots }};"></div>
                     @endfor
+
+                    @foreach ($businessMarks as $mark)
+                        <div class="tg-boundary-line" style="grid-row:{{ $mark['slot'] + 2 }}; border-color:{{ $mark['color'] }};"></div>
+                        <div class="tg-boundary-label" style="grid-row:{{ $mark['slot'] + 2 }}; background:{{ $mark['color'] }}; color:#111;" title="{{ $mark['desc'] }}">{{ $mark['label'] }}</div>
+                    @endforeach
 
                     @foreach ($blocks as $block)
                         @php $shift = $block['shift']; @endphp
