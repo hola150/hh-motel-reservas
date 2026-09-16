@@ -3,10 +3,10 @@
     <div class="card-head">
         <b>{{ $room->name }}</b>
         @if ($offer)
-            <span class="offer-badge" title="{{ $offer['label'] }}">🏷️ {{ $offer['tag'] }}</span>
+            <span class="offer-badge" title="{{ $offer['label'] }}">{{ $offer['tag'] }}</span>
         @endif
         @if ($needsMaintenance)
-            <span class="maintenance-badge" title="{{ $room->latestInspection->notes }}">🔧 Mantención</span>
+            <span class="maintenance-badge" title="{{ $room->latestInspection->notes }}">Mantención</span>
         @endif
     </div>
     <div class="cat">Categoría {{ $room->category->name }}</div>
@@ -29,7 +29,7 @@
     @else
         <span class="pill pill-libre">LIBRE</span>
         @if ($status['next_booking'])
-            <span class="pill pill-upcoming">📅 {{ $status['next_booking']->starts_at->timezone('America/Santiago')->format('H:i') }}</span>
+            <span class="pill pill-upcoming">{{ $status['next_booking']->starts_at->timezone('America/Santiago')->format('H:i') }}</span>
         @endif
     @endif
 
@@ -82,7 +82,7 @@
         <a class="bookings-btn empty" href="{{ route('rooms.bookings', $room) }}">Sin reservas próximas</a>
     @endif
 
-    <a class="inspect-btn" href="{{ route('rooms.inspections.create', $room) }}">🔧 Inspeccionar</a>
+    <a class="inspect-btn" href="{{ route('rooms.inspections.create', $room) }}">Inspeccionar</a>
 
     <details>
         <summary>Cambiar estado</summary>

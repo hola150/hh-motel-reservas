@@ -267,7 +267,7 @@
                     <div class="cat-filter" id="cat-filter">
                         <button type="button" data-cat="todas" onclick="hhFilterCategory('todas')">Todas</button>
                         @foreach ($boardCategories as $cat)
-                            <button type="button" data-cat="{{ Str::slug($cat->name) }}" onclick="hhFilterCategory('{{ Str::slug($cat->name) }}')">{{ $cat->name === 'NEW LITE' ? '✨ '.$cat->name : $cat->name }}</button>
+                            <button type="button" data-cat="{{ Str::slug($cat->name) }}" onclick="hhFilterCategory('{{ Str::slug($cat->name) }}')">{{ $cat->name }}</button>
                         @endforeach
                     </div>
                 @endif
