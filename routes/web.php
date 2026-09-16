@@ -28,11 +28,15 @@ use App\Http\Controllers\ReservationSearchController;
 use App\Http\Controllers\RoomBoardController;
 use App\Http\Controllers\RoomInspectionController;
 use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\CatalogController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return redirect()->route('rooms.board');
 });
+
+// Público -- sin login, pensado para compartir el link con clientes.
+Route::get('/catalogo', [CatalogController::class, 'index'])->name('catalog.index');
 
 Route::get('/reservar', [ReservationController::class, 'create'])->name('reservations.create');
 Route::get('/clientes/buscar', [ReservationController::class, 'lookupCustomer'])->middleware('throttle:40,1')->name('customers.lookup');
