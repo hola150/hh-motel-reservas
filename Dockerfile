@@ -18,7 +18,11 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /app
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader --no-interaction \
+# Sin --no-dev: el seeder de arranque (DatabaseSeeder -> UserFactory) usa
+# fake() de fakerphp/faker, que es una dependencia de desarrollo. Para una
+# imagen de producción "de verdad" habría que sacar el seeder de la
+# dependencia de Faker y volver a --no-dev.
+RUN composer install --optimize-autoloader --no-interaction \
     && php artisan config:clear
 
 COPY docker/entrypoint.sh /entrypoint.sh
