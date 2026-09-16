@@ -38,8 +38,6 @@
         .dsum-label { font-size:11px; color:#9cc7ac; text-transform:uppercase; letter-spacing:.03em; }
         .dsum-tile.total .dsum-label { color:#ffb379; }
         .dsum-value { font-family: ui-monospace, monospace; font-weight:700; font-size:19px; color:#eee; }
-        .dsum-value small { font-weight:500; font-size:13px; color:#8fe0ad; }
-        .dsum-tile.total .dsum-value small { color:#ffb379; }
 
         .page-grid { display:grid; grid-template-columns: 1fr 280px; gap:28px; align-items:start; }
         @media (max-width: 1100px) { .page-grid { grid-template-columns: 1fr; } }
@@ -250,11 +248,19 @@
     <div class="daily-summary">
         <a href="{{ route('sales.daily') }}" class="dsum-tile">
             <span class="dsum-label">Playrooms vendidos hoy</span>
-            <span class="dsum-value">{{ $dailySummary['rooms_count'] }} <small>· ${{ number_format($dailySummary['rooms_revenue'], 0, ',', '.') }}</small></span>
+            <span class="dsum-value">{{ $dailySummary['rooms_count'] }}</span>
         </a>
         <a href="{{ route('sales.daily') }}" class="dsum-tile">
             <span class="dsum-label">Extras vendidos hoy</span>
-            <span class="dsum-value">{{ $dailySummary['extras_count'] }} <small>· ${{ number_format($dailySummary['extras_revenue'], 0, ',', '.') }}</small></span>
+            <span class="dsum-value">{{ $dailySummary['extras_count'] }}</span>
+        </a>
+        <a href="{{ route('sales.daily') }}" class="dsum-tile">
+            <span class="dsum-label">Venta Playrooms</span>
+            <span class="dsum-value">${{ number_format($dailySummary['rooms_revenue'], 0, ',', '.') }}</span>
+        </a>
+        <a href="{{ route('sales.daily') }}" class="dsum-tile">
+            <span class="dsum-label">Venta extras</span>
+            <span class="dsum-value">${{ number_format($dailySummary['extras_revenue'], 0, ',', '.') }}</span>
         </a>
         <a href="{{ route('sales.daily') }}" class="dsum-tile total">
             <span class="dsum-label">Total del día</span>
