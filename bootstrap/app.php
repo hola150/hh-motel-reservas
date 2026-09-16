@@ -12,7 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Detrás de Render (y cualquier proxy/balanceador), Laravel recibe
+        // la conexión interna como HTTP plano -- sin confiar en el proxy,
+        // genera todos los links (assets, formularios) con http:// aunque
+        // el visitante haya entrado por https://, y el navegador bloquea
+        // esos recursos como "Mixed Content".
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
