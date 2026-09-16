@@ -57,20 +57,44 @@ class RoomController extends Controller
         return $this->save($request, $room);
     }
 
+    /** Una URL por línea -> array limpio, sin líneas vacías. */
+    private function parseLines(?string $text): array
+    {
+        return collect(preg_split('/\r\n|\r|\n/', (string) $text))
+            ->map(fn ($line) => trim($line))
+            ->filter()
+            ->values()
+            ->all();
+    }
+
     private function save(Request $request, Room $room): RedirectResponse
     {
+        // Solo links (alojados afuera, ej. GHL) -- no se sube ningun
+        // archivo al servidor, asi que nada se pierde en un redespliegue.
+        $request->merge([
+            'photos' => $this->parseLines($request->input('photos_text')),
+            'videos' => $this->parseLines($request->input('videos_text')),
+        ]);
+
         $validated = $request->validate([
             'room_category_id' => ['required', 'exists:room_categories,id'],
             'name' => ['required', 'string', 'max:100', 'unique:rooms,name,'.$room->id],
             'buffer_minutes' => ['required', 'integer', 'min:0'],
             'operational_status' => ['required', 'in:activa,mantencion,inactiva,aseo'],
             'operational_note' => ['nullable', 'string', 'max:255'],
+            'photos' => ['nullable', 'array'],
+            'photos.*' => ['url', 'max:500'],
+            'videos' => ['nullable', 'array'],
+            'videos.*' => ['url', 'max:500'],
             'furniture_present' => ['sometimes', 'in:1'],
             'furniture' => ['sometimes', 'array', 'max:500'],
             'furniture.*.id' => ['required', 'integer', 'distinct', 'exists:furniture_items,id'],
             'furniture.*.quantity' => ['required', 'integer', 'min:0', 'max:100'],
             'furniture.*.condition' => ['required', 'in:operativo,reparacion,fuera_de_uso'],
             'furniture.*.notes' => ['nullable', 'string', 'max:255'],
+        ], [
+            'photos.*.url' => 'Cada línea de fotos debe ser un link válido (https://...).',
+            'videos.*.url' => 'Cada línea de videos debe ser un link válido (https://...).',
         ]);
 
         $updateFurniture = isset($validated['furniture_present']);

@@ -22,6 +22,9 @@
         .card { background:#1c1c1c; border:1px solid #333; border-radius: 10px; padding: 18px 20px; }
         .row { display:flex; justify-content:space-between; padding: 7px 0; font-size: 14.5px; border-bottom: 1px solid #292929; gap:12px; }
         .row:last-child { border-bottom: none; }
+        .room-media { display:flex; flex-wrap:wrap; gap:6px; padding:8px 0; border-bottom: 1px solid #292929; }
+        .room-media img { width:64px; height:48px; object-fit:cover; border-radius:6px; border:1px solid #333; }
+        .room-media-video { display:flex; align-items:center; justify-content:center; width:64px; height:48px; border-radius:6px; border:1px dashed #444; color:#ff7918; text-decoration:none; font-size:11px; }
         .row.total { font-weight: 700; font-size: 16px; color:#fff; }
         .row .muted { color:#999; flex:none; }
         .pill { display:inline-block; font-size:11px; font-family: ui-monospace, monospace; padding:3px 9px; border-radius:20px; background:#2a2a2a; color:#ccc; }
@@ -95,6 +98,16 @@
         <div class="col">
             <div class="card">
                 <div class="row"><span class="muted">Habitación</span><span>{{ $booking->room->name }} ({{ $booking->room->category->name }})</span></div>
+                @if ($booking->room->photos || $booking->room->videos)
+                    <div class="room-media">
+                        @foreach (($booking->room->photos ?? []) as $url)
+                            <a href="{{ $url }}" target="_blank" rel="noopener"><img src="{{ $url }}" alt="Foto de {{ $booking->room->name }}" loading="lazy"></a>
+                        @endforeach
+                        @foreach (($booking->room->videos ?? []) as $url)
+                            <a href="{{ $url }}" target="_blank" rel="noopener" class="room-media-video">Video ↗</a>
+                        @endforeach
+                    </div>
+                @endif
                 @php $custSegment = $booking->customer->segment(); @endphp
                 <div class="row">
                     <span class="muted">Cliente</span>

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-#[Fillable(['room_category_id', 'name', 'wing', 'photos', 'buffer_minutes', 'operational_status', 'operational_note', 'aseo_override_at', 'aseo_started_at'])]
+#[Fillable(['room_category_id', 'name', 'wing', 'photos', 'videos', 'buffer_minutes', 'operational_status', 'operational_note', 'aseo_override_at', 'aseo_started_at'])]
 class Room extends Model
 {
     use HasFactory;
@@ -19,6 +19,7 @@ class Room extends Model
     {
         return [
             'photos' => 'array',
+            'videos' => 'array',
             'aseo_override_at' => 'datetime',
             'aseo_started_at' => 'datetime',
         ];

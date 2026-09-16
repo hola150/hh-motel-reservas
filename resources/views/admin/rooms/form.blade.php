@@ -42,6 +42,35 @@
         <label>Observación operativa (opcional)</label>
         <input type="text" name="operational_note" value="{{ old('operational_note', $room->operational_note) }}" placeholder="Ej. Aire acondicionado en reparación">
 
+        <section class="hh-media-section">
+            <h2>Fotos y videos</h2>
+            <p class="sub">Solo links (alojados en GHL u otro lugar externo) — no se sube ningún archivo acá. Un link por línea.</p>
+            <div class="row2">
+                <div>
+                    <label>Fotos</label>
+                    <textarea name="photos_text" rows="4" placeholder="https://...&#10;https://...">{{ old('photos_text', implode("\n", $room->photos ?? [])) }}</textarea>
+                    @if ($room->photos)
+                        <div class="hh-media-preview">
+                            @foreach ($room->photos as $url)
+                                <a href="{{ $url }}" target="_blank" rel="noopener"><img src="{{ $url }}" alt="Foto de {{ $room->name }}" loading="lazy"></a>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+                <div>
+                    <label>Videos</label>
+                    <textarea name="videos_text" rows="4" placeholder="https://...&#10;https://...">{{ old('videos_text', implode("\n", $room->videos ?? [])) }}</textarea>
+                    @if ($room->videos)
+                        <div class="hh-media-preview links">
+                            @foreach ($room->videos as $url)
+                                <a href="{{ $url }}" target="_blank" rel="noopener">{{ Str::limit($url, 40) }} ↗</a>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </section>
+
         <section class="hh-furniture-section" aria-labelledby="furniture-heading">
             <h2 id="furniture-heading">Mobiliario de este Playroom</h2>
             <p class="sub">Indica cantidad y estado de cada elemento. Cantidad 0 significa que no está asignado a este Playroom.</p>
