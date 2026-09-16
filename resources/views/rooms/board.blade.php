@@ -251,6 +251,7 @@
         <div class="topline-toolbar">
             <a class="compact-toggle sales-btn" href="{{ route('sales.daily') }}">Ventas del día →</a>
             <a class="compact-toggle" href="{{ route('calendar.index') }}">Calendario</a>
+            <button type="button" class="compact-toggle" id="catalog-link-btn" onclick="navigator.clipboard.writeText('{{ route('catalog.index') }}'); this.textContent='¡Copiado! — pegalo en WhatsApp'; setTimeout(() => this.textContent='Copiar link del catálogo', 2000);">Copiar link del catálogo</button>
             <button type="button" class="compact-toggle" id="compact-toggle-btn" onclick="hhToggleCompact()">⊟ Vista compacta</button>
         </div>
     </div>
