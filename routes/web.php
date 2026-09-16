@@ -29,6 +29,7 @@ use App\Http\Controllers\RoomBoardController;
 use App\Http\Controllers\RoomInspectionController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CatalogController;
+use App\Http\Controllers\PublicBookingController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -37,6 +38,9 @@ Route::get('/', function () {
 
 // Público -- sin login, pensado para compartir el link con clientes.
 Route::get('/catalogo', [CatalogController::class, 'index'])->name('catalog.index');
+Route::get('/catalogo/reservar', [PublicBookingController::class, 'create'])->name('catalog.reserve');
+Route::post('/catalogo/reservar', [PublicBookingController::class, 'store'])->middleware('throttle:8,1')->name('catalog.reserve.store');
+Route::get('/catalogo/reservado/{code}', [PublicBookingController::class, 'booked'])->name('catalog.booked');
 
 Route::get('/reservar', [ReservationController::class, 'create'])->name('reservations.create');
 Route::get('/clientes/buscar', [ReservationController::class, 'lookupCustomer'])->middleware('throttle:40,1')->name('customers.lookup');

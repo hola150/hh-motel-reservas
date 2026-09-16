@@ -16,8 +16,11 @@
         header.hero .brand { font-size: 15px; font-weight: 800; letter-spacing: .1em; color: #ff7918; margin-bottom: 10px; }
         header.hero h1 { font-size: 26px; margin: 0 0 10px; letter-spacing: -.01em; }
         header.hero p { color:#999; font-size: 14.5px; max-width: 520px; margin: 0 auto 22px; }
-        a.hero-btn { display:inline-block; background:#25d366; color:#fff; text-decoration:none; padding: 13px 26px; border-radius: 30px; font-weight:700; font-size:14.5px; }
-        a.hero-btn:hover { background:#1ebd5a; }
+        .hero-btn-row { display:inline-flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+        a.hero-btn { display:inline-block; background:#262626; border:1px solid #383838; color:#eee; text-decoration:none; padding: 13px 26px; border-radius: 30px; font-weight:700; font-size:14.5px; }
+        a.hero-btn:hover { border-color:#25d366; }
+        a.hero-btn.primary { background:#ff7918; border-color:#ff7918; color:#fff; }
+        a.hero-btn.primary:hover { background:#df6209; }
 
         .cat-card { background:#1a1a1a; border:1px solid #2c2c2c; border-radius: 16px; overflow:hidden; margin-bottom: 28px; }
         .cat-gallery { display:grid; grid-template-columns: repeat(4, 1fr); gap:2px; background:#111; }
@@ -39,8 +42,12 @@
         table.price-table td.price { font-family: ui-monospace, monospace; font-weight:700; color:#fff; }
         table.price-table td.dash { color:#555; }
 
-        a.cat-btn { display:block; text-align:center; background:#25d366; color:#fff; text-decoration:none; padding: 13px; border-radius: 9px; font-weight:700; font-size:14px; }
-        a.cat-btn:hover { background:#1ebd5a; }
+        .cat-btn-row { display:flex; gap:10px; }
+        a.cat-btn { flex:1; display:block; text-align:center; background:#262626; border:1px solid #383838; color:#eee; text-decoration:none; padding: 13px; border-radius: 9px; font-weight:700; font-size:13.5px; }
+        a.cat-btn:hover { border-color:#25d366; }
+        a.cat-btn.primary { background:#ff7918; border-color:#ff7918; color:#fff; }
+        a.cat-btn.primary:hover { background:#df6209; }
+        @media (max-width: 420px) { .cat-btn-row { flex-direction:column; } }
 
         .video-links { display:flex; flex-wrap:wrap; gap:10px; margin: -6px 0 18px; }
         .video-links a { font-size: 12.5px; color:#7fbcdc; text-decoration:none; border:1px solid #2f4a5a; padding:5px 11px; border-radius:20px; }
@@ -60,8 +67,11 @@
         <header class="hero">
             <div class="brand">HH MOTEL</div>
             <h1>Nuestras habitaciones</h1>
-            <p>Elegí la que más te acomode y reservá directo por WhatsApp — te confirmamos al toque.</p>
-            <a class="hero-btn" href="{{ $whatsappUrl }}" target="_blank" rel="noopener">Reservar por WhatsApp →</a>
+            <p>Elegí la que más te acomode — reservá online al toque o escribinos por WhatsApp.</p>
+            <div class="hero-btn-row">
+                <a class="hero-btn primary" href="{{ route('catalog.reserve') }}">Reservar online →</a>
+                <a class="hero-btn" href="{{ $whatsappUrl }}" target="_blank" rel="noopener">Por WhatsApp →</a>
+            </div>
         </header>
 
         @forelse ($categories as $entry)
@@ -122,7 +132,10 @@
                         </table>
                     @endif
 
-                    <a class="cat-btn" href="{{ $catWhatsapp }}" target="_blank" rel="noopener">Reservar {{ $category->name }} por WhatsApp →</a>
+                    <div class="cat-btn-row">
+                        <a class="cat-btn primary" href="{{ route('catalog.reserve', ['categoria' => $category->id]) }}">Reservar online →</a>
+                        <a class="cat-btn" href="{{ $catWhatsapp }}" target="_blank" rel="noopener">Por WhatsApp →</a>
+                    </div>
                 </div>
             </section>
         @empty
