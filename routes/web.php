@@ -19,6 +19,7 @@ use App\Http\Controllers\CustomerLoyaltyController;
 use App\Http\Controllers\DailyAseoController;
 use App\Http\Controllers\DailySalesController;
 use App\Http\Controllers\BookingFinalizeController;
+use App\Http\Controllers\BookingPassController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\ReservationSearchController;
@@ -38,6 +39,7 @@ Route::get('/buscar', [ReservationSearchController::class, 'index'])->name('rese
 Route::get('/calendario', [CalendarController::class, 'index'])->name('calendar.index');
 Route::post('/reservar', [ReservationController::class, 'store'])->name('reservations.store');
 Route::get('/reservas/{code}', [ReservationController::class, 'show'])->name('reservations.show');
+Route::get('/reservas/{code}/pase.pdf', [BookingPassController::class, 'download'])->name('bookings.pass.pdf');
 Route::get('/reservas/{code}/editar', [ReservationController::class, 'edit'])->name('reservations.edit');
 Route::put('/reservas/{code}', [ReservationController::class, 'update'])->name('reservations.update');
 
