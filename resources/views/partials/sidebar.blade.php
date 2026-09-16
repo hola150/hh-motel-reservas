@@ -1,8 +1,7 @@
 @php
     $navigation = [
         ['rooms.board', 'rooms.*', 'Tablero', 'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z'],
-        ['calendar.index', 'calendar.*', 'Calendario', 'M3 4h18v17H3z M8 2v4 M16 2v4 M3 9h18 M7 13h3 M14 13h3 M7 17h3'],
-        ['reservations.search', 'reservations.*,bookings.*', 'Buscar reservas', 'M10.5 4a6.5 6.5 0 1 0 0 13a6.5 6.5 0 0 0 0-13 M16 16l5 5'],
+        ['calendar.index', 'calendar.*,reservations.*,bookings.*', 'Calendario', 'M3 4h18v17H3z M8 2v4 M16 2v4 M3 9h18 M7 13h3 M14 13h3 M7 17h3'],
         ['admin.customers.index', 'admin.customers.*', 'Clientes', 'M16 7a4 4 0 1 1-8 0a4 4 0 0 1 8 0 M4 21v-3a8 8 0 0 1 16 0v3'],
         ['admin.products.index', 'admin.products.*,admin.combos.*', 'Productos', 'M4 7h16v14H4z M8 7V5a4 4 0 0 1 8 0v2'],
         ['cash.show', 'cash.*,payments.*', 'Caja', 'M3 5h18v16H3z M3 9h18 M15 13h6v4h-6z'],

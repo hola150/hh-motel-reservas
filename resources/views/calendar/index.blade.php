@@ -38,24 +38,20 @@
 </section>
 @endif
 
-<section class="calendar-card calendar-summary">
- <h2>Resumen {{ $view==='month' ? 'del mes' : ($view==='week' ? 'de la semana' : 'del día') }}</h2>
- <div class="summary-grid">
-  <div class="summary-tile"><span>Reservas</span><b>{{ $summary['count'] }}</b></div>
-  <div class="summary-tile"><span>Venta Playrooms</span><b>${{ number_format($summary['rooms_revenue'], 0, ',', '.') }}</b></div>
-  <div class="summary-tile"><span>Venta extras</span><b>${{ number_format($summary['extras_revenue'], 0, ',', '.') }}</b></div>
-  <div class="summary-tile total"><span>Total</span><b>${{ number_format($summary['total'], 0, ',', '.') }}</b></div>
- </div>
+<section class="calendar-card calendar-history">
+ <h2>Historial {{ $view==='month' ? 'del mes' : ($view==='week' ? 'de la semana' : 'del día') }} <span class="hist-count">{{ $bookings->count() }} {{ Str::plural('reserva', $bookings->count()) }}</span></h2>
+ @forelse ($bookings as $booking)
+  <a class="booking-row" href="{{ route('reservations.show',$booking->code) }}"><div class="booking-time"><b>{{ $booking->starts_at->locale('es')->isoFormat('D MMM') }}</b><span>{{ $booking->starts_at->format('H:i') }}</span></div><div><strong>{{ $booking->room->name }}</strong><small>{{ $booking->room->category->name }} · {{ $booking->customer->name }}</small></div><div class="booking-status">{{ str_replace('_',' ', $booking->booking_status) }}</div><span class="arrow">→</span></a>
+ @empty
+  <p class="empty">No hay reservas en este período.</p>
+ @endforelse
 </section>
 </main>
 <style>
 *{box-sizing:border-box}.calendar-page{max-width:1500px}.calendar-head,.calendar-toolbar{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:20px}.calendar-head h1{margin-bottom:4px}.primary-btn{background:#ff7918;color:white;text-decoration:none;padding:12px 18px;border-radius:8px;font-weight:700}.calendar-toolbar,.calendar-card{background:#fff;border:1px solid #dededb;border-radius:14px;padding:16px}.calendar-views{display:flex;gap:5px}.calendar-views a,.calendar-nav a{color:#4c4c4a;text-decoration:none;padding:9px 16px;border-radius:8px}.calendar-views a.active,.calendar-views a:hover{background:#ff7918;color:#fff}.calendar-nav{display:flex;align-items:center;gap:16px}.calendar-nav a{font-size:25px;background:#f0f0ee}.weekdays,.month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}.weekdays{margin-bottom:7px;color:#777;font-size:11px;letter-spacing:.08em}.day-cell{min-height:130px;border:1px solid #e2e2df;border-radius:9px;padding:10px;background:#fff}.day-cell.today{border:2px solid #ff7918}.day-cell.muted{background:#f7f7f5;color:#aaa}.event{display:block;text-decoration:none;color:#373737;background:#f8dfce;border-left:3px solid #ff7918;padding:5px 6px;margin-top:8px;border-radius:4px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.event span{font-weight:700}.cat-go{border-color:#4b91d1}.cat-lite{border-color:#26b9b0}.cat-plus{border-color:#9b72d5}.cat-max{border-color:#e2aa32}.day-cell small{display:block;margin-top:7px;color:#777}.booking-row{display:grid;grid-template-columns:100px 1fr 170px 25px;align-items:center;gap:18px;padding:16px 8px;border-bottom:1px solid #e5e5e2;text-decoration:none;color:#272727}.booking-row:last-child{border:0}.booking-time span,.booking-row small{display:block;color:#777;font-size:12px;margin-top:4px}.booking-status{font-size:11px;text-transform:uppercase;color:#a55a13}.arrow{font-size:20px;color:#ff7918}.empty{color:#777;padding:30px}@media(max-width:700px){.calendar-head,.calendar-toolbar{align-items:flex-start;flex-direction:column}.calendar-toolbar{width:100%}.calendar-nav{width:100%;justify-content:space-between}.day-cell{min-height:95px;padding:6px}.event{font-size:10px;padding:3px}.weekdays{font-size:9px}.booking-row{grid-template-columns:65px 1fr 20px}.booking-status{display:none}.calendar-search{width:100%}.calendar-search input{flex:1;min-width:0}}
 .calendar-search{display:flex;gap:8px}.calendar-search input{border:1px solid #dededb;border-radius:8px;padding:9px 12px;font-size:13px;min-width:240px}.calendar-search button{background:#ff7918;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-weight:600;cursor:pointer}
-.calendar-summary{margin-top:20px}.calendar-summary h2{margin:0 0 12px;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:#888}
-.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
-.summary-tile{border:1px solid #e2e2df;border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:5px}
-.summary-tile span{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.03em}
-.summary-tile b{font-family:ui-monospace,monospace;font-size:19px}
-.summary-tile.total{background:#fff4ea;border-color:#ff7918}
-.summary-tile.total b{color:#a55a13}
+.calendar-history{margin-top:20px}.calendar-history h2{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:#888;display:flex;align-items:baseline;gap:10px}
+.hist-count{font-size:11px;text-transform:none;letter-spacing:0;color:#aaa;font-weight:500}
+.calendar-history .booking-row{grid-template-columns:70px 1fr 170px 25px}
+.calendar-history{max-height:520px;overflow-y:auto}
 </style></body></html>
