@@ -60,7 +60,11 @@
             <div class="code">{{ $status['current_booking']->code }}</div>
             <a class="consumo-btn" href="{{ route('reservations.show', $status['current_booking']->code) }}#consumo">+ Agregar consumo →</a>
             @if ($status['current_booking']->checked_in_at)
-                <a class="checkout-btn" href="{{ route('bookings.finalize.show', $status['current_booking']->code) }}">Finalizar / Check-out →</a>
+                @if ($status['current_booking']->balanceDue() > 0)
+                    <a class="checkout-btn pending-balance" href="{{ route('reservations.show', $status['current_booking']->code) }}#consumo">Falta cobrar ${{ number_format($status['current_booking']->balanceDue(), 0, ',', '.') }} →</a>
+                @else
+                    <a class="checkout-btn" href="{{ route('bookings.finalize.show', $status['current_booking']->code) }}">Finalizar / Check-out →</a>
+                @endif
             @else
                 <a class="checkin-btn" href="{{ route('bookings.checkin.show', $status['current_booking']->code) }}">Falta check-in — marcar ahora</a>
             @endif

@@ -149,6 +149,8 @@
         .aseo-ready-btn:hover { border-color:#e8c76f; }
         a.checkout-btn { display:block; text-align:center; margin-top:8px; background:#2a2a2a; border:1px solid #444; color:#eee; text-decoration:none; padding:8px; border-radius:7px; font-size:12.5px; font-weight:600; }
         a.checkout-btn:hover { border-color:#ff7918; color:#ff7918; }
+        a.checkout-btn.pending-balance { background:#2a2010; border-color:#6b5a1e; color:#e8a23f; }
+        a.checkout-btn.pending-balance:hover { border-color:#e8a23f; color:#ffcf7a; }
         a.bookings-btn { display:block; text-align:center; margin-top:8px; text-decoration:none; padding:8px; border-radius:7px; font-size:12.5px; font-weight:600; }
         a.bookings-btn.has-bookings { background:#1c2f3a; border:1px solid #3a5a72; color:#7fbcdc; }
         a.bookings-btn.has-bookings:hover { border-color:#7fbcdc; }
