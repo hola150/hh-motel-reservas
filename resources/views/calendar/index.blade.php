@@ -37,15 +37,10 @@
  @endforeach
  </div>
 </section>
-@else
-<section class="calendar-card list-view">
- @forelse($bookings as $booking)
-  <a class="booking-row" href="{{ route('reservations.show',$booking->code) }}"><div class="booking-time"><b>{{ $booking->starts_at->format('H:i') }}</b><span>{{ $booking->ends_at->format('H:i') }}</span></div><div><strong>{{ $booking->room->name }}</strong><small>{{ $booking->room->category->name }} · {{ $booking->customer->name }}</small></div><div class="booking-status">{{ str_replace('_',' ', $booking->booking_status) }}</div><span class="arrow">→</span></a>
- @empty
-  <p class="empty">No hay reservas en este periodo.</p>
- @endforelse
-</section>
 @endif
+{{-- Para semana/día no hay un bloque de lista aparte -- sería la misma
+     $bookings de "Historial" de más abajo, mostrada dos veces con menos
+     información (sin fecha por fila, ambigua en vista semana). --}}
 
 <section class="calendar-card calendar-history">
  <h2>Historial {{ $view==='month' ? 'del mes' : ($view==='week' ? 'de la semana' : 'del día') }} <span class="hist-count">{{ $bookings->count() }} {{ Str::plural('reserva', $bookings->count()) }}</span></h2>

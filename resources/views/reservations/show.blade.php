@@ -82,7 +82,28 @@
     <div class="page-inner">
     <h1>HH MOTEL — Reserva creada</h1>
     <div class="code">{{ $booking->code }}</div>
-    <div class="col-actions"><a class="col-btn" href="{{ route('bookings.pass.preview', $booking->code) }}" target="_blank">Ver pase PDF</a><a class="col-btn" href="{{ route('bookings.pass.pdf', $booking->code) }}">Descargar pase</a></div>
+    {{-- Un solo grupo de botones -- antes estaba partido en dos filas (uno
+         acá arriba, otro repetido adentro de la columna "El dinero"), y con
+         cantidades distintas de botones por fila se veía desalineado. --}}
+    <div class="col-actions">
+        <a class="col-btn" href="{{ route('bookings.pass.preview', $booking->code) }}" target="_blank">Ver pase PDF</a>
+        <a class="col-btn" href="{{ route('bookings.pass.pdf', $booking->code) }}">Descargar pase</a>
+        <a class="col-btn" href="{{ route('rooms.board') }}">← Tablero</a>
+        @unless (in_array($booking->booking_status, ['CANCELADA', 'EXPIRADA', 'NO_SHOW', 'FINALIZADA']))
+            <a class="col-btn" href="{{ route('reservations.edit', $booking->code) }}">Modificar</a>
+        @endunless
+        @unless (in_array($booking->booking_status, ['FINALIZADA', 'CANCELADA', 'EXPIRADA', 'NO_SHOW']))
+            <details class="col-cancel">
+                <summary class="col-btn">Cancelar</summary>
+                <form class="cancel-form" method="POST" action="{{ route('bookings.cancel', $booking->code) }}" onsubmit="return confirm('¿Cancelar esta reserva? La habitación queda libre de inmediato.');">
+                    @csrf
+                    <label style="display:block; font-size:12px; color:#bbb; margin-bottom:6px;">Motivo (opcional)</label>
+                    <input type="text" name="reason" placeholder="Cliente no llegó, error de carga, cambio de planes...">
+                    <button type="submit">Confirmar cancelación</button>
+                </form>
+            </details>
+        @endunless
+    </div>
 
     @if (session('status'))
         <div class="banner ok">{{ session('status') }}</div>
@@ -121,6 +142,7 @@
                 </div>
                 <div class="row"><span class="muted">Teléfono</span><span>{{ $booking->customer->phone_e164 }}</span></div>
                 <div class="row"><span class="muted">Fecha / hora de ingreso</span><span>{{ $booking->starts_at->timezone('America/Santiago')->format('d/m/Y H:i') }}</span></div>
+                <div class="row"><span class="muted">Hora de salida</span><span>{{ $booking->ends_at->timezone('America/Santiago')->format('d/m/Y H:i') }}</span></div>
                 <div class="row"><span class="muted">Duración</span><span>{{ $booking->duration_minutes / 60 }} h</span></div>
                 <div class="row"><span class="muted">Reservado el</span><span>{{ $booking->created_at->timezone('America/Santiago')->format('d/m/Y H:i') }}</span></div>
                 <div class="row"><span class="muted">Tarifa aplicada</span><span class="pill">{{ $booking->rate_rule_name_snapshot }}</span></div>
@@ -168,23 +190,6 @@
 
         {{-- ===== Columna derecha: el dinero ===== --}}
         <div class="col">
-            <div class="col-actions">
-                <a class="col-btn" href="{{ route('rooms.board') }}">← Tablero</a>
-                @unless (in_array($booking->booking_status, ['CANCELADA', 'EXPIRADA', 'NO_SHOW', 'FINALIZADA']))
-                    <a class="col-btn" href="{{ route('reservations.edit', $booking->code) }}">Modificar</a>
-                @endunless
-                @unless (in_array($booking->booking_status, ['FINALIZADA', 'CANCELADA', 'EXPIRADA', 'NO_SHOW']))
-                    <details class="col-cancel">
-                        <summary class="col-btn">Cancelar</summary>
-                        <form class="cancel-form" method="POST" action="{{ route('bookings.cancel', $booking->code) }}" onsubmit="return confirm('¿Cancelar esta reserva? La habitación queda libre de inmediato.');">
-                            @csrf
-                            <label style="display:block; font-size:12px; color:#bbb; margin-bottom:6px;">Motivo (opcional)</label>
-                            <input type="text" name="reason" placeholder="Cliente no llegó, error de carga, cambio de planes...">
-                            <button type="submit">Confirmar cancelación</button>
-                        </form>
-                    </details>
-                @endunless
-            </div>
             <div class="card">
                 <div class="row"><span class="muted">Precio original</span><span>${{ number_format($booking->price_original, 0, ',', '.') }}</span></div>
                 @if ($booking->coupon_code_snapshot)

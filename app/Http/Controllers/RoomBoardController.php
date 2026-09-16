@@ -171,16 +171,25 @@ class RoomBoardController extends Controller
     {
         $now = now();
 
+        // Terminal = ya terminó de verdad, sin importar si la hora agendada
+        // de salida todavía no llega -- un check-out anticipado (FINALIZADA
+        // antes de la hora) o un no-show/cancelación no deberían seguir
+        // apareciendo en "Hoy y próximas" solo porque ends_at todavía no pasó.
+        $terminalStatuses = ['CANCELADA', 'EXPIRADA', 'NO_SHOW', 'FINALIZADA'];
+
         $upcoming = $room->bookings()
             ->with('customer')
-            ->whereNotIn('booking_status', ['CANCELADA', 'EXPIRADA'])
+            ->whereNotIn('booking_status', $terminalStatuses)
             ->where('ends_at', '>=', $now)
             ->orderBy('starts_at')
             ->get();
 
         $past = $room->bookings()
             ->with('customer')
-            ->where('ends_at', '<', $now)
+            ->where(function ($query) use ($terminalStatuses, $now) {
+                $query->whereIn('booking_status', $terminalStatuses)
+                    ->orWhere('ends_at', '<', $now);
+            })
             ->orderByDesc('starts_at')
             ->limit(10)
             ->get();
