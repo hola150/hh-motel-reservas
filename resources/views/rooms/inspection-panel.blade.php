@@ -1,7 +1,7 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" style="background:#111;color:#eee">
 <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8"><meta name="color-scheme" content="dark">
     <title>Mantención — HH Motel</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>

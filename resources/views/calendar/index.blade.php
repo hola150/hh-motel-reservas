@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Calendario — HH Motel</title></head><body>
+<!doctype html><html lang="es" style="background:#111;color:#eee"><head><meta charset="utf-8"><meta name="color-scheme" content="dark"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Calendario — HH Motel</title></head><body>
 @include('partials.navbar')
 <main class="page-inner calendar-page">
 <div class="calendar-head"><div><h1>Calendario de reservas</h1><p class="sub">Gestiona ocupación, llegadas y salidas por Playroom.</p></div></div>
