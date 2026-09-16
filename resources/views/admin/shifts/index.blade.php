@@ -106,7 +106,7 @@
                 @endforeach
             </div>
             <div style="overflow-x:auto;">
-                <div class="time-grid" style="grid-template-rows: repeat({{ $totalSlots + 1 }}, 6px) 16px; min-width:640px;">
+                <div class="time-grid" style="grid-template-rows: 40px repeat({{ $totalSlots }}, 6px) 16px; min-width:640px;">
                     <div class="tg-corner"></div>
                     @for ($i = 0; $i < 7; $i++)
                         @php $day = $weekStart->copy()->addDays($i); @endphp
