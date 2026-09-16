@@ -11,19 +11,6 @@
         @endif
     </div>
     <div class="cat">Categoría {{ $room->category->name }}</div>
-    @if ($room->photos)
-        <a href="{{ route('admin.rooms.edit', $room) }}" class="room-photo-link">
-            <img src="{{ $room->photos[0] }}" alt="">
-            <span>{{ count($room->photos) }} foto{{ count($room->photos) === 1 ? '' : 's' }}</span>
-        </a>
-    @endif
-    @if ($room->furniture->where('pivot.quantity', '>', 0)->isNotEmpty())
-        <div class="equipment-icons">
-            @foreach ($room->furniture->where('pivot.quantity', '>', 0)->take(5) as $equipment)
-                <span data-tooltip="{{ $equipment->name }}" aria-label="{{ $equipment->name }}" role="img">{{ $equipment->icon ?? '✦' }}</span>
-            @endforeach
-        </div>
-    @endif
 
     @if ($room->operational_status === 'aseo')
         <span class="pill pill-aseo">EN ASEO</span>
@@ -35,9 +22,6 @@
         <span class="pill pill-ocupada">OCUPADA</span>
     @else
         <span class="pill pill-libre">LIBRE</span>
-        @if ($status['next_booking'])
-            <span class="pill pill-upcoming">{{ $status['next_booking']->starts_at->timezone('America/Santiago')->format('H:i') }}</span>
-        @endif
     @endif
 
     @if ($room->operational_status === 'aseo')

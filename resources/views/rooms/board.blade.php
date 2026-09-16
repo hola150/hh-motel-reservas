@@ -122,13 +122,6 @@
         a.inspect-btn:hover { border-color:#e88a9a; color:#e88a9a; border-style:solid; }
         .compact a.inspect-btn { padding: 5px; font-size: 10.5px; margin-top: 5px; }
         .cat { font-size: 11.5px; color:#999; margin-bottom: 10px; }
-        .room-photo-link { display:flex; align-items:center; gap:6px; margin:-4px 0 10px; text-decoration:none; }
-        .room-photo-link img { width:32px; height:24px; object-fit:cover; border-radius:4px; border:1px solid #333; }
-        .room-photo-link span { font-size:10.5px; color:#888; }
-        .room-photo-link:hover span { color:#ff7918; }
-        .compact .room-photo-link { margin-top:-2px; margin-bottom:5px; }
-        .compact .room-photo-link img { width:24px; height:18px; }
-        .chips .room-photo-link { display:none; }
         /* Franja de color por categoría — para reconocer de un vistazo sin leer el texto. */
         .card.cat-go { border-left-color:#5b9dd9; }
         .card.cat-lite { border-left-color:#4ecdc4; }
@@ -145,7 +138,6 @@
         .pill-ocupada { background:#3a1c22; color:#e88a9a; }
         .pill-reservada { background:#2a2010; color:#e8a23f; }
         .pill-aseo { background:#3a331c; color:#e8c76f; }
-        .pill-upcoming { background:#2a2010; color:#e8a23f; margin-left:6px; }
         .pill-mantencion, .pill-inactiva { background:#2a2a2a; color:#aaa; }
         .pill-activa { background:#1c2f3a; color:#7fbcdc; }
         .eta { font-size: 11.5px; color:#999; margin-top: 6px; }
