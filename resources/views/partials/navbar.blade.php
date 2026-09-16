@@ -58,7 +58,7 @@
     @if (request()->routeIs('admin.*'))
         <div class="hh-subnav">
             <a href="{{ route('admin.categories.index') }}" class="{{ request()->routeIs('admin.categories.*') ? 'hh-active' : '' }}">Categorías</a>
-            <a href="{{ route('admin.rooms.index') }}" class="{{ request()->routeIs('admin.rooms.*') ? 'hh-active' : '' }}">Habitaciones</a>
+            <a href="{{ route('admin.rooms.index') }}" class="{{ request()->routeIs('admin.rooms.*') ? 'hh-active' : '' }}">Playrooms</a>
             <a href="{{ route('admin.furniture.index') }}" class="{{ request()->routeIs('admin.furniture.*') ? 'hh-active' : '' }}">Mobiliario</a>
             <a href="{{ route('admin.rates.index') }}" class="{{ request()->routeIs('admin.rates.*') ? 'hh-active' : '' }}">Tarifas</a>
             <a href="{{ route('admin.offers.index') }}" class="{{ request()->routeIs('admin.offers.*') ? 'hh-active' : '' }}">Ofertas</a>
