@@ -7,6 +7,7 @@
         ['admin.products.index', 'admin.products.*,admin.combos.*', 'Productos', 'M4 7h16v14H4z M8 7V5a4 4 0 0 1 8 0v2'],
         ['cash.show', 'cash.*,payments.*', 'Caja', 'M3 5h18v16H3z M3 9h18 M15 13h6v4h-6z'],
         ['aseo.daily', 'aseo.*', 'Aseo', 'M8 10l8-8 M6 11l7 7 M3 16l6-6 8 8-6 4z'],
+        ['rooms.inspections.panel', 'rooms.inspections.*', 'Rondas', 'M4 5h16v15H4z M8 3v4 M16 3v4 M8 11l2 2 5-5'],
         ['sales.daily', 'sales.*,admin.analytics.*', 'Reportes', 'M4 21V11h4v10 M10 21V6h4v15 M16 21V3h4v18'],
         ['admin.categories.index', 'admin.categories.*,admin.rooms.*,admin.furniture.*,admin.rates.*,admin.offers.*,admin.upsells.*,admin.coupons.*', 'Administración', 'M12 3v3 M12 18v3 M3 12h3 M18 12h3 M6 6l2 2 M16 16l2 2 M6 18l2-2 M16 8l2-2 M16 12a4 4 0 1 1-8 0a4 4 0 0 1 8 0'],
     ];

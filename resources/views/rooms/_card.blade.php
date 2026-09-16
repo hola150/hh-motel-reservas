@@ -82,8 +82,6 @@
         <a class="bookings-btn empty" href="{{ route('rooms.bookings', $room) }}">Sin reservas próximas</a>
     @endif
 
-    <a class="inspect-btn" href="{{ route('rooms.inspections.create', $room) }}">Inspeccionar</a>
-
     <details>
         <summary>Cambiar estado</summary>
         <form method="POST" action="{{ route('rooms.status', $room) }}" onsubmit="return this.operational_status.value !== '__aseo' || confirm('¿Mandar {{ $room->name }} a aseo? Queda fuera de disponibles hasta que la marques como activa.');">

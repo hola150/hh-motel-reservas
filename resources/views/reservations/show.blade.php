@@ -73,7 +73,7 @@
     <div class="page-inner">
     <h1>HH MOTEL — Reserva creada</h1>
     <div class="code">{{ $booking->code }}</div>
-    <div class="col-actions"><a class="col-btn" href="{{ route('bookings.pass.pdf', $booking->code) }}">Descargar pase PDF</a></div>
+    <div class="col-actions"><a class="col-btn" href="{{ route('bookings.pass.preview', $booking->code) }}" target="_blank">Ver pase PDF</a><a class="col-btn" href="{{ route('bookings.pass.pdf', $booking->code) }}">Descargar pase</a></div>
 
     @if (session('status'))
         <div class="banner ok">{{ session('status') }}</div>
