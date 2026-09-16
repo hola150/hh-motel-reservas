@@ -25,7 +25,11 @@
     .hh-navbar a.hh-danger { color:#a87878; }
     .hh-navbar a.hh-danger:hover { background:#2e1c1c; color:#e88a8a; }
 </style>
-<link rel="stylesheet" href="{{ asset('css/hh-theme.css') }}?v={{ filemtime(public_path('css/hh-theme.css')) }}">
+{{-- Se incrusta el CSS en vez de enlazarlo: al ser un archivo externo, la
+     latencia de red (notoria en Render) dejaba una fraccion de segundo con
+     el texto sin estilo antes de que cargara -- ese era el "flash" al
+     navegar entre secciones. Incrustado no depende de una segunda descarga. --}}
+<style>{!! file_get_contents(public_path('css/hh-theme.css')) !!}</style>
 @include('partials.sidebar')
 <div class="hh-nav-wrap">
     <div class="hh-navbar">
