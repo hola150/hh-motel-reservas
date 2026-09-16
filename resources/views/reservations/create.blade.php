@@ -22,6 +22,19 @@
         @media (max-width: 700px) { .panel { padding:20px; } }
         .row { display:flex; gap:14px; }
         .row > div { flex:1; }
+        /* Fecha (una rueda) y Hora (dos ruedas lado a lado) no pesan lo
+           mismo -- a 50/50 estricto, Hora no entraba en su mitad y las
+           ruedas se salían del panel en pantallas anchas (el panel de "La
+           estadía" ya es la mitad de la página, así que Hora terminaba con
+           menos de 300px). Con wrap, si no entran lado a lado, Hora baja a
+           su propia línea en vez de desbordar. */
+        .row-datetime { flex-wrap: wrap; }
+        /* hh-theme.css trae ".panel > .row > div { flex:1 1 230px }" con la
+           misma especificidad y carga después (via navbar) -- le gana en el
+           cascade a un ".row-datetime > div" simple. Hay que igualar el
+           prefijo ".panel >" para ganar por especificidad, no por orden. */
+        .panel > .row-datetime > div:first-child { flex: 1 1 220px; }
+        .panel > .row-datetime > div:last-child { flex: 1 1 300px; }
         .dob-row { display:flex; gap:8px; }
         .dob-row select { flex:1; min-width:0; }
         .guest-row { display:flex; gap:8px; margin-bottom:8px; align-items:center; }
@@ -133,7 +146,12 @@
         .upsell-add { width:100%; margin:0 0 8px; background:#ff7918; color:#fff; border:none; padding:13px; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer; }
         .upsell-skip { width:100%; margin:0; background:transparent; border:1px solid #444; color:#aaa; padding:11px; border-radius:8px; font-size:13.5px; cursor:pointer; }
         .upsell-skip:hover { border-color:#666; color:#ccc; }
-        .form-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 0 24px; align-items:start; }
+        /* stretch (no align-items:start): en pantallas anchas "El cliente"
+           siempre es mas alto que "La estadia" -- con align-items:start el
+           panel corto se quedaba mas bajo y dejaba un hueco de fondo de
+           pagina a la vista en vez de verse como dos columnas parejas. */
+        .form-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+        .form-grid > .panel { height:100%; }
         @media (max-width: 700px) { .form-grid { grid-template-columns: 1fr; } }
         .form-col-head { font-size:13.5px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#eee; margin-top:0; padding-bottom:14px; margin-bottom:6px; border-bottom:1px solid #292929; }
         .sub-head { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:#777; margin:28px 0 4px; padding-top:18px; border-top:1px solid #232323; }
@@ -208,7 +226,7 @@
 
                 <div class="price-box" id="price-box" hidden></div>
 
-                <div class="row">
+                <div class="row row-datetime">
                     <div>
                         <label>Fecha <span id="date-wheel-month" class="date-month-badge"></span></label>
                         <div class="wheel wheel-date" id="date-wheel">
