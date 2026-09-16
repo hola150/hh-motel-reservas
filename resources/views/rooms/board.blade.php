@@ -31,13 +31,14 @@
         a.sales-btn { background:#14251c; border-color:#2e6e45; color:#8fe0ad; font-weight:600; }
         a.sales-btn:hover { border-color:#6fd39a; color:#fff; }
 
-        .daily-summary { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; margin-bottom:30px; }
-        .dsum-tile { display:flex; flex-direction:column; gap:5px; background:#14251c; border:1px solid #2e6e45; border-radius:10px; padding:13px 16px; text-decoration:none; }
+        .daily-summary { display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; margin-bottom:30px; }
+        @media (max-width: 760px) { .daily-summary { grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); } }
+        .dsum-tile { display:flex; flex-direction:column; gap:3px; background:#14251c; border:1px solid #2e6e45; border-radius:9px; padding:10px 12px; text-decoration:none; min-width:0; }
         .dsum-tile:hover { border-color:#6fd39a; }
         .dsum-tile.total { background:#1c1c1c; border-color:#ff7918; }
-        .dsum-label { font-size:11px; color:#9cc7ac; text-transform:uppercase; letter-spacing:.03em; }
+        .dsum-label { font-size:10px; color:#9cc7ac; text-transform:uppercase; letter-spacing:.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         .dsum-tile.total .dsum-label { color:#ffb379; }
-        .dsum-value { font-family: ui-monospace, monospace; font-weight:700; font-size:19px; color:#eee; }
+        .dsum-value { font-family: ui-monospace, monospace; font-weight:700; font-size:16px; color:#eee; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
         .page-grid { display:grid; grid-template-columns: 1fr 280px; gap:28px; align-items:start; }
         @media (max-width: 1100px) { .page-grid { grid-template-columns: 1fr; } }
