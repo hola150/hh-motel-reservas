@@ -14,7 +14,7 @@
     <div class="actions" style="justify-content:space-between; margin-bottom:18px;">
         <div>
             <h1>Ofertas</h1>
-            <p class="sub">Precios especiales temporales por habitación o categoría — se aplican solos, sin código, cuando el cliente reserva dentro de la vigencia.</p>
+            <p class="sub">Precios especiales temporales por Playroom o categoría — se aplican solos, sin código, cuando el cliente reserva dentro de la vigencia.</p>
         </div>
         <a class="btn" href="{{ route('admin.offers.create') }}">+ Nueva oferta</a>
     </div>
@@ -38,7 +38,7 @@
                                 @endif
                                 @if ($offer->rooms->isNotEmpty())
                                     @if ($offer->roomCategories->isNotEmpty()) · @endif
-                                    Habitaciones: <b>{{ $offer->rooms->pluck('name')->implode(', ') }}</b>
+                                    Playrooms: <b>{{ $offer->rooms->pluck('name')->implode(', ') }}</b>
                                 @endif
                             </div>
                         </td>
@@ -64,7 +64,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" style="color:#666;">Todavía no hay ofertas. Creá una para que aparezcan habitaciones con precio especial al reservar.</td></tr>
+                    <tr><td colspan="5" style="color:#666;">Todavía no hay ofertas. Creá una para que aparezcan Playrooms con precio especial al reservar.</td></tr>
                 @endforelse
             </tbody>
         </table>

@@ -1,5 +1,6 @@
 @php $room = $entry['room']; $status = $entry['status']; $offer = ($roomOffers ?? [])[$room->id] ?? null; $needsMaintenance = $room->latestInspection && $room->latestInspection->needs_maintenance; @endphp
-<div class="card cat-{{ Str::slug($room->category->name) }} {{ $needsMaintenance ? 'needs-maintenance' : '' }}" data-href="{{ route('rooms.bookings', $room) }}">
+@php $cardTarget = ($status['current_booking'] ?? null) ? route('reservations.show', $status['current_booking']->code) : route('rooms.bookings', $room); @endphp
+<div class="card cat-{{ Str::slug($room->category->name) }} {{ $needsMaintenance ? 'needs-maintenance' : '' }} {{ (($status['eta_minutes'] ?? 0) < 0 && ($status['current_booking'] ?? null)) ? 'overdue-room' : '' }}" data-href="{{ $cardTarget }}">
     <div class="card-head">
         <b>{{ $room->name }}</b>
         @if ($offer)

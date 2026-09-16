@@ -497,6 +497,7 @@ class ReservationController extends Controller
         $products = Product::where('is_active', true)->orderBy('display_order')->get();
         $combos = Combo::with('items.product')->where('is_active', true)->orderBy('display_order')->get();
 
-        return view('reservations.show', ['booking' => $booking, 'products' => $products, 'combos' => $combos]);
+        $extraHourPrice = (int) (\App\Models\RateRule::where('name', $booking->rate_rule_name_snapshot)->value('extra_hour_price') ?? 0);
+        return view('reservations.show', ['booking' => $booking, 'products' => $products, 'combos' => $combos, 'extraHourPrice' => $extraHourPrice]);
     }
 }

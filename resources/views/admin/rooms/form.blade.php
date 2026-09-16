@@ -1,8 +1,8 @@
 @extends('admin.layout')
-@section('title', $room->exists ? 'Editar habitación' : 'Nueva habitación')
+@section('title', $room->exists ? 'Editar Playroom' : 'Nuevo Playroom')
 @section('content')
-    <h1>{{ $room->exists ? 'Editar habitación' : 'Nueva habitación' }}</h1>
-    <p class="sub">{{ $room->exists ? $room->name : 'Registrar una habitación real' }}</p>
+    <h1>{{ $room->exists ? 'Editar Playroom' : 'Nuevo Playroom' }}</h1>
+    <p class="sub">{{ $room->exists ? $room->name : 'Registrar un Playroom real' }}</p>
 
     <form method="POST" action="{{ $room->exists ? route('admin.rooms.update', $room) : route('admin.rooms.store') }}">
         @csrf
@@ -43,8 +43,8 @@
         <input type="text" name="operational_note" value="{{ old('operational_note', $room->operational_note) }}" placeholder="Ej. Aire acondicionado en reparación">
 
         <section class="hh-furniture-section" aria-labelledby="furniture-heading">
-            <h2 id="furniture-heading">Mobiliario de esta habitación</h2>
-            <p class="sub">Indica cantidad y estado de cada elemento. Cantidad 0 significa que no está asignado a esta habitación.</p>
+            <h2 id="furniture-heading">Mobiliario de este Playroom</h2>
+            <p class="sub">Indica cantidad y estado de cada elemento. Cantidad 0 significa que no está asignado a este Playroom.</p>
             <a class="link" href="{{ route('admin.furniture.index') }}" target="_blank" rel="noopener">Administrar categorías y elementos ↗</a>
             <input type="hidden" name="furniture_present" value="1">
             @forelse ($furnitureCategories as $furnitureCategory)
@@ -74,9 +74,9 @@
                     @endforelse
                 </fieldset>
             @empty
-                <div class="hh-empty-equipment">Primero crea las categorías y sus elementos en Mobiliario. Luego podrás asignarlos aquí a cada habitación.</div>
+                <div class="hh-empty-equipment">Primero crea las categorías y sus elementos en Mobiliario. Luego podrás asignarlos aquí a cada Playroom.</div>
             @endforelse
-            <p class="sub">El estado del mobiliario es informativo: no cambia automáticamente el estado operativo de la habitación.</p>
+            <p class="sub">El estado del mobiliario es informativo: no cambia automáticamente el estado operativo del Playroom.</p>
         </section>
         <div class="actions" style="margin-top:20px;">
             <button class="btn" type="submit">Guardar</button>

@@ -80,6 +80,9 @@ class BookingService
         if ($offer) {
             $coupon = $offer['coupon'];
             $discountAmount = $offer['discount'];
+            $waived = min(max(0, (int) $data['guests_count'] - $room->category->base_capacity), (int) $coupon->included_extra_guests);
+            $pricing['extra_guests_fee'] = max(0, $pricing['extra_guests_fee'] - ($waived * $pricing['rate_rule']->extra_person_price));
+            $priceOriginal = $pricing['price_original'] + $pricing['extra_guests_fee'];
         } elseif (! empty($data['coupon_code'])) {
             $coupon = Coupon::where('auto_apply', false)
                 ->whereRaw('UPPER(code) = ?', [mb_strtoupper(trim($data['coupon_code']))])
@@ -203,6 +206,9 @@ class BookingService
                 $couponId = $offer['coupon']->id;
                 $couponSnapshot = $offer['coupon']->label();
                 $discountAmount = $offer['discount'];
+                $waived = min(max(0, (int) $data['guests_count'] - $room->category->base_capacity), (int) $offer['coupon']->included_extra_guests);
+                $pricing['extra_guests_fee'] = max(0, $pricing['extra_guests_fee'] - ($waived * $pricing['rate_rule']->extra_person_price));
+                $priceOriginal = $pricing['price_original'] + $pricing['extra_guests_fee'];
             } else {
                 $couponId = null;
                 $couponSnapshot = null;

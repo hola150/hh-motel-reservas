@@ -46,6 +46,10 @@
             </div>
         </div>
 
+        <label>Personas adicionales sin costo</label>
+        <input type="number" name="included_extra_guests" min="0" max="5" value="{{ old('included_extra_guests', $offer->included_extra_guests ?? 0) }}">
+        <div class="hint">Ejemplo: 1 permite una persona adicional sin cobrar el recargo de la tarifa.</div>
+
         <div class="row2">
             <div>
                 <label>Vigencia desde</label>
@@ -75,7 +79,7 @@
             </div>
         </div>
 
-        <label style="margin-top:18px;">¿A qué aplica? — categorías completas y/o habitaciones puntuales</label>
+        <label style="margin-top:18px;">¿A qué aplica? — categorías completas y/o Playrooms puntuales</label>
 
         <div class="cat-name" style="margin-top:6px;">Categorías completas</div>
         <div class="scope-grid">
@@ -86,7 +90,7 @@
 
         @foreach ($rooms->groupBy('category.name') as $catName => $catRooms)
             <div class="cat-block">
-                <div class="cat-name">{{ $catName }} — habitaciones puntuales</div>
+                <div class="cat-name">{{ $catName }} — Playrooms puntuales</div>
                 <div class="scope-grid">
                     @foreach ($catRooms as $room)
                         <label><input type="checkbox" name="room_ids[]" value="{{ $room->id }}" @checked($selRooms->contains($room->id))> {{ $room->name }}</label>
@@ -117,7 +121,7 @@
                 hint.textContent = 'Ej. 20 = 20% de descuento sobre el precio normal.';
             } else {
                 label.textContent = 'Precio fijo de oferta (CLP)';
-                hint.textContent = 'Ej. 28000 = la habitación queda a $28.000 sin importar su precio normal.';
+                hint.textContent = 'Ej. 28000 = el Playroom queda a $28.000 sin importar su precio normal.';
             }
         }
         hhDtHint();

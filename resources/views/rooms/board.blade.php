@@ -121,6 +121,11 @@
         .pill-activa { background:#1c2f3a; color:#7fbcdc; }
         .eta { font-size: 11.5px; color:#999; margin-top: 6px; }
         .eta.overtime { color:#e88a9a; font-weight:600; }
+        .overdue-room { border-color:#e05252 !important; box-shadow:0 0 0 2px rgba(224,82,82,.2), 0 8px 22px rgba(224,82,82,.12); }
+        .overdue-room .overtime { color:#ff7777; font-weight:800; animation: overdue-warning 1.5s ease-in-out infinite; }
+        .overdue-room .pill-ocupada { background:#7d2635; color:#fff; }
+        @keyframes overdue-warning { 0%,100% { opacity:1; text-shadow:0 0 0 rgba(255,82,82,0); } 50% { opacity:.45; text-shadow:0 0 10px rgba(255,82,82,.9); } }
+        @media (prefers-reduced-motion: reduce) { .overdue-room .overtime { animation:none; } }
         .code { font-family: ui-monospace, monospace; font-size: 11px; margin-top:2px; color:#888; }
         a.consumo-btn { display:block; text-align:center; margin-top:6px; background:#1c2f3a; border:1px solid #3a5a72; color:#7fbcdc; text-decoration:none; padding:8px; border-radius:7px; font-size:12.5px; font-weight:600; }
         a.consumo-btn:hover { border-color:#7fbcdc; }
@@ -348,8 +353,9 @@
         // Vista chips: la tarjeta entera es clickeable hacia el detalle de
         // la habitación (sus botones quedan ocultos por CSS en ese modo).
         document.querySelectorAll('.grid .card[data-href]').forEach(function (card) {
-            card.addEventListener('click', function () {
-                if (hhCurrentDensity() === 'chips') window.location.href = card.dataset.href;
+            card.addEventListener('click', function (event) {
+                if (event.target.closest('a, button, input, select, form')) return;
+                if (hhCurrentDensity() === 'chips' || card.classList.contains('overdue-room') || card.querySelector('.pill-ocupada')) window.location.href = card.dataset.href;
             });
         });
 

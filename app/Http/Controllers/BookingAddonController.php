@@ -6,12 +6,28 @@ use App\Exceptions\InsufficientStockException;
 use App\Models\Booking;
 use App\Models\Combo;
 use App\Models\Product;
+use App\Models\RateRule;
 use App\Services\Booking\ConsumptionService;
+use App\Services\Booking\AvailabilityChecker;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class BookingAddonController extends Controller
 {
+    public function extraHour(string $code, ConsumptionService $consumption, AvailabilityChecker $availability): RedirectResponse
+    {
+        $booking = Booking::with('room')->where('code', $code)->firstOrFail();
+        $newEndsAt = $booking->ends_at->copy()->addHour();
+        if (! $availability->isAvailable($booking->room, $booking->ends_at, $newEndsAt, $booking->id)) {
+            return back()->withErrors(['booking' => 'No se puede vender la hora adicional porque existe otra reserva después.']);
+        }
+        $rateName = strtoupper($booking->rate_rule_name_snapshot ?? 'HH');
+        $amount = (int) (RateRule::where('name', $rateName)->value('extra_hour_price') ?? (str_contains($rateName, 'HOT') ? 15000 : 10000));
+        $booking->update(['ends_at' => $newEndsAt]);
+        $consumption->addCustom($booking, 'Hora adicional (1 hora)', $amount, auth()->id());
+        return back()->with('status', 'Hora adicional agregada por $'.number_format($amount, 0, ',', '.').'. Nueva salida: '.$newEndsAt->timezone('America/Santiago')->format('H:i').'.');
+    }
+
     public function store(Request $request, string $code, ConsumptionService $consumption): RedirectResponse
     {
         $booking = Booking::where('code', $code)->firstOrFail();

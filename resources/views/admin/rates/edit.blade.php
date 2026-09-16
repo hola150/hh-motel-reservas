@@ -13,6 +13,10 @@
                     <input type="number" name="extra_person_price" min="0" value="{{ old('extra_person_price', $rateRule->extra_person_price) }}" required>
                 </div>
                 <div>
+                    <label>Hora adicional (60 min, CLP)</label>
+                    <input type="number" name="extra_hour_price" min="0" value="{{ old('extra_hour_price', $rateRule->extra_hour_price ?? 0) }}" required>
+                </div>
+                <div>
                     <label>Prioridad (desempate si dos tarifas compiten)</label>
                     <input type="number" name="priority" value="{{ old('priority', $rateRule->priority) }}" required>
                 </div>

@@ -2,7 +2,7 @@
 @section('title', $category->exists ? 'Editar categoría' : 'Nueva categoría')
 @section('content')
     <h1>{{ $category->exists ? 'Editar categoría' : 'Nueva categoría' }}</h1>
-    <p class="sub">{{ $category->exists ? $category->name : 'Crear categoría de habitación' }}</p>
+    <p class="sub">{{ $category->exists ? $category->name : 'Crear categoría de Playroom' }}</p>
 
     <form method="POST" action="{{ $category->exists ? route('admin.categories.update', $category) : route('admin.categories.store') }}">
         @csrf

@@ -39,7 +39,7 @@ class PromotionResolver
                 continue;
             }
 
-            if ($discount > 0 && ($best === null || $discount > $best['discount'])) {
+            if (($discount > 0 || $coupon->included_extra_guests > 0) && ($best === null || $discount > $best['discount'])) {
                 $best = ['coupon' => $coupon, 'discount' => $discount];
             }
         }

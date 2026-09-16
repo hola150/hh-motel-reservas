@@ -238,7 +238,7 @@
     </div>
 
     <div class="card">
-        <h3>Habitaciones ({{ $metricLabel }})</h3>
+        <h3>Playrooms ({{ $metricLabel }})</h3>
         @php $maxR = max(1, $byRoom->max('value')); @endphp
         @forelse ($byRoom as $e)
             <div class="bar-row">

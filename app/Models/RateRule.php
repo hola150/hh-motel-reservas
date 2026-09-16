@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'description', 'extra_person_price', 'priority', 'valid_from', 'valid_until', 'is_active'])]
+#[Fillable(['name', 'description', 'extra_person_price', 'extra_hour_price', 'priority', 'valid_from', 'valid_until', 'is_active'])]
 class RateRule extends Model
 {
     use HasFactory;

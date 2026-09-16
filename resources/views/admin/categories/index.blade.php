@@ -2,7 +2,7 @@
 @section('title', 'Categorías')
 @section('content')
     <div class="actions" style="justify-content:space-between; margin-bottom:18px;">
-        <div><h1>Categorías de habitación</h1><p class="sub">GO, LITE, PLUS, MAX — características y capacidad base.</p></div>
+        <div><h1>Categorías de Playroom</h1><p class="sub">GO, LITE, PLUS, MAX — características y capacidad base.</p></div>
         <a class="btn" href="{{ route('admin.categories.create') }}">+ Nueva categoría</a>
     </div>
     <div class="card">

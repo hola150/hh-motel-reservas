@@ -65,6 +65,7 @@ Route::post('/habitaciones/{room}/inspeccion', [RoomInspectionController::class,
 Route::get('/reservas/{code}/pago', [PaymentController::class, 'create'])->name('payments.create');
 Route::post('/reservas/{code}/pago', [PaymentController::class, 'store'])->name('payments.store');
 Route::post('/reservas/{code}/consumo', [BookingAddonController::class, 'store'])->name('addons.store');
+Route::post('/reservas/{code}/hora-adicional', [BookingAddonController::class, 'extraHour'])->name('addons.extra-hour');
 Route::get('/reservas/{code}/checkin', [BookingCheckInController::class, 'show'])->name('bookings.checkin.show');
 Route::post('/reservas/{code}/checkin', [BookingCheckInController::class, 'store'])->name('bookings.checkin');
 Route::post('/reservas/{code}/cancelar', [BookingCancelController::class, 'store'])->name('bookings.cancel');

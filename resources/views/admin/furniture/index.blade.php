@@ -2,14 +2,14 @@
 @section('title', 'Mobiliario')
 @section('content')
     <h1>Mobiliario y equipamiento</h1>
-    <p class="sub">Organiza el catálogo por categorías. Asigna después los elementos a cada habitación desde su ficha.</p>
+    <p class="sub">Organiza el catálogo por categorías. Asigna después los elementos a cada Playroom desde su ficha.</p>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 24px;">
-        @foreach([['Tipos de mobiliario',$summary['types']],['Unidades asignadas',$summary['units']],['Habitaciones con mobiliario',$summary['rooms']],['Elementos sin asignar',$summary['unassigned']]] as [$label,$value])
+        @foreach([['Tipos de mobiliario',$summary['types']],['Unidades asignadas',$summary['units']],['Playrooms con mobiliario',$summary['rooms']],['Elementos sin asignar',$summary['unassigned']]] as [$label,$value])
             <div class="card" style="padding:14px 16px;"><small style="display:block;color:#777;text-transform:uppercase;font-size:10px;letter-spacing:.06em;">{{ $label }}</small><strong style="display:block;font-size:25px;margin-top:5px;">{{ $value }}</strong></div>
         @endforeach
     </div>
-    <h2>Equipamiento por habitación</h2>
-    <p class="sub">Vista rápida de lo que encontrará recepción en cada habitación. Estos mismos íconos aparecen en el tablero.</p>
+    <h2>Equipamiento por Playroom</h2>
+    <p class="sub">Vista rápida de lo que encontrará recepción en cada Playroom. Estos mismos íconos aparecen en el tablero.</p>
     @if($roomSummary->isNotEmpty())
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:0 0 26px;">
             @foreach($roomSummary as $room)

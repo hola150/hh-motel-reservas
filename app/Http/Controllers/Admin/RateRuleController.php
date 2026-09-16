@@ -48,6 +48,7 @@ class RateRuleController extends Controller
     {
         $validated = $request->validate([
             'extra_person_price' => ['required', 'integer', 'min:0'],
+            'extra_hour_price' => ['required', 'integer', 'min:0'],
             'priority' => ['required', 'integer'],
             'is_active' => ['sometimes', 'boolean'],
         ]);

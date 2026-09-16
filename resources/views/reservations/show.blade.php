@@ -209,6 +209,10 @@
                 @endif
 
                 <div class="addon-label">Agregar producto o combo</div>
+                <form method="POST" action="{{ route('addons.extra-hour', $booking->code) }}" style="margin:10px 0 14px;">
+                    @csrf
+                    <button type="submit" style="width:100%;background:#f0b84b;color:#241b08;border:none;padding:10px;border-radius:7px;font-weight:700;cursor:pointer;">Vender 1 hora adicional — ${{ number_format($extraHourPrice, 0, ',', '.') }}</button>
+                </form>
                 <form class="addon-form" method="POST" action="{{ route('addons.store', $booking->code) }}">
                     @csrf
                     <select name="item" required>
