@@ -52,7 +52,34 @@ class RoomBoardController extends Controller
             'closesLabel' => $tariff ? $this->formatCountdown($now, $tariff['closes_at']) : null,
             'nextOpeningLabel' => $nextOpening ? $this->formatCountdown($now, $nextOpening) : null,
             'cleaningStaff' => $this->cleaningStaffNames(),
+            'dailySummary' => $this->dailySummary(),
         ]);
+    }
+
+    /**
+     * Resumen esencial del día para monitorear en el propio tablero, sin
+     * tener que entrar a Ventas del día -- mismo criterio que esa pantalla
+     * (reservas cuya estadía empieza hoy, sin canceladas): cuántos Playrooms
+     * se vendieron y por cuánto, y cuántos extras se consumieron y por cuánto.
+     */
+    private function dailySummary(): array
+    {
+        $day = now('America/Santiago')->startOfDay();
+        $dayEnd = $day->copy()->endOfDay();
+
+        $bookings = Booking::with('addons')
+            ->whereBetween('starts_at', [$day->copy(), $dayEnd])
+            ->where('booking_status', '!=', 'CANCELADA')
+            ->get();
+
+        $addons = $bookings->flatMap->addons;
+
+        return [
+            'rooms_count' => $bookings->count(),
+            'rooms_revenue' => (int) $bookings->sum('price_final'),
+            'extras_count' => (int) $addons->sum('quantity'),
+            'extras_revenue' => (int) $addons->sum('amount'),
+        ];
     }
 
     /**

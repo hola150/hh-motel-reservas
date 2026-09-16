@@ -28,6 +28,19 @@
         .summary .chip.proximas b { color:#e8c76f; }
         .summary .chip.fuera b { color:#aaa; }
 
+        a.sales-btn { background:#14251c; border-color:#2e6e45; color:#8fe0ad; font-weight:600; }
+        a.sales-btn:hover { border-color:#6fd39a; color:#fff; }
+
+        .daily-summary { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; margin-bottom:30px; }
+        .dsum-tile { display:flex; flex-direction:column; gap:5px; background:#14251c; border:1px solid #2e6e45; border-radius:10px; padding:13px 16px; text-decoration:none; }
+        .dsum-tile:hover { border-color:#6fd39a; }
+        .dsum-tile.total { background:#1c1c1c; border-color:#ff7918; }
+        .dsum-label { font-size:11px; color:#9cc7ac; text-transform:uppercase; letter-spacing:.03em; }
+        .dsum-tile.total .dsum-label { color:#ffb379; }
+        .dsum-value { font-family: ui-monospace, monospace; font-weight:700; font-size:19px; color:#eee; }
+        .dsum-value small { font-weight:500; font-size:13px; color:#8fe0ad; }
+        .dsum-tile.total .dsum-value small { color:#ffb379; }
+
         .page-grid { display:grid; grid-template-columns: 1fr 280px; gap:28px; align-items:start; }
         @media (max-width: 1100px) { .page-grid { grid-template-columns: 1fr; } }
 
@@ -220,6 +233,7 @@
             <p class="sub">Se actualiza solo cada 30s · <a href="{{ route('rooms.board') }}">actualizar ahora</a></p>
         </div>
         <div class="topline-toolbar">
+            <a class="compact-toggle sales-btn" href="{{ route('sales.daily') }}">Ventas del día →</a>
             <a class="compact-toggle" href="{{ route('calendar.index') }}">Calendario</a>
             <button type="button" class="compact-toggle" id="compact-toggle-btn" onclick="hhToggleCompact()">⊟ Vista compacta</button>
         </div>
@@ -231,6 +245,21 @@
         <div class="chip disponibles"><b>{{ $grouped['disponibles']->count() }}</b><span>Disponibles</span></div>
         <div class="chip proximas"><b>{{ $grouped['proximas']->count() }}</b><span>Por llegar</span></div>
         <div class="chip fuera"><b>{{ $grouped['fuera_de_servicio']->count() }}</b><span>Fuera de servicio</span></div>
+    </div>
+
+    <div class="daily-summary">
+        <a href="{{ route('sales.daily') }}" class="dsum-tile">
+            <span class="dsum-label">Playrooms vendidos hoy</span>
+            <span class="dsum-value">{{ $dailySummary['rooms_count'] }} <small>· ${{ number_format($dailySummary['rooms_revenue'], 0, ',', '.') }}</small></span>
+        </a>
+        <a href="{{ route('sales.daily') }}" class="dsum-tile">
+            <span class="dsum-label">Extras vendidos hoy</span>
+            <span class="dsum-value">{{ $dailySummary['extras_count'] }} <small>· ${{ number_format($dailySummary['extras_revenue'], 0, ',', '.') }}</small></span>
+        </a>
+        <a href="{{ route('sales.daily') }}" class="dsum-tile total">
+            <span class="dsum-label">Total del día</span>
+            <span class="dsum-value">${{ number_format($dailySummary['rooms_revenue'] + $dailySummary['extras_revenue'], 0, ',', '.') }}</span>
+        </a>
     </div>
 
     <div class="page-grid">
