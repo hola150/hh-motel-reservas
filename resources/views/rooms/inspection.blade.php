@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
-    <title>Inspección — {{ $room->name }} — HH Motel</title>
+    <title>Inspección de Playroom — {{ $room->name }} — HH Motel</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         :root { color-scheme: dark; }
@@ -51,7 +51,7 @@
     @include('partials.navbar')
     <div class="page-inner">
     <a class="back-btn" href="{{ route('rooms.board') }}">← Volver al tablero</a>
-    <h1>Inspeccionar {{ $room->name }}</h1>
+    <h1>Inspeccionar Playroom {{ $room->name }}</h1>
     <p class="sub">Categoría {{ $room->category->name }} · completa la pauta real de habitación y mobiliario antes de liberarla.</p>
 
     @if ($errors->any())

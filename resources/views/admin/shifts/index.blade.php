@@ -2,26 +2,33 @@
 @section('title', 'Turnos')
 @section('content')
     <style>
-        .shift-nav { display:flex; align-items:center; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
+        .shift-nav { display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
         .shift-nav a.navbtn { background:#1c1c1c; border:1px solid #333; color:#ccc; text-decoration:none; padding:8px 14px; border-radius:7px; font-size:13px; }
         .shift-nav a.navbtn:hover { border-color:#ff7918; color:#ff7918; }
         .shift-nav .today-pill { font-size:11.5px; color:#6fd39a; background:#1c3a2a; padding:3px 10px; border-radius:20px; }
-        table.shift-table { width:100%; border-collapse:collapse; font-size:13px; margin-top:12px; }
-        table.shift-table th, table.shift-table td { border:1px solid #333; padding:7px 9px; text-align:center; vertical-align:top; }
-        table.shift-table th { color:#999; font-weight:600; font-size:11.5px; text-transform:uppercase; background:#181818; }
-        table.shift-table th .daydate { display:block; font-size:14px; color:#eee; font-weight:700; }
-        table.shift-table td:first-child, table.shift-table th:first-child { text-align:left; white-space:nowrap; background:#181818; color:#ccc; font-weight:600; }
-        .today-col { background:#1a2620 !important; }
-        .shift-name { display:block; background:#23282e; border:1px solid #3a4048; border-radius:6px; padding:4px 7px; margin-bottom:3px; cursor:pointer; color:#eee; font-size:12.5px; }
-        .shift-name:hover { border-color:#ff7918; }
-        .shift-name .time { display:block; color:#999; font-size:10.5px; }
-        .shift-name.has-notes { border-color:#7a6a1e; background:#2a2410; }
-        details.edit-shift { margin-top:4px; text-align:left; }
-        details.edit-shift form { display:flex; flex-direction:column; gap:5px; background:#111; border:1px solid #333; border-radius:6px; padding:8px; margin-top:4px; }
-        details.edit-shift input, details.edit-shift select { font-size:12px; padding:4px 6px; }
-        .add-shift-card { margin-top:14px; }
-        .add-shift-card form { display:grid; grid-template-columns:repeat(5, 1fr) auto; gap:10px; align-items:end; }
-        @media (max-width: 900px) { .add-shift-card form { grid-template-columns:1fr 1fr; } }
+        .shift-nav select { margin-left:auto; }
+
+        .conflict-banner { background:#3a1c1c; border:1px solid #7a2d2d; color:#f3b8b8; padding:12px 16px; border-radius:9px; margin-bottom:18px; font-size:13.5px; }
+        .conflict-banner ul { margin:6px 0 0; padding-left:18px; }
+
+        .time-grid { display:grid; grid-template-columns:46px repeat(7, 1fr); grid-auto-rows:6px; border:1px solid #333; background:#151515; border-radius:8px; overflow:hidden; margin-top:12px; }
+        .tg-daylabel { grid-row:1; padding:7px 4px; text-align:center; font-size:10.5px; color:#999; text-transform:uppercase; background:#181818; border-left:1px solid #292929; position:sticky; top:0; z-index:5; }
+        .tg-daylabel .dnum { display:block; font-size:13px; color:#eee; font-weight:700; }
+        .tg-daylabel.today { color:#ff9a4a; background:#241a10; }
+        .tg-corner { grid-row:1; grid-column:1; background:#181818; }
+        .tg-hourlabel { grid-column:1; font-size:9px; color:#666; text-align:right; padding-right:6px; border-top:1px solid #232323; white-space:nowrap; }
+        .tg-daybg { border-left:1px solid #232323; position:relative; }
+        .tg-daybg.today { background:rgba(255,121,24,.05); }
+        .shift-cell { position:relative; }
+        details.shift-block-details summary { list-style:none; cursor:pointer; }
+        details.shift-block-details summary::-webkit-details-marker { display:none; }
+        .shift-block { position:absolute; inset:1px; border-radius:4px; padding:2px 4px; font-size:10px; font-weight:700; color:#111; overflow:hidden; line-height:1.15; box-shadow:0 1px 3px rgba(0,0,0,.4); }
+        .shift-block .t { display:block; font-weight:500; font-size:8.5px; opacity:.8; }
+        .shift-block.conflict { outline:2px solid #ff3b3b; outline-offset:-2px; }
+        .edit-shift-panel { position:absolute; top:0; left:100%; margin-left:4px; z-index:40; background:#111; border:1px solid #333; border-radius:8px; padding:10px; width:220px; box-shadow:0 8px 24px rgba(0,0,0,.5); }
+        .edit-shift-panel form { display:flex; flex-direction:column; gap:6px; margin-bottom:6px; }
+        .edit-shift-panel input, .edit-shift-panel select { font-size:12px; padding:5px 6px; }
+
         table.hours-table { width:100%; border-collapse:collapse; font-size:13px; }
         table.hours-table th, table.hours-table td { padding:8px 10px; text-align:left; border-bottom:1px solid #292929; }
         table.hours-table th { color:#999; font-weight:600; font-size:11px; text-transform:uppercase; }
@@ -30,22 +37,125 @@
         .extra-pill.none { background:#1c3a2a; color:#6fd39a; }
         .extra-pill.some { background:#3a1c22; color:#e88a9a; }
         .extra-pill.unknown { background:#2a2a2a; color:#888; }
+
+        .add-shift-card { margin-top:14px; }
+        .add-shift-card form { display:grid; grid-template-columns:repeat(5, 1fr) auto; gap:10px; align-items:end; }
+        @media (max-width: 900px) { .add-shift-card form { grid-template-columns:1fr 1fr; } }
+
+        .role-legend { display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 4px; font-size:11.5px; }
+        .role-legend span.dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:4px; vertical-align:middle; }
     </style>
 
     <h1>Turnos</h1>
-    <p class="sub">Panel semanal por rol -- una fila por franja horaria, una columna por día. <a class="link" href="{{ route('admin.staff.index') }}">Administrar personal →</a></p>
+    <p class="sub">Calendario semanal por rol -- cada bloque dibuja su horario real. <a class="link" href="{{ route('admin.staff.index') }}">Administrar personal →</a></p>
 
     <div class="shift-nav">
-        <a class="navbtn" href="{{ route('admin.shifts.index', ['date' => $prevWeek]) }}">← Semana anterior</a>
+        <a class="navbtn" href="{{ route('admin.shifts.index', array_filter(['date' => $prevWeek, 'staff_id' => $selectedStaffId])) }}">← Semana anterior</a>
         <strong>Semana del {{ $weekStart->locale('es')->isoFormat('D [de] MMMM') }} al {{ $weekEnd->locale('es')->isoFormat('D [de] MMMM') }}</strong>
         @if ($isCurrentWeek)<span class="today-pill">semana actual</span>@endif
-        <a class="navbtn" href="{{ route('admin.shifts.index', ['date' => $nextWeek]) }}">Semana siguiente →</a>
+        <a class="navbtn" href="{{ route('admin.shifts.index', array_filter(['date' => $nextWeek, 'staff_id' => $selectedStaffId])) }}">Semana siguiente →</a>
+
+        <form method="GET" action="{{ route('admin.shifts.index') }}">
+            <input type="hidden" name="date" value="{{ $weekStart->toDateString() }}">
+            <select name="staff_id" onchange="this.form.submit()">
+                <option value="">Todo el personal</option>
+                @foreach ($staffByRole as $roleName => $people)
+                    <optgroup label="{{ $roleName }}">
+                        @foreach ($people as $person)
+                            <option value="{{ $person->id }}" @selected($selectedStaffId === $person->id)>{{ $person->name }}</option>
+                        @endforeach
+                    </optgroup>
+                @endforeach
+            </select>
+        </form>
     </div>
 
-    @if ($hoursSummary->isNotEmpty())
+    @if ($hasConflicts)
+        <div class="conflict-banner">
+            <strong>⚠ Choque de horarios</strong> -- la misma persona tiene turnos que se superponen:
+            <ul>
+                @foreach ($conflictShifts as $shift)
+                    <li>{{ $shift->staff->name }} -- {{ ucfirst($shift->date->locale('es')->isoFormat('dddd D/MM')) }}, {{ $shift->rangeLabel() }}{{ $shift->crossesMidnight() ? ' (+1 día)' : '' }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    @forelse ($roleBlocks as $role => $blocks)
         <div class="card">
-            <h2 style="font-size:14px;">Horas de la semana</h2>
-            <p class="sub" style="margin:2px 0 10px;">Horas asignadas contra las horas legales de cada persona -- lo que pasa de ahí es hora extra. Cargá las horas legales desde <a class="link" href="{{ route('admin.staff.index') }}">Personal</a>.</p>
+            <h2 style="text-transform:uppercase; font-size:14px; letter-spacing:.04em; color:#ff9a4a; margin-bottom:2px;">{{ $role }}</h2>
+            <div class="role-legend">
+                @foreach ($blocks->pluck('shift.staff')->unique('id') as $person)
+                    <span><span class="dot" style="background:{{ $blocks->firstWhere('shift.staff_id', $person->id)['color'] }};"></span>{{ $person->name }}</span>
+                @endforeach
+            </div>
+            <div style="overflow-x:auto;">
+                <div class="time-grid" style="grid-template-rows: repeat({{ $totalSlots + 1 }}, 6px); min-width:640px;">
+                    <div class="tg-corner"></div>
+                    @for ($i = 0; $i < 7; $i++)
+                        @php $day = $weekStart->copy()->addDays($i); @endphp
+                        <div class="tg-daylabel {{ $day->isToday() ? 'today' : '' }}" style="grid-column:{{ $i + 2 }};">
+                            {{ ucfirst($day->locale('es')->isoFormat('ddd')) }}
+                            <span class="dnum">{{ $day->format('d') }}</span>
+                        </div>
+                    @endfor
+
+                    @foreach ($hourMarks as $mark)
+                        <div class="tg-hourlabel" style="grid-row:{{ $mark['slot'] + 2 }} / span 4;">{{ $mark['label'] }}</div>
+                    @endforeach
+
+                    @for ($i = 0; $i < 7; $i++)
+                        @php $day = $weekStart->copy()->addDays($i); @endphp
+                        <div class="tg-daybg {{ $day->isToday() ? 'today' : '' }}" style="grid-column:{{ $i + 2 }}; grid-row:2 / span {{ $totalSlots }};"></div>
+                    @endfor
+
+                    @foreach ($blocks as $block)
+                        @php $shift = $block['shift']; @endphp
+                        <div class="shift-cell" style="grid-column:{{ $block['day'] + 2 }}; grid-row:{{ $block['start_slot'] + 2 }} / span {{ $block['span'] }};">
+                            <details class="shift-block-details">
+                                <summary class="shift-block {{ $block['conflict'] ? 'conflict' : '' }}" style="background:{{ $block['color'] }};" title="{{ $shift->staff->name }} · {{ $shift->rangeLabel() }}{{ $shift->notes ? ' · '.$shift->notes : '' }}">
+                                    {{ $shift->staff->name }}
+                                    <span class="t">{{ $shift->rangeLabel() }}</span>
+                                </summary>
+                                <div class="edit-shift-panel">
+                                    <form method="POST" action="{{ route('admin.shifts.update', $shift) }}">
+                                        @csrf @method('PUT')
+                                        <select name="staff_id" required>
+                                            @foreach ($staffByRole as $roleName => $people)
+                                                <optgroup label="{{ $roleName }}">
+                                                    @foreach ($people as $person)
+                                                        <option value="{{ $person->id }}" @selected($person->id === $shift->staff_id)>{{ $person->name }}</option>
+                                                    @endforeach
+                                                </optgroup>
+                                            @endforeach
+                                        </select>
+                                        <input type="date" name="date" value="{{ $shift->date->toDateString() }}" required>
+                                        <input type="time" name="start_time" value="{{ $shift->startLabel() }}" required>
+                                        <input type="time" name="end_time" value="{{ $shift->endLabel() }}" required>
+                                        <input type="text" name="notes" value="{{ $shift->notes }}" placeholder="Notas">
+                                        <button class="btn secondary" type="submit" style="padding:6px; font-size:11.5px;">Guardar</button>
+                                    </form>
+                                    <form method="POST" action="{{ route('admin.shifts.destroy', $shift) }}" onsubmit="return confirm('¿Eliminar este turno?');">
+                                        @csrf @method('DELETE')
+                                        <button class="btn secondary" type="submit" style="padding:6px; font-size:11.5px; width:100%;">Eliminar</button>
+                                    </form>
+                                </div>
+                            </details>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    @empty
+        <p class="sub">Sin turnos cargados esta semana todavía.</p>
+    @endforelse
+
+    <div class="card">
+        <h2 style="font-size:14px;">Horas de la semana</h2>
+        <p class="sub" style="margin:2px 0 10px;">Horas asignadas contra las horas legales de cada persona -- lo que pasa de ahí es hora extra.</p>
+        @if ($hoursSummary->isEmpty())
+            <p class="sub">Sin turnos esta semana.</p>
+        @else
             <table class="hours-table">
                 <thead><tr><th>Persona</th><th>Rol</th><th style="text-align:right;">Asignadas</th><th style="text-align:right;">Legales</th><th>Extra</th></tr></thead>
                 <tbody>
@@ -68,75 +178,39 @@
                     @endforeach
                 </tbody>
             </table>
-        </div>
-    @endif
+        @endif
+    </div>
 
-    @forelse ($roleTables as $role => $rows)
-        <div class="card">
-            <h2 style="text-transform:uppercase; font-size:14px; letter-spacing:.04em; color:#ff9a4a;">{{ $role }}</h2>
-            <div style="overflow-x:auto;">
-                <table class="shift-table">
-                    <thead>
+    <div class="card">
+        <h2 style="font-size:14px;">Resumen mensual -- {{ $monthLabel }}</h2>
+        <p class="sub" style="margin:2px 0 10px;">Horas legales prorrateadas por los días del mes (horas semanales ÷ 7 × días del mes).</p>
+        @if ($monthlySummary->isEmpty())
+            <p class="sub">Sin turnos este mes.</p>
+        @else
+            <table class="hours-table">
+                <thead><tr><th>Persona</th><th>Rol</th><th style="text-align:right;">Asignadas</th><th style="text-align:right;">Legales (aprox.)</th><th>Extra</th></tr></thead>
+                <tbody>
+                    @foreach ($monthlySummary as $row)
                         <tr>
-                            <th>Turno</th>
-                            @for ($i = 0; $i < 7; $i++)
-                                @php $day = $weekStart->copy()->addDays($i); @endphp
-                                <th class="{{ $day->isToday() ? 'today-col' : '' }}">
-                                    {{ ucfirst($day->locale('es')->isoFormat('dddd')) }}
-                                    <span class="daydate">{{ $day->format('d') }}</span>
-                                </th>
-                            @endfor
+                            <td>{{ $row['staff']->name }}</td>
+                            <td>{{ $row['staff']->role }}</td>
+                            <td class="num">{{ $row['assigned'] }} h</td>
+                            <td class="num">{{ $row['legal'] !== null ? $row['legal'].' h' : '—' }}</td>
+                            <td>
+                                @if ($row['extra'] === null)
+                                    <span class="extra-pill unknown">sin dato</span>
+                                @elseif ($row['extra'] > 0)
+                                    <span class="extra-pill some">+{{ $row['extra'] }} h extra</span>
+                                @else
+                                    <span class="extra-pill none">sin extra</span>
+                                @endif
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($rows as $row)
-                            <tr>
-                                <td>TURNO {{ $row['range'] }}</td>
-                                @for ($i = 0; $i < 7; $i++)
-                                    <td class="{{ $weekStart->copy()->addDays($i)->isToday() ? 'today-col' : '' }}">
-                                        @foreach (($row['cells'][$i] ?? []) as $shift)
-                                            <details>
-                                                <summary class="shift-name {{ $shift->notes ? 'has-notes' : '' }}" title="{{ $shift->notes }}">
-                                                    {{ $shift->staff->name }}
-                                                    @if ($shift->notes)<span class="time">{{ $shift->notes }}</span>@endif
-                                                </summary>
-                                                <details class="edit-shift">
-                                                    <summary style="font-size:11px; color:#888; cursor:pointer;">Editar / eliminar</summary>
-                                                    <form method="POST" action="{{ route('admin.shifts.update', $shift) }}">
-                                                        @csrf @method('PUT')
-                                                        <select name="staff_id" required>
-                                                            @foreach ($staffByRole as $roleName => $people)
-                                                                <optgroup label="{{ $roleName }}">
-                                                                    @foreach ($people as $person)
-                                                                        <option value="{{ $person->id }}" @selected($person->id === $shift->staff_id)>{{ $person->name }}</option>
-                                                                    @endforeach
-                                                                </optgroup>
-                                                            @endforeach
-                                                        </select>
-                                                        <input type="date" name="date" value="{{ $shift->date->toDateString() }}" required>
-                                                        <input type="time" name="start_time" value="{{ $shift->startLabel() }}" required>
-                                                        <input type="time" name="end_time" value="{{ $shift->endLabel() }}" required>
-                                                        <input type="text" name="notes" value="{{ $shift->notes }}" placeholder="Notas (ej. reemplazo, horas hostel)">
-                                                        <button class="btn secondary" type="submit" style="padding:6px; font-size:11.5px;">Guardar</button>
-                                                    </form>
-                                                    <form method="POST" action="{{ route('admin.shifts.destroy', $shift) }}" onsubmit="return confirm('¿Eliminar este turno?');" style="margin-top:4px;">
-                                                        @csrf @method('DELETE')
-                                                        <button class="btn secondary" type="submit" style="padding:6px; font-size:11.5px; width:100%;">Eliminar turno</button>
-                                                    </form>
-                                                </details>
-                                            </details>
-                                        @endforeach
-                                    </td>
-                                @endfor
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    @empty
-        <p class="sub">Sin turnos cargados esta semana todavía.</p>
-    @endforelse
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
+    </div>
 
     @if ($staffByRole->isEmpty())
         <p class="sub">Primero <a class="link" href="{{ route('admin.staff.index') }}">agregá personal</a> para poder cargar turnos.</p>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="refresh" content="30">
-    <title>Tablero de habitaciones — HH Motel</title>
+    <title>Tablero de Playrooms — HH Motel</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         :root { color-scheme: dark; }
@@ -209,7 +209,7 @@
     @endif
     <div class="topline">
         <div>
-            <h1>HH MOTEL — Tablero de habitaciones</h1>
+            <h1>HH MOTEL — Tablero de Playrooms</h1>
             <p class="sub">Se actualiza solo cada 30s · <a href="{{ route('rooms.board') }}">actualizar ahora</a></p>
         </div>
         <div class="topline-toolbar">

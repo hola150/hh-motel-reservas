@@ -9,56 +9,152 @@ use App\Models\Staff;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class ShiftController extends Controller
 {
     /**
-     * Panel semanal de turnos, agrupado por rol -- una tabla por rol
-     * (Anfitrión, Mucama, ...), una fila por cada franja horaria distinta
-     * usada esa semana, una columna por día. Replica el formato de la
-     * planilla que ya usaba recepción, pero editable.
+     * Eje horario del calendario -- de 06:00 a 03:00 del día siguiente
+     * (21 horas), en bloques de 15 min. Cubre con margen tanto el horario
+     * HH (10:30 a 03:00) como el HOT (continuo fin de semana), más la
+     * llegada temprana de mucamas/anfitriones antes de abrir.
+     */
+    private const GRID_START_HOUR = 6;
+
+    private const GRID_TOTAL_SLOTS = 84; // 21 horas x 4 bloques de 15 min
+
+    private const SLOT_MINUTES = 15;
+
+    private const PALETTE = ['#5b9dd9', '#4ecdc4', '#b088e8', '#f2994a', '#e8c76f', '#6fd39a', '#e88a9a', '#7fbcdc', '#c9a6f5', '#f7b06a', '#9ad1d4', '#e69ec2'];
+
+    /**
+     * Panel semanal de turnos: un calendario por rol, con los turnos
+     * dibujados como bloques según su horario real (no solo listados en
+     * una tabla) -- así se ve de un vistazo cuánto rango cubre cada uno,
+     * los huecos, y los choques de horario.
      */
     public function index(Request $request): View
     {
         $anchor = $request->query('date') ? Carbon::parse($request->query('date')) : now('America/Santiago');
         $weekStart = $anchor->copy()->startOfWeek(Carbon::MONDAY)->startOfDay();
         $weekEnd = $weekStart->copy()->addDays(6)->endOfDay();
+        $staffId = $request->query('staff_id') ? (int) $request->query('staff_id') : null;
 
-        $shifts = Shift::with('staff')
-            ->whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()])
-            ->get()
-            ->sortBy(fn (Shift $s) => $s->start_time);
+        $shiftsQuery = Shift::with('staff')->whereBetween('date', [$weekStart->toDateString(), $weekEnd->toDateString()]);
+        if ($staffId) {
+            $shiftsQuery->where('staff_id', $staffId);
+        }
+        $shifts = $shiftsQuery->get();
 
-        // Una tabla por rol -- dentro de cada una, una fila por franja
-        // horaria distinta (agrupa los turnos que comparten el mismo
-        // horario aunque sean de días distintos), ordenadas por hora de
-        // inicio, con una celda por día de la semana.
-        $roleTables = $shifts->groupBy(fn (Shift $s) => $s->staff->role)
-            ->map(function ($roleShifts) use ($weekStart) {
-                return $roleShifts->groupBy(fn (Shift $s) => $s->rangeLabel())
-                    ->map(function ($rangeShifts) use ($weekStart) {
-                        $cells = [];
-                        foreach ($rangeShifts as $shift) {
-                            $dayIndex = $weekStart->diffInDays($shift->date->copy()->startOfDay());
-                            $cells[$dayIndex][] = $shift;
-                        }
+        $conflictIds = $this->detectConflicts($shifts);
 
-                        return [
-                            'range' => $rangeShifts->first()->rangeLabel(),
-                            'start_time' => $rangeShifts->first()->start_time,
-                            'cells' => $cells,
-                        ];
-                    })
-                    ->sortBy('start_time')
-                    ->values();
+        $roleBlocks = $shifts->groupBy(fn (Shift $s) => $s->staff->role)
+            ->map(function (Collection $roleShifts) use ($weekStart, $conflictIds) {
+                return $roleShifts->map(function (Shift $shift) use ($weekStart, $conflictIds) {
+                    [$startSlot, $span] = $this->gridPosition($shift);
+
+                    return [
+                        'shift' => $shift,
+                        'day' => $weekStart->diffInDays($shift->date->copy()->startOfDay()),
+                        'start_slot' => $startSlot,
+                        'span' => $span,
+                        'color' => self::PALETTE[$shift->staff_id % count(self::PALETTE)],
+                        'conflict' => $conflictIds->contains($shift->id),
+                    ];
+                })->values();
             });
 
-        // Horas asignadas esta semana por persona, contra sus horas legales
-        // -- para ver de un vistazo quién quedó con horas extra. Solo se
-        // calcula para quien tiene horas legales cargadas.
-        $hoursSummary = $shifts->groupBy('staff_id')
-            ->map(function ($personShifts) {
+        // Marcas de hora en el eje (cada 1h = 4 bloques de 15 min).
+        $hourMarks = collect(range(0, self::GRID_TOTAL_SLOTS / 4 - 1))->map(fn ($i) => [
+            'slot' => $i * 4,
+            'label' => str_pad((self::GRID_START_HOUR + $i) % 24, 2, '0', STR_PAD_LEFT).':00',
+        ]);
+
+        return view('admin.shifts.index', [
+            'weekStart' => $weekStart,
+            'weekEnd' => $weekEnd,
+            'roleBlocks' => $roleBlocks,
+            'hourMarks' => $hourMarks,
+            'totalSlots' => self::GRID_TOTAL_SLOTS,
+            'hasConflicts' => $conflictIds->isNotEmpty(),
+            'conflictShifts' => $shifts->whereIn('id', $conflictIds->all())->sortBy('start_time'),
+            'hoursSummary' => $this->hoursSummary($shifts),
+            'monthlySummary' => $this->monthlySummary($anchor, $staffId),
+            'monthLabel' => ucfirst($anchor->locale('es')->isoFormat('MMMM YYYY')),
+            'staffList' => Staff::where('is_active', true)->orderBy('role')->orderBy('name')->get(),
+            'selectedStaffId' => $staffId,
+            'staffByRole' => Staff::where('is_active', true)->orderBy('role')->orderBy('name')->get()->groupBy('role'),
+            'prevWeek' => $weekStart->copy()->subWeek()->toDateString(),
+            'nextWeek' => $weekStart->copy()->addWeek()->toDateString(),
+            'isCurrentWeek' => now('America/Santiago')->between($weekStart, $weekEnd),
+        ]);
+    }
+
+    /**
+     * Posición del turno en la grilla horaria: en qué bloque de 15 min
+     * arranca y cuántos bloques ocupa. Un turno que cruza medianoche (ej.
+     * 22:30 a 03:00) se estira más allá de la hora 24 en la MISMA columna
+     * del día en que empezó -- así se ve como un solo bloque continuo, no
+     * cortado en dos días.
+     *
+     * @return array{0: int, 1: int}
+     */
+    private function gridPosition(Shift $shift): array
+    {
+        $toMinutes = fn (string $time) => ((int) substr($time, 0, 2)) * 60 + ((int) substr($time, 3, 2));
+
+        $startMinutes = $toMinutes($shift->start_time);
+        $endMinutes = $toMinutes($shift->end_time);
+        if ($shift->crossesMidnight()) {
+            $endMinutes += 24 * 60;
+        }
+
+        $gridStartMinutes = self::GRID_START_HOUR * 60;
+        $startSlot = intdiv($startMinutes - $gridStartMinutes, self::SLOT_MINUTES);
+        $span = max(1, intdiv($endMinutes - $startMinutes, self::SLOT_MINUTES));
+
+        // Si por algún motivo cae fuera del eje visible, se recorta en vez
+        // de romper la grilla.
+        $startSlot = max(0, min($startSlot, self::GRID_TOTAL_SLOTS - 1));
+
+        return [$startSlot, $span];
+    }
+
+    /**
+     * Mismo personal con dos turnos cuyo horario real se superpone (usa
+     * startsAt/endsAt, que ya resuelven turnos que cruzan medianoche).
+     *
+     * @return Collection<int, int> IDs de los turnos en conflicto
+     */
+    private function detectConflicts(Collection $shifts): Collection
+    {
+        $conflicts = collect();
+
+        foreach ($shifts->groupBy('staff_id') as $personShifts) {
+            $list = $personShifts->values();
+            for ($i = 0; $i < $list->count(); $i++) {
+                for ($j = $i + 1; $j < $list->count(); $j++) {
+                    $a = $list[$i];
+                    $b = $list[$j];
+                    if ($a->startsAt()->lt($b->endsAt()) && $b->startsAt()->lt($a->endsAt())) {
+                        $conflicts->push($a->id);
+                        $conflicts->push($b->id);
+                    }
+                }
+            }
+        }
+
+        return $conflicts->unique();
+    }
+
+    /**
+     * @return Collection<int, array{staff: Staff, assigned: float, legal: ?int, extra: ?float}>
+     */
+    private function hoursSummary(Collection $shifts): Collection
+    {
+        return $shifts->groupBy('staff_id')
+            ->map(function (Collection $personShifts) {
                 $staff = $personShifts->first()->staff;
                 $assigned = round($personShifts->sum(fn (Shift $s) => $s->durationHours()), 1);
                 $legal = $staff->legal_hours_per_week;
@@ -72,17 +168,43 @@ class ShiftController extends Controller
             })
             ->sortBy(fn (array $row) => $row['staff']->role.$row['staff']->name)
             ->values();
+    }
 
-        return view('admin.shifts.index', [
-            'weekStart' => $weekStart,
-            'weekEnd' => $weekEnd,
-            'roleTables' => $roleTables,
-            'hoursSummary' => $hoursSummary,
-            'staffByRole' => Staff::where('is_active', true)->orderBy('role')->orderBy('name')->get()->groupBy('role'),
-            'prevWeek' => $weekStart->copy()->subWeek()->toDateString(),
-            'nextWeek' => $weekStart->copy()->addWeek()->toDateString(),
-            'isCurrentWeek' => now('America/Santiago')->between($weekStart, $weekEnd),
-        ]);
+    /**
+     * Resumen del mes calendario que contiene $anchor -- las horas legales
+     * se prorratean por día (horas semanales / 7 x días del mes) ya que un
+     * mes no tiene un número parejo de semanas.
+     *
+     * @return Collection<int, array{staff: Staff, assigned: float, legal: ?float, extra: ?float}>
+     */
+    private function monthlySummary(Carbon $anchor, ?int $staffId): Collection
+    {
+        $monthStart = $anchor->copy()->startOfMonth();
+        $monthEnd = $anchor->copy()->endOfMonth();
+        $daysInMonth = $monthStart->daysInMonth;
+
+        $query = Shift::with('staff')->whereBetween('date', [$monthStart->toDateString(), $monthEnd->toDateString()]);
+        if ($staffId) {
+            $query->where('staff_id', $staffId);
+        }
+
+        return $query->get()->groupBy('staff_id')
+            ->map(function (Collection $personShifts) use ($daysInMonth) {
+                $staff = $personShifts->first()->staff;
+                $assigned = round($personShifts->sum(fn (Shift $s) => $s->durationHours()), 1);
+                $legal = $staff->legal_hours_per_week !== null
+                    ? round($staff->legal_hours_per_week / 7 * $daysInMonth, 1)
+                    : null;
+
+                return [
+                    'staff' => $staff,
+                    'assigned' => $assigned,
+                    'legal' => $legal,
+                    'extra' => $legal !== null ? round(max(0, $assigned - $legal), 1) : null,
+                ];
+            })
+            ->sortBy(fn (array $row) => $row['staff']->role.$row['staff']->name)
+            ->values();
     }
 
     public function store(Request $request): RedirectResponse

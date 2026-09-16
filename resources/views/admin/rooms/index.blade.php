@@ -1,9 +1,9 @@
 @extends('admin.layout')
-@section('title', 'Habitaciones')
+@section('title', 'Playrooms')
 @section('content')
     <div class="actions" style="justify-content:space-between; margin-bottom:18px;">
-        <div><h1>Habitaciones</h1><p class="sub">Inventario real de habitaciones — reemplaza las de ejemplo aquí.</p></div>
-        <a class="btn" href="{{ route('admin.rooms.create') }}">+ Nueva habitación</a>
+        <div><h1>Playrooms</h1><p class="sub">Inventario real de Playrooms — reemplaza los de ejemplo aquí.</p></div>
+        <a class="btn" href="{{ route('admin.rooms.create') }}">+ Nuevo Playroom</a>
     </div>
     <div class="card">
         <table>

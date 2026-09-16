@@ -13,7 +13,7 @@
     @if ($room->furniture->where('pivot.quantity', '>', 0)->isNotEmpty())
         <div class="equipment-icons" title="Equipamiento de la habitación">
             @foreach ($room->furniture->where('pivot.quantity', '>', 0)->take(5) as $equipment)
-                <span>{{ $equipment->icon ?? '✦' }} {{ $equipment->name }}</span>
+                <span title="{{ $equipment->name }}" aria-label="{{ $equipment->name }}">{{ $equipment->icon ?? '✦' }}</span>
             @endforeach
         </div>
     @endif

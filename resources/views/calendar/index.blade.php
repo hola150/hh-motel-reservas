@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Calendario — HH Motel</title></head><body>
 @include('partials.navbar')
 <main class="page-inner calendar-page">
-<div class="calendar-head"><div><h1>Calendario de reservas</h1><p class="sub">Gestiona ocupación, llegadas y salidas por habitación.</p></div></div>
+<div class="calendar-head"><div><h1>Calendario de reservas</h1><p class="sub">Gestiona ocupación, llegadas y salidas por Playroom.</p></div></div>
 <section class="calendar-toolbar">
  <div class="calendar-views"><a class="{{ $view==='month'?'active':'' }}" href="{{ route('calendar.index',['view'=>'month','date'=>$date->toDateString()]) }}">Mes</a><a class="{{ $view==='week'?'active':'' }}" href="{{ route('calendar.index',['view'=>'week','date'=>$date->toDateString()]) }}">Semana</a><a class="{{ $view==='day'?'active':'' }}" href="{{ route('calendar.index',['view'=>'day','date'=>$date->toDateString()]) }}">Día</a></div>
  <div class="calendar-nav"><a href="{{ route('calendar.index',['view'=>$view,'date'=>$previous]) }}">‹</a><strong>{{ $view==='month' ? ucfirst($date->locale('es')->isoFormat('MMMM YYYY')) : ($view==='week' ? 'Semana del '.$rangeStart->format('d/m').' al '.$rangeEnd->format('d/m/Y') : ucfirst($date->locale('es')->isoFormat('dddd D [de] MMMM YYYY'))) }}</strong><a href="{{ route('calendar.index',['view'=>$view,'date'=>$next]) }}">›</a></div>
