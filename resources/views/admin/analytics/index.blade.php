@@ -73,6 +73,33 @@
         .legend { font-size:11px; color:#888; margin-bottom:8px; }
         .legend .dash { display:inline-block; width:14px; border-top:2px dashed #888; vertical-align:middle; margin:0 3px; }
         .empty { color:#666; font-size:14px; padding: 16px 0; text-align:center; }
+
+        /* Gráficos de línea (SVG, sin librería) para series continuas —
+           meses y días de la semana. El resto sigue en barra porque son
+           categorías sueltas, no una serie. */
+        .chart-legend-row { display:flex; gap:18px; font-size:11.5px; color:#999; margin-bottom:10px; }
+        .chart-legend-row .sw { display:inline-block; width:14px; height:2px; margin-right:6px; vertical-align:middle; background:#ff7918; }
+        .chart-legend-row .sw.prev { background:none; border-top:2px dashed #888; height:0; }
+        .svg-chart-wrap { position:relative; margin-bottom:14px; }
+        .svg-chart-wrap svg { display:block; width:100%; height:auto; overflow:visible; }
+        .chart-grid line { stroke:#262626; stroke-width:1; }
+        .chart-axis-label { font-size:9px; fill:#666; font-family: ui-monospace, monospace; }
+        .chart-xlabel { font-size:9px; fill:#777; text-anchor:middle; font-family: ui-monospace, monospace; }
+        .chart-line { fill:none; stroke-width:2; }
+        .chart-line.prev { stroke-dasharray:4,3; }
+        .chart-area { opacity:.13; }
+        .chart-point { fill:#151515; stroke-width:2; }
+        .chart-crosshair { stroke:#555; stroke-width:1; stroke-dasharray:3,3; opacity:0; }
+        .chart-hit { fill:transparent; }
+        .chart-tooltip { position:absolute; pointer-events:none; background:#111; border:1px solid #333; border-radius:7px; padding:7px 11px; font-size:11.5px; color:#eee; box-shadow:0 6px 18px rgba(0,0,0,.5); opacity:0; transform:translate(-50%,-115%); transition:opacity .1s; white-space:nowrap; z-index:20; }
+        .chart-tooltip.show { opacity:1; }
+        .chart-tooltip b { display:block; font-size:12px; margin-bottom:3px; }
+        .chart-tooltip .tt-row { display:flex; justify-content:space-between; gap:14px; color:#bbb; }
+        .chart-tooltip .tt-row span:last-child { color:#eee; font-family: ui-monospace, monospace; }
+        .chart-table { width:100%; border-collapse:collapse; font-size:12px; margin-top:2px; }
+        .chart-table td { padding:4px 6px; color:#aaa; border-top:1px solid #232323; }
+        .chart-table td.v { text-align:right; color:#ddd; font-family: ui-monospace, monospace; }
+        .chart-table tr:first-child td { border-top:none; }
     </style>
 
     @php
@@ -170,43 +197,125 @@
 
     <div class="card">
         <h3>Por mes — últimos 12 ({{ $metricLabel }})</h3>
-        @forelse ($monthly['rows'] as $m)
-            <div class="month-row">
-                <div>
-                    <div class="m-name">{{ $m['label'] }}</div>
-                    <div class="m-count">{{ $m['count'] }} {{ Str::plural('reserva', $m['count']) }}</div>
-                </div>
-                <div class="m-track"><div class="m-fill" style="width: {{ $monthly['max'] > 0 ? round($m['value'] / $monthly['max'] * 100) : 0 }}%;"></div></div>
-                <div class="m-val">{{ $metricVal($m['value']) }}</div>
-                <div class="m-delta {{ $m['delta_pct'] === null ? 'flat' : ($m['delta_pct'] > 0 ? 'up' : ($m['delta_pct'] < 0 ? 'down' : 'flat')) }}">
-                    @if ($m['delta_pct'] === null) —
-                    @elseif ($m['delta_pct'] > 0) ▲{{ $m['delta_pct'] }}%
-                    @elseif ($m['delta_pct'] < 0) ▼{{ abs($m['delta_pct']) }}%
-                    @else 0%
-                    @endif
-                </div>
+        @if ($monthly['rows']->isNotEmpty())
+            @php
+                $mW = 720; $mH = 200; $mPadL = 46; $mPadR = 10; $mPadT = 14; $mPadB = 24;
+                $mPlotW = $mW - $mPadL - $mPadR; $mPlotH = $mH - $mPadT - $mPadB;
+                $monthlyArr = $monthly['rows']->values();
+                $mCount = max(1, $monthlyArr->count() - 1);
+                $mAxisMax = max(1, $monthly['max'] * 1.15);
+                $mX = fn ($i) => $mPadL + ($i / $mCount) * $mPlotW;
+                $mY = fn ($v) => $mPadT + $mPlotH - ($v / $mAxisMax) * $mPlotH;
+                $mColWidth = $mPlotW / max(1, $monthlyArr->count());
+                $mPoints = $monthlyArr->map(fn ($row, $i) => ['x' => $mX($i), 'y' => $mY($row['value']), 'row' => $row]);
+                $mLinePath = $mPoints->map(fn ($p, $i) => ($i === 0 ? 'M' : 'L').round($p['x'], 1).','.round($p['y'], 1))->implode(' ');
+                $mAreaPath = $mLinePath.' L'.round($mPoints->last()['x'], 1).','.($mPadT + $mPlotH).' L'.round($mPoints->first()['x'], 1).','.($mPadT + $mPlotH).' Z';
+                $mTicks = collect([1, 0.66, 0.33, 0])->map(fn ($f) => ['v' => $mAxisMax * $f, 'y' => $mPadT + $mPlotH - $f * $mPlotH]);
+            @endphp
+            <div class="svg-chart-wrap">
+                <svg viewBox="0 0 {{ $mW }} {{ $mH }}" preserveAspectRatio="none" role="img" aria-label="Evolución mensual de {{ $metricLabel }}">
+                    <g class="chart-grid">
+                        @foreach ($mTicks as $tick)
+                            <line x1="{{ $mPadL }}" y1="{{ $tick['y'] }}" x2="{{ $mW - $mPadR }}" y2="{{ $tick['y'] }}" />
+                            <text class="chart-axis-label" x="{{ $mPadL - 6 }}" y="{{ $tick['y'] + 3 }}" text-anchor="end">{{ $metricVal((int) $tick['v']) }}</text>
+                        @endforeach
+                    </g>
+                    <path class="chart-area" d="{{ $mAreaPath }}" fill="#ff7918"></path>
+                    <path class="chart-line" d="{{ $mLinePath }}" stroke="#ff7918"></path>
+                    <line class="chart-crosshair" x1="0" y1="{{ $mPadT }}" x2="0" y2="{{ $mPadT + $mPlotH }}"></line>
+                    @foreach ($mPoints as $i => $p)
+                        <circle class="chart-point" cx="{{ $p['x'] }}" cy="{{ $p['y'] }}" r="3.2" stroke="#ff7918"></circle>
+                        <text class="chart-xlabel" x="{{ $p['x'] }}" y="{{ $mH - 6 }}">{{ explode(' ', $p['row']['label'])[0] }}</text>
+                        <rect class="chart-hit" tabindex="0"
+                              data-title="{{ $p['row']['label'] }}"
+                              data-rows="{{ $metricLabel }}:{{ $metricVal($p['row']['value']) }}|Reservas:{{ $p['row']['count'] }}{{ $p['row']['delta_pct'] !== null ? '|vs mes anterior:'.($p['row']['delta_pct'] > 0 ? '+' : '').$p['row']['delta_pct'].'%' : '' }}"
+                              data-cx="{{ round($p['x'] / $mW * 100, 2) }}" data-cy="{{ round($p['y'] / $mH * 100, 2) }}" data-crosshair-x="{{ round($p['x'], 1) }}"
+                              x="{{ round($p['x'] - $mColWidth / 2, 1) }}" y="{{ $mPadT }}" width="{{ round($mColWidth, 1) }}" height="{{ $mPlotH }}"></rect>
+                    @endforeach
+                </svg>
+                <div class="chart-tooltip"></div>
             </div>
-        @empty
+            <table class="chart-table">
+                @foreach ($monthlyArr as $m)
+                    <tr>
+                        <td>{{ $m['label'] }} <span style="color:#555;">· {{ $m['count'] }} {{ Str::plural('reserva', $m['count']) }}</span></td>
+                        <td class="v">{{ $metricVal($m['value']) }}</td>
+                        <td class="v" style="width:70px; color:{{ $m['delta_pct'] === null ? '#777' : ($m['delta_pct'] > 0 ? '#6fd39a' : ($m['delta_pct'] < 0 ? '#e88a9a' : '#777')) }};">
+                            @if ($m['delta_pct'] === null) —
+                            @elseif ($m['delta_pct'] > 0) ▲{{ $m['delta_pct'] }}%
+                            @elseif ($m['delta_pct'] < 0) ▼{{ abs($m['delta_pct']) }}%
+                            @else 0%
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+            </table>
+        @else
             <p class="empty">Sin datos.</p>
-        @endforelse
+        @endif
     </div>
 
     <div class="card">
         <h3>Días de la semana ({{ $metricLabel }})</h3>
-        <div class="legend">Barra llena = período actual · <span class="dash"></span> línea punteada = mismo día en el período anterior</div>
-        @php $maxWd = max(1, $byWeekday->max(fn ($e) => max($e['value'], $e['prev']))); @endphp
-        @foreach ($byWeekday as $e)
-            <div class="bar-row">
-                <div class="name">{{ $e['label'] }}</div>
-                <div class="bar-track">
-                    <div class="bar-fill alt" style="width: {{ round($e['value'] / $maxWd * 100) }}%;"></div>
-                    @if ($e['prev'] > 0)
-                        <div class="bar-prev" style="left: {{ round($e['prev'] / $maxWd * 100) }}%;"></div>
+        @php
+            $maxWd = max(1, $byWeekday->max(fn ($e) => max($e['value'], $e['prev'])));
+            $hasPrevWd = $byWeekday->sum('prev') > 0;
+        @endphp
+        <div class="chart-legend-row">
+            <span><span class="sw"></span>Período actual</span>
+            @if ($hasPrevWd)<span><span class="sw prev"></span>Período anterior</span>@endif
+        </div>
+        @php
+            $wW = 720; $wH = 200; $wPadL = 46; $wPadR = 10; $wPadT = 14; $wPadB = 24;
+            $wPlotW = $wW - $wPadL - $wPadR; $wPlotH = $wH - $wPadT - $wPadB;
+            $weekdayArr = $byWeekday->values();
+            $wCount = max(1, $weekdayArr->count() - 1);
+            $wAxisMax = max(1, $maxWd * 1.15);
+            $wX = fn ($i) => $wPadL + ($i / $wCount) * $wPlotW;
+            $wY = fn ($v) => $wPadT + $wPlotH - ($v / $wAxisMax) * $wPlotH;
+            $wColWidth = $wPlotW / max(1, $weekdayArr->count());
+            $wPointsCur = $weekdayArr->map(fn ($e, $i) => ['x' => $wX($i), 'y' => $wY($e['value']), 'e' => $e]);
+            $wLineCur = $wPointsCur->map(fn ($p, $i) => ($i === 0 ? 'M' : 'L').round($p['x'], 1).','.round($p['y'], 1))->implode(' ');
+            $wLinePrev = $weekdayArr->map(fn ($e, $i) => ($i === 0 ? 'M' : 'L').round($wX($i), 1).','.round($wY($e['prev']), 1))->implode(' ');
+            $wTicks = collect([1, 0.66, 0.33, 0])->map(fn ($f) => ['v' => $wAxisMax * $f, 'y' => $wPadT + $wPlotH - $f * $wPlotH]);
+        @endphp
+        <div class="svg-chart-wrap">
+            <svg viewBox="0 0 {{ $wW }} {{ $wH }}" preserveAspectRatio="none" role="img" aria-label="Ventas por día de la semana, {{ $metricLabel }}">
+                <g class="chart-grid">
+                    @foreach ($wTicks as $tick)
+                        <line x1="{{ $wPadL }}" y1="{{ $tick['y'] }}" x2="{{ $wW - $wPadR }}" y2="{{ $tick['y'] }}" />
+                        <text class="chart-axis-label" x="{{ $wPadL - 6 }}" y="{{ $tick['y'] + 3 }}" text-anchor="end">{{ $metricVal((int) $tick['v']) }}</text>
+                    @endforeach
+                </g>
+                @if ($hasPrevWd)
+                    <path class="chart-line prev" d="{{ $wLinePrev }}" stroke="#888"></path>
+                @endif
+                <path class="chart-line" d="{{ $wLineCur }}" stroke="#ff7918"></path>
+                <line class="chart-crosshair" x1="0" y1="{{ $wPadT }}" x2="0" y2="{{ $wPadT + $wPlotH }}"></line>
+                @foreach ($wPointsCur as $i => $p)
+                    @if ($hasPrevWd)
+                        <circle class="chart-point" cx="{{ $wX($i) }}" cy="{{ $wY($p['e']['prev']) }}" r="2.6" stroke="#888"></circle>
                     @endif
-                </div>
-                <div class="val">{{ $metricVal($e['value']) }} @if ($e['prev'] > 0)<small>(ant. {{ $metricVal($e['prev']) }})</small>@endif</div>
-            </div>
-        @endforeach
+                    <circle class="chart-point" cx="{{ $p['x'] }}" cy="{{ $p['y'] }}" r="3.2" stroke="#ff7918"></circle>
+                    <text class="chart-xlabel" x="{{ $p['x'] }}" y="{{ $wH - 6 }}">{{ mb_substr($p['e']['label'], 0, 3) }}</text>
+                    <rect class="chart-hit" tabindex="0"
+                          data-title="{{ $p['e']['label'] }}"
+                          data-rows="Actual:{{ $metricVal($p['e']['value']) }}{{ $p['e']['prev'] > 0 ? '|Anterior:'.$metricVal($p['e']['prev']) : '' }}"
+                          data-cx="{{ round($p['x'] / $wW * 100, 2) }}" data-cy="{{ round(min($p['y'], $wY($p['e']['prev'])) / $wH * 100, 2) }}" data-crosshair-x="{{ round($p['x'], 1) }}"
+                          x="{{ round($p['x'] - $wColWidth / 2, 1) }}" y="{{ $wPadT }}" width="{{ round($wColWidth, 1) }}" height="{{ $wPlotH }}"></rect>
+                @endforeach
+            </svg>
+            <div class="chart-tooltip"></div>
+        </div>
+        <table class="chart-table">
+            @foreach ($byWeekday as $e)
+                <tr>
+                    <td>{{ $e['label'] }}</td>
+                    <td class="v">{{ $metricVal($e['value']) }}</td>
+                    <td class="v" style="color:#888;">{{ $e['prev'] > 0 ? 'ant. '.$metricVal($e['prev']) : '—' }}</td>
+                </tr>
+            @endforeach
+        </table>
     </div>
 
     <div class="card">
@@ -257,4 +366,45 @@
             <p class="empty">Sin reservas en el rango.</p>
         @endforelse
     </div>
+
+    <script>
+        // Tooltip + crosshair genérico para los gráficos de línea SVG de
+        // arriba -- cada rect .chart-hit trae su contenido en data-title/
+        // data-rows ("Label:Valor|Label:Valor") para no tener que armar
+        // HTML crudo desde Blade.
+        document.querySelectorAll('.svg-chart-wrap').forEach(function (wrap) {
+            var tooltip = wrap.querySelector('.chart-tooltip');
+            var crosshair = wrap.querySelector('.chart-crosshair');
+            wrap.querySelectorAll('.chart-hit').forEach(function (hit) {
+                var show = function () {
+                    var rows = hit.getAttribute('data-rows').split('|').map(function (r) {
+                        var parts = r.split(':');
+                        return '<div class="tt-row"><span>' + parts[0] + '</span><span>' + parts[1] + '</span></div>';
+                    }).join('');
+                    tooltip.innerHTML = '<b>' + hit.getAttribute('data-title') + '</b>' + rows;
+                    var cx = parseFloat(hit.getAttribute('data-cx'));
+                    // Cerca de un borde, ancla el tooltip a ese lado en vez de
+                    // centrarlo -- si no, se corta contra el borde de la tarjeta.
+                    var anchorX = cx > 82 ? -92 : (cx < 18 ? -8 : -50);
+                    tooltip.style.left = cx + '%';
+                    tooltip.style.top = hit.getAttribute('data-cy') + '%';
+                    tooltip.style.transform = 'translate(' + anchorX + '%, -115%)';
+                    tooltip.classList.add('show');
+                    if (crosshair) {
+                        crosshair.setAttribute('x1', hit.getAttribute('data-crosshair-x'));
+                        crosshair.setAttribute('x2', hit.getAttribute('data-crosshair-x'));
+                        crosshair.style.opacity = 1;
+                    }
+                };
+                var hide = function () {
+                    tooltip.classList.remove('show');
+                    if (crosshair) crosshair.style.opacity = 0;
+                };
+                hit.addEventListener('mouseenter', show);
+                hit.addEventListener('mouseleave', hide);
+                hit.addEventListener('focus', show);
+                hit.addEventListener('blur', hide);
+            });
+        });
+    </script>
 @endsection
