@@ -19,9 +19,11 @@
     }
     .hh-tariff-chip.hh-closed .hh-tag { background:#93641a; color:#fff3d6; }
     .hh-tariff-chip .hh-when { color:#aaa; }
-    .hh-subnav { display:flex; gap:4px; padding:10px 24px; border-bottom:1px solid #222; flex-wrap:wrap; background:#161616; }
+    .hh-subnav { display:flex; align-items:center; gap:4px; padding:10px 24px; border-bottom:1px solid #222; flex-wrap:wrap; background:#161616; }
     .hh-subnav a { color:#888; text-decoration:none; font-size:12.5px; padding:5px 10px; border-radius:6px; }
     .hh-subnav a.hh-active, .hh-subnav a:hover { background:#222; color:#eee; }
+    .hh-subnav-group { display:flex; align-items:center; gap:4px; }
+    .hh-subnav-sep { width:1px; height:16px; background:#2e2e2e; margin:0 8px; flex:none; }
     .hh-navbar a.hh-danger { color:#a87878; }
     .hh-navbar a.hh-danger:hover { background:#2e1c1c; color:#e88a8a; }
 </style>
@@ -60,20 +62,27 @@
         <a class="hh-new-btn" href="{{ route('reservations.create') }}">+ Nueva reserva</a>
     </div>
     @if (request()->routeIs('admin.*'))
+        {{-- Solo configuraciones generales acá, agrupadas por tema. Clientes,
+             Analytics y Personal/Turnos ya tienen su propio ícono en el riel
+             izquierdo -- repetirlos acá era puro ruido. --}}
         <div class="hh-subnav">
-            <a href="{{ route('admin.categories.index') }}" class="{{ request()->routeIs('admin.categories.*') ? 'hh-active' : '' }}">Categorías</a>
-            <a href="{{ route('admin.rooms.index') }}" class="{{ request()->routeIs('admin.rooms.*') ? 'hh-active' : '' }}">Playrooms</a>
-            <a href="{{ route('admin.furniture.index') }}" class="{{ request()->routeIs('admin.furniture.*') ? 'hh-active' : '' }}">Mobiliario</a>
-            <a href="{{ route('admin.rates.index') }}" class="{{ request()->routeIs('admin.rates.*') ? 'hh-active' : '' }}">Tarifas</a>
-            <a href="{{ route('admin.offers.index') }}" class="{{ request()->routeIs('admin.offers.*') ? 'hh-active' : '' }}">Ofertas</a>
-            <a href="{{ route('admin.upsells.index') }}" class="{{ request()->routeIs('admin.upsells.*') ? 'hh-active' : '' }}">Upsells</a>
-            <a href="{{ route('admin.coupons.index') }}" class="{{ request()->routeIs('admin.coupons.*') ? 'hh-active' : '' }}">Cupones</a>
-            <a href="{{ route('admin.products.index') }}" class="{{ request()->routeIs('admin.products.*') ? 'hh-active' : '' }}">Productos</a>
-            <a href="{{ route('admin.combos.index') }}" class="{{ request()->routeIs('admin.combos.*') ? 'hh-active' : '' }}">Combos</a>
-            <a href="{{ route('admin.customers.index') }}" class="{{ request()->routeIs('admin.customers.*') ? 'hh-active' : '' }}">Clientes</a>
-            <a href="{{ route('admin.analytics.index') }}" class="{{ request()->routeIs('admin.analytics.*') ? 'hh-active' : '' }}">Analytics</a>
-            <a href="{{ route('admin.staff.index') }}" class="{{ request()->routeIs('admin.staff.*') ? 'hh-active' : '' }}">Personal</a>
-            <a href="{{ route('admin.shifts.index') }}" class="{{ request()->routeIs('admin.shifts.*') ? 'hh-active' : '' }}">Turnos</a>
+            <span class="hh-subnav-group">
+                <a href="{{ route('admin.categories.index') }}" class="{{ request()->routeIs('admin.categories.*') ? 'hh-active' : '' }}">Categorías</a>
+                <a href="{{ route('admin.rooms.index') }}" class="{{ request()->routeIs('admin.rooms.*') ? 'hh-active' : '' }}">Playrooms</a>
+                <a href="{{ route('admin.furniture.index') }}" class="{{ request()->routeIs('admin.furniture.*') ? 'hh-active' : '' }}">Mobiliario</a>
+            </span>
+            <span class="hh-subnav-sep"></span>
+            <span class="hh-subnav-group">
+                <a href="{{ route('admin.rates.index') }}" class="{{ request()->routeIs('admin.rates.*') ? 'hh-active' : '' }}">Tarifas</a>
+                <a href="{{ route('admin.offers.index') }}" class="{{ request()->routeIs('admin.offers.*') ? 'hh-active' : '' }}">Ofertas</a>
+                <a href="{{ route('admin.upsells.index') }}" class="{{ request()->routeIs('admin.upsells.*') ? 'hh-active' : '' }}">Upsells</a>
+                <a href="{{ route('admin.coupons.index') }}" class="{{ request()->routeIs('admin.coupons.*') ? 'hh-active' : '' }}">Cupones</a>
+            </span>
+            <span class="hh-subnav-sep"></span>
+            <span class="hh-subnav-group">
+                <a href="{{ route('admin.products.index') }}" class="{{ request()->routeIs('admin.products.*') ? 'hh-active' : '' }}">Productos</a>
+                <a href="{{ route('admin.combos.index') }}" class="{{ request()->routeIs('admin.combos.*') ? 'hh-active' : '' }}">Combos</a>
+            </span>
         </div>
     @endif
 </div>
