@@ -7,7 +7,7 @@
     </div>
     <div class="card">
         <table>
-            <thead><tr><th>Nombre</th><th>Categoría</th><th>Buffer aseo</th><th>Estado</th><th></th></tr></thead>
+            <thead><tr><th>Nombre</th><th>Categoría</th><th>Buffer aseo</th><th>Estado</th><th>Fotos</th><th></th></tr></thead>
             <tbody>
                 @foreach ($rooms as $room)
                     <tr>
@@ -15,6 +15,16 @@
                         <td>{{ $room->category->name }}</td>
                         <td>{{ $room->buffer_minutes }} min</td>
                         <td><span class="pill">{{ strtoupper($room->operational_status) }}</span></td>
+                        <td>
+                            @if ($room->photos)
+                                <a href="{{ route('admin.rooms.edit', $room) }}" class="hh-room-thumb-link">
+                                    <img src="{{ $room->photos[0] }}" alt="" class="hh-room-thumb">
+                                    <span>{{ count($room->photos) }}</span>
+                                </a>
+                            @else
+                                <span class="sub" style="font-size:12px;">—</span>
+                            @endif
+                        </td>
                         <td><a class="link" href="{{ route('admin.rooms.edit', $room) }}">Editar</a></td>
                     </tr>
                 @endforeach

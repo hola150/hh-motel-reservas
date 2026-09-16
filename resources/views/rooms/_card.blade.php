@@ -11,6 +11,12 @@
         @endif
     </div>
     <div class="cat">Categoría {{ $room->category->name }}</div>
+    @if ($room->photos)
+        <a href="{{ route('admin.rooms.edit', $room) }}" class="room-photo-link">
+            <img src="{{ $room->photos[0] }}" alt="">
+            <span>{{ count($room->photos) }} foto{{ count($room->photos) === 1 ? '' : 's' }}</span>
+        </a>
+    @endif
     @if ($room->furniture->where('pivot.quantity', '>', 0)->isNotEmpty())
         <div class="equipment-icons">
             @foreach ($room->furniture->where('pivot.quantity', '>', 0)->take(5) as $equipment)

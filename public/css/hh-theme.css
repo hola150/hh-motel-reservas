@@ -285,6 +285,9 @@ body > .wrap :is(input, select, textarea) { min-height: 42px; }
 .hh-media-preview.links { flex-direction: column; gap: 4px; }
 .hh-media-preview.links a { font-size: 12.5px; color: #a74600; text-decoration: none; }
 .hh-media-preview.links a:hover { text-decoration: underline; }
+.hh-room-thumb-link { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+.hh-room-thumb { width: 36px; height: 27px; object-fit: cover; border-radius: 5px; border: 1px solid #d4d6da; }
+.hh-room-thumb-link span { font-size: 11px; color: #777; }
 .hh-equipment-group { margin: 20px 0; padding: 14px 18px; border: 1px solid #d4d6da; border-radius: 10px; background: #fff; min-width: 0; }
 .hh-equipment-group legend { padding: 0 8px; font-weight: 700; color: #292c31; }
 .hh-equipment-row { display: grid; grid-template-columns: minmax(140px, 1fr) 90px minmax(150px, 1fr) minmax(160px, 1.3fr); gap: 14px; align-items: center; padding: 12px 0; border-bottom: 1px solid #e3e4e6; }
