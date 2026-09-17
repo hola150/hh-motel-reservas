@@ -107,14 +107,14 @@ body > .wrap > table :is(td, th) { padding: 12px; }
 .section-head h2 { letter-spacing: 0; text-transform: none; font-size: 16px; }
 .section.ocupadas .section-head h2 { color: #a34812; }
 .section.aseo .section-head h2, .sidebar-title h2 { color: #866015; }
-.section.disponibles .section-head h2 { color: #187547; }
+.section.disponibles .section-head h2 { color: #059669; }
 .section.fuera .section-head h2 { color: #59616d; }
 .summary { gap: 10px; margin-bottom: 24px; }
 .summary .chip { background: #fff; border-color: #dedfe2; padding: 12px 16px; border-radius: 10px; }
 .summary .chip span { color: #60636a; }
 .summary .chip b { font-size: 23px; }
 .summary .chip.ocupadas b { color: #b64c0a; }
-.summary .chip.disponibles b { color: #157544; }
+.summary .chip.disponibles b { color: #059669; }
 .summary .chip.aseo b, .summary .chip.proximas b { color: #956009; }
 .summary .chip.fuera b { color: #5c626d; }
 /* Primary actions; cancellation keeps its separate red styling. */

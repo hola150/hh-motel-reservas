@@ -10,7 +10,7 @@
         * { box-sizing: border-box; }
         body { background:#111; color:#eee; font-family: -apple-system, "Segoe UI", sans-serif; margin: 0; }
         .page-inner { max-width: 1700px; width:100%; margin: 0; padding: 24px 24px 60px; }
-        .flash-status { background:#14251c; border:1px solid #2e6e45; color:#8fe0ad; padding:12px 16px; border-radius:9px; font-size:14px; font-weight:600; margin-bottom:20px; }
+        .flash-status { background:#0f2b22; border:1px solid #1c9169; color:#6ee7b7; padding:12px 16px; border-radius:9px; font-size:14px; font-weight:600; margin-bottom:20px; }
         .topline { margin-bottom: 26px; display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; }
         .topline-toolbar { display:flex; gap:8px; flex-wrap:wrap; flex:none; }
         a.compact-toggle { text-decoration:none; display:inline-flex; align-items:center; }
@@ -24,18 +24,18 @@
         .summary .chip span { font-size:11.5px; color:#999; text-transform:uppercase; letter-spacing:.04em; }
         .summary .chip.ocupadas b { color:#e88a9a; }
         .summary .chip.aseo b { color:#e8c76f; }
-        .summary .chip.disponibles b { color:#6fd39a; }
+        .summary .chip.disponibles b { color:#34d399; }
         .summary .chip.proximas b { color:#e8c76f; }
         .summary .chip.fuera b { color:#aaa; }
 
-        a.sales-btn { background:#14251c; border-color:#2e6e45; color:#8fe0ad; font-weight:600; }
-        a.sales-btn:hover { border-color:#6fd39a; color:#fff; }
+        a.sales-btn { background:#1c1c1c; border-color:#333; color:#6ee7b7; font-weight:600; }
+        a.sales-btn:hover { border-color:#34d399; color:#fff; }
 
         .wing-toggle-row { display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
         .wing-toggle { display:inline-flex; align-items:center; gap:9px; background:#1c1c1c; border:1px solid #333; color:#ccc; border-radius:20px; padding:8px 16px 8px 12px; font-size:12.5px; font-weight:600; cursor:pointer; }
         .wing-toggle-dot { width:9px; height:9px; border-radius:50%; background:#555; flex:none; }
-        .wing-toggle.on { border-color:#2e6e45; background:#14251c; color:#8fe0ad; }
-        .wing-toggle.on .wing-toggle-dot { background:#6fd39a; }
+        .wing-toggle.on { border-color:#1c9169; background:#0f2b22; color:#6ee7b7; }
+        .wing-toggle.on .wing-toggle-dot { background:#34d399; }
         .wing-toggle.off { border-color:#7a2d2d; background:#2a1c1c; color:#e8a2a2; }
         .wing-toggle.off .wing-toggle-dot { background:#e05252; }
         .wing-toggle:hover { border-color:#ff7918; }
@@ -43,10 +43,10 @@
 
         .daily-summary { display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; margin-bottom:30px; }
         @media (max-width: 760px) { .daily-summary { grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); } }
-        .dsum-tile { display:flex; flex-direction:column; gap:3px; background:#14251c; border:1px solid #2e6e45; border-radius:9px; padding:10px 12px; text-decoration:none; min-width:0; }
-        .dsum-tile:hover { border-color:#6fd39a; }
+        .dsum-tile { display:flex; flex-direction:column; gap:3px; background:#1c1c1c; border:1px solid #333; border-radius:9px; padding:10px 12px; text-decoration:none; min-width:0; }
+        .dsum-tile:hover { border-color:#666; }
         .dsum-tile.total { background:#1c1c1c; border-color:#ff7918; }
-        .dsum-label { font-size:10px; color:#9cc7ac; text-transform:uppercase; letter-spacing:.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .dsum-label { font-size:10px; color:#999; text-transform:uppercase; letter-spacing:.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         .dsum-tile.total .dsum-label { color:#ffb379; }
         .dsum-value { font-family: ui-monospace, monospace; font-weight:700; font-size:16px; color:#eee; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
@@ -60,7 +60,7 @@
         .section-head .bar { flex:1; height:1px; background:#292929; }
         .section.ocupadas .section-head h2 { color:#e88a9a; }
         .section.aseo .section-head h2 { color:#e8c76f; }
-        .section.disponibles .section-head h2 { color:#6fd39a; }
+        .section.disponibles .section-head h2 { color:#34d399; }
         .section.fuera .section-head h2 { color:#aaa; }
         .section-empty { color:#666; font-size:13px; }
 
@@ -134,7 +134,7 @@
         .cat-max .cat { color:#f2994a; }
         .cat-new-lite .cat { color:#e8c76f; font-weight:700; }
         .pill { display:inline-block; font-family: ui-monospace, monospace; font-size: 11px; padding:3px 9px; border-radius:20px; font-weight:600; margin-bottom:6px; }
-        .pill-libre { background:#1c3a2a; color:#6fd39a; }
+        .pill-libre { background:#0f2b22; color:#34d399; }
         .pill-ocupada { background:#3a1c22; color:#e88a9a; }
         .pill-reservada { background:#2a2010; color:#e8a23f; }
         .pill-aseo { background:#3a331c; color:#e8c76f; }
@@ -212,7 +212,10 @@
         .chips .eta, .chips .code, .chips .offer-badge, .chips .maintenance-badge,
         .chips a.reserve-btn, .chips .aseo-ready-btn, .chips a.bookings-btn,
         .chips a.checkout-btn, .chips .checkin-btn, .chips a.consumo-btn, .chips a.inspect-btn,
-        .chips details, .chips form { display: none !important; }
+        /* Acotado a las tarjetas -- un selector ".chips form" a secas también
+           escondía los formularios de los toggles de Ala Sur/categoría de
+           más arriba, que no tienen nada que ver con la densidad de tarjetas. */
+        .chips .card details, .chips .card form { display: none !important; }
         .chips .proxima-card { padding: 8px 10px; margin-bottom: 8px; }
     </style>
     <script>
