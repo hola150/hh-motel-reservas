@@ -23,9 +23,9 @@
         a { color: inherit; }
         .wrap { max-width: 980px; margin: 0 auto; padding: 0 20px 60px; }
 
-        header.hero { text-align:center; padding: 18px 16px 20px; background:#111; border-radius:0 0 18px 18px; margin-bottom: 26px; box-shadow:0 5px 18px #0002; overflow:hidden; }
-        header.hero .brand { display:flex; justify-content:center; width:100%; margin:0 auto 10px; padding:0; }
-        header.hero .brand img { display:block; width:min(250px, 72vw); max-width:100%; height:auto; max-height:76px; object-fit:contain; }
+        header.hero { text-align:center; padding: 12px 12px 16px; background:#111; border-radius:0 0 18px 18px; margin-bottom: 22px; box-shadow:0 5px 18px #0002; overflow:hidden; }
+        header.hero .brand { display:flex; justify-content:center; width:100%; margin:0 auto 7px; padding:0; }
+        header.hero .brand img { display:block; width:min(220px, 64vw); max-width:100%; height:auto; max-height:58px; object-fit:contain; }
         header.hero h1 { color:#fff; font-size: 24px; margin: 0 0 7px; letter-spacing: -.03em; }
         header.hero p { color:#c9cbd0; font-size: 13.5px; max-width: 520px; margin: 0 auto 16px; }
         .hero-btn-row { display:flex; align-items:center; justify-content:center; gap:18px; flex-wrap:wrap; }
@@ -57,8 +57,8 @@
         .cat-new-lite h2 { color:#f0d98a; }
 
         .cat-gallery { display:grid; gap:3px; background:#202122; padding:3px; }
-        .cat-gallery.gallery-4 { grid-template-columns:2fr 1fr 1fr; grid-template-rows:repeat(2, minmax(92px, 1fr)); }
-        .cat-gallery.gallery-3 { grid-template-columns:2fr 1fr; grid-template-rows:repeat(2, minmax(92px, 1fr)); }
+        .cat-gallery.gallery-4 { grid-template-columns:2fr 1fr 1fr; grid-template-rows:repeat(2, minmax(92px, 1fr)); aspect-ratio:16/7; }
+        .cat-gallery.gallery-3 { grid-template-columns:2fr 1fr; grid-template-rows:repeat(2, minmax(92px, 1fr)); aspect-ratio:16/7; }
         .cat-gallery.gallery-2 { grid-template-columns:repeat(2, 1fr); grid-template-rows:minmax(150px, 1fr); }
         .cat-gallery.gallery-1 { grid-template-columns:1fr; grid-template-rows:minmax(220px, 1fr); }
         .cat-gallery a { display:block; aspect-ratio:auto; min-height:92px; overflow:hidden; position:relative; }
@@ -102,7 +102,7 @@
         footer.catalog-footer { text-align:center; color:#8a8d93; font-size:12.5px; padding: 20px 0 10px; }
 
         @media (max-width: 560px) {
-            .cat-gallery.gallery-4, .cat-gallery.gallery-3 { grid-template-rows:repeat(2, minmax(84px, 1fr)); }
+            .cat-gallery.gallery-4, .cat-gallery.gallery-3 { grid-template-rows:repeat(2, minmax(84px, 1fr)); aspect-ratio:4/3; }
             .cat-gallery.gallery-2 { grid-template-rows:minmax(120px, 1fr); }
             .cat-gallery.gallery-1 { grid-template-rows:minmax(180px, 1fr); }
             .cat-gallery a:first-child { min-height:172px; }
@@ -115,7 +115,7 @@
 <body>
     <div class="wrap">
         <header class="hero">
-            <div class="brand"><img src="https://assets.cdn.filesafe.space/ksYYfSiY8nP4YFvkrJFJ/media/6aa2d058d1b3cd745b958c57.png" alt="HH Motel Santiago Playrooms"></div>
+            <div class="brand"><img src="https://assets.cdn.filesafe.space/ksYYfSiY8nP4YFvkrJFJ/media/6aab44cf9f8b31b6ab530587.png" alt="HH Motel Santiago Playrooms"></div>
             <h1>Nuestras habitaciones</h1>
             <p>Elige la que más te guste — reserva online o escríbenos por WhatsApp.</p>
             <div class="hero-btn-row">
