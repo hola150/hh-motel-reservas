@@ -24,27 +24,21 @@ class RoomBoardController extends Controller
 
         $isProxima = fn (array $e) => $e['status']['occupancy'] === 'libre' && $e['status']['imminent'];
 
-        $alaSurEnabled = OperationalSetting::current()->ala_sur_enabled;
+        // Los interruptores de Ala Sur / categoría / piso viven en el panel
+        // de administración (Categorías) -- acá solo se aplica su efecto,
+        // sacando de "Disponibles" lo que corresponda. No es responsabilidad
+        // de quien está en el tablero prender o apagar nada de esto.
+        $setting = OperationalSetting::current();
+        $disabledCategoryIds = RoomCategory::where('is_active', false)->pluck('id');
+        $disabledFloors = $setting->disabledFloors();
 
         $disponibles = $entries->filter(
             fn (array $e) => $e['room']->operational_status === 'activa' && $e['status']['occupancy'] === 'libre' && ! $isProxima($e)
+        )->reject(
+            fn (array $e) => (! $setting->ala_sur_enabled && $e['room']->wing === 'sur')
+                || $disabledCategoryIds->contains($e['room']->room_category_id)
+                || in_array($e['room']->floor, $disabledFloors, true)
         );
-        // El Ala Sur apagada solo saca habitaciones de "Disponibles" -- lo
-        // que ya esta ocupado, por llegar, en aseo o fuera de servicio en
-        // esa ala se sigue viendo igual, no desaparece de la nada.
-        $hiddenSurCount = $alaSurEnabled ? 0 : $disponibles->filter(fn (array $e) => $e['room']->wing === 'sur')->count();
-        if (! $alaSurEnabled) {
-            $disponibles = $disponibles->reject(fn (array $e) => $e['room']->wing === 'sur');
-        }
-
-        // Mismo criterio que el Ala Sur pero por categoría: una categoría
-        // apagada solo saca sus habitaciones libres de "Disponibles", no
-        // toca lo que ya está ocupado, por llegar, en aseo o fuera de
-        // servicio en esa categoría.
-        $categories = RoomCategory::orderBy('display_order')->get();
-        $disabledCategoryIds = $categories->where('is_active', false)->pluck('id');
-        $hiddenCategoryCount = $disponibles->filter(fn (array $e) => $disabledCategoryIds->contains($e['room']->room_category_id))->count();
-        $disponibles = $disponibles->reject(fn (array $e) => $disabledCategoryIds->contains($e['room']->room_category_id));
 
         $grouped = [
             'ocupadas' => $entries->filter(
@@ -75,40 +69,7 @@ class RoomBoardController extends Controller
             'nextOpeningLabel' => $nextOpening ? $this->formatCountdown($now, $nextOpening) : null,
             'cleaningStaff' => $this->cleaningStaffNames(),
             'dailySummary' => $this->dailySummary(),
-            'alaSurEnabled' => $alaSurEnabled,
-            'hiddenSurCount' => $hiddenSurCount,
-            'categories' => $categories,
-            'hiddenCategoryCount' => $hiddenCategoryCount,
         ]);
-    }
-
-    /**
-     * Prende/apaga la oferta del Ala Sur -- deja de ofrecerse para reservas
-     * nuevas sin tocar las habitaciones que ya estan ocupadas, por llegar,
-     * en aseo o fuera de servicio ahi.
-     */
-    public function toggleAlaSur(): RedirectResponse
-    {
-        $setting = OperationalSetting::current();
-        $setting->update(['ala_sur_enabled' => ! $setting->ala_sur_enabled]);
-
-        return redirect()->route('rooms.board')->with('status', $setting->ala_sur_enabled
-            ? 'Ala Sur habilitada — vuelve a ofrecerse en el tablero.'
-            : 'Ala Sur deshabilitada — sus habitaciones libres ya no se ofrecen.');
-    }
-
-    /**
-     * Espejo de toggleAlaSur pero por categoría (mismo campo que ya
-     * controla si la categoría aparece en el catálogo público -- una
-     * categoría "inactiva" lo es en todos lados, no solo en el tablero).
-     */
-    public function toggleCategory(RoomCategory $category): RedirectResponse
-    {
-        $category->update(['is_active' => ! $category->is_active]);
-
-        return redirect()->route('rooms.board')->with('status', $category->is_active
-            ? "{$category->name} habilitada — vuelve a ofrecerse en el tablero y el catálogo."
-            : "{$category->name} deshabilitada — sus habitaciones libres ya no se ofrecen.");
     }
 
     /**

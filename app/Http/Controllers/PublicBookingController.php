@@ -71,9 +71,11 @@ class PublicBookingController extends Controller
         $startsAt = Carbon::parse($validated['date'].' '.sprintf('%02d:%02d', $validated['time_hour'], $validated['time_minute']));
         $endsAt = $startsAt->copy()->addMinutes((int) $validated['duration_minutes']);
 
+        $operationalSetting = \App\Models\OperationalSetting::current();
         $room = Room::where('room_category_id', $validated['room_category_id'])
             ->where('operational_status', 'activa')
-            ->wingEnabled(\App\Models\OperationalSetting::current()->ala_sur_enabled)
+            ->wingEnabled($operationalSetting->ala_sur_enabled)
+            ->floorEnabled($operationalSetting->disabledFloors())
             ->orderBy('name')
             ->get()
             ->first(fn (Room $r) => $availability->isAvailable($r, $startsAt, $endsAt));

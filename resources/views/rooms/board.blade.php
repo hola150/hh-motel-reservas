@@ -31,16 +31,6 @@
         a.sales-btn { background:#1c1c1c; border-color:#333; color:#6ee7b7; font-weight:600; }
         a.sales-btn:hover { border-color:#34d399; color:#fff; }
 
-        .wing-toggle-row { display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
-        .wing-toggle { display:inline-flex; align-items:center; gap:9px; background:#1c1c1c; border:1px solid #333; color:#ccc; border-radius:20px; padding:8px 16px 8px 12px; font-size:12.5px; font-weight:600; cursor:pointer; }
-        .wing-toggle-dot { width:9px; height:9px; border-radius:50%; background:#555; flex:none; }
-        .wing-toggle.on { border-color:#1c9169; background:#0f2b22; color:#6ee7b7; }
-        .wing-toggle.on .wing-toggle-dot { background:#34d399; }
-        .wing-toggle.off { border-color:#7a2d2d; background:#2a1c1c; color:#e8a2a2; }
-        .wing-toggle.off .wing-toggle-dot { background:#e05252; }
-        .wing-toggle:hover { border-color:#ff7918; }
-        .wing-hidden-note { font-size:12px; color:#888; }
-
         .daily-summary { display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; margin-bottom:30px; }
         @media (max-width: 760px) { .daily-summary { grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); } }
         .dsum-tile { display:flex; flex-direction:column; gap:3px; background:#1c1c1c; border:1px solid #333; border-radius:9px; padding:10px 12px; text-decoration:none; min-width:0; }
@@ -251,36 +241,9 @@
         </div>
     </div>
 
-    <div class="wing-toggle-row">
-        <form method="POST" action="{{ route('rooms.ala_sur.toggle') }}">
-            @csrf
-            <button type="submit" class="wing-toggle {{ $alaSurEnabled ? 'on' : 'off' }}">
-                <span class="wing-toggle-dot"></span>
-                Ala Sur {{ $alaSurEnabled ? 'habilitada' : 'deshabilitada' }}
-            </button>
-        </form>
-        @if (! $alaSurEnabled && $hiddenSurCount > 0)
-            <span class="wing-hidden-note">{{ $hiddenSurCount }} {{ Str::plural('habitación', $hiddenSurCount) }} libre{{ $hiddenSurCount === 1 ? '' : 's' }} oculta{{ $hiddenSurCount === 1 ? '' : 's' }} de Disponibles</span>
-        @endif
-    </div>
-
-    {{-- Mismo mecanismo que Ala Sur pero por categoría -- apaga is_active,
-         que ya es el mismo campo que controla si aparece en el catálogo
-         público, así que queda consistente en todos lados. --}}
-    <div class="wing-toggle-row" id="category-toggle-row">
-        @foreach ($categories as $cat)
-            <form method="POST" action="{{ route('rooms.category.toggle', $cat) }}">
-                @csrf
-                <button type="submit" class="wing-toggle {{ $cat->is_active ? 'on' : 'off' }}">
-                    <span class="wing-toggle-dot"></span>
-                    {{ $cat->name }} {{ $cat->is_active ? 'habilitada' : 'deshabilitada' }}
-                </button>
-            </form>
-        @endforeach
-        @if ($hiddenCategoryCount > 0)
-            <span class="wing-hidden-note">{{ $hiddenCategoryCount }} {{ Str::plural('habitación', $hiddenCategoryCount) }} libre{{ $hiddenCategoryCount === 1 ? '' : 's' }} oculta{{ $hiddenCategoryCount === 1 ? '' : 's' }} de Disponibles</span>
-        @endif
-    </div>
+    {{-- Los interruptores de Ala Sur / categoría / piso se movieron al panel
+         de administración (Categorías) -- no es responsabilidad de quien
+         está en el tablero prender o apagar disponibilidad. --}}
 
     <div class="summary">
         <div class="chip ocupadas"><b>{{ $grouped['ocupadas']->count() }}</b><span>Ocupadas</span></div>

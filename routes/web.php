@@ -67,8 +67,6 @@ Route::get('/habitaciones/proximas', [RoomBoardController::class, 'upcoming'])->
 Route::get('/habitaciones/{room}/reservas', [RoomBoardController::class, 'bookings'])->name('rooms.bookings');
 Route::post('/habitaciones/{room}/estado', [RoomBoardController::class, 'updateStatus'])->name('rooms.status');
 Route::post('/habitaciones/{room}/aseo-listo', [RoomBoardController::class, 'markAseoReady'])->name('rooms.aseo_ready');
-Route::post('/habitaciones/ala-sur/toggle', [RoomBoardController::class, 'toggleAlaSur'])->name('rooms.ala_sur.toggle');
-Route::post('/categorias/{category}/toggle-tablero', [RoomBoardController::class, 'toggleCategory'])->name('rooms.category.toggle');
 Route::get('/mantencion', [RoomInspectionController::class, 'panel'])->name('rooms.inspections.panel');
 Route::get('/habitaciones/{room}/inspeccion', [RoomInspectionController::class, 'create'])->name('rooms.inspections.create');
 Route::post('/habitaciones/{room}/inspeccion', [RoomInspectionController::class, 'store'])->name('rooms.inspections.store');
@@ -99,6 +97,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/categorias', [RoomCategoryController::class, 'store'])->name('categories.store');
     Route::get('/categorias/{category}/editar', [RoomCategoryController::class, 'edit'])->name('categories.edit');
     Route::put('/categorias/{category}', [RoomCategoryController::class, 'update'])->name('categories.update');
+    Route::post('/categorias/{category}/toggle', [RoomCategoryController::class, 'toggleCategory'])->name('categories.toggle');
+    Route::post('/ala-sur/toggle', [RoomCategoryController::class, 'toggleAlaSur'])->name('ala_sur.toggle');
+    Route::post('/pisos/{floor}/toggle', [RoomCategoryController::class, 'toggleFloor'])->name('floors.toggle');
 
     Route::get('/habitaciones', [AdminRoomController::class, 'index'])->name('rooms.index');
     Route::get('/habitaciones/crear', [AdminRoomController::class, 'create'])->name('rooms.create');

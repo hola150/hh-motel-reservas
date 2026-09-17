@@ -77,6 +77,37 @@ class Room extends Model
     }
 
     /**
+     * Piso según los últimos 3 dígitos del nombre ("PLUS 201" -> 2). Null si
+     * el nombre no sigue ese patrón (no debería pasar con los datos reales,
+     * pero no hay que romper si algún día lo hace).
+     */
+    public function getFloorAttribute(): ?int
+    {
+        if (! preg_match('/(\d{3})$/', $this->name, $m)) {
+            return null;
+        }
+
+        return intdiv((int) $m[1], 100);
+    }
+
+    /**
+     * Espejo de scopeWingEnabled/scopeCategoryEnabled pero por piso (1/2/3,
+     * según OperationalSetting::disabledFloors()).
+     */
+    public function scopeFloorEnabled($query, array $disabledFloors)
+    {
+        if (empty($disabledFloors)) {
+            return $query;
+        }
+
+        return $query->where(function ($q) use ($disabledFloors) {
+            foreach ($disabledFloors as $floor) {
+                $q->whereRaw("NOT (name ~ '\\d{3}$' AND (right(name, 3))::int BETWEEN ? AND ?)", [$floor * 100, $floor * 100 + 99]);
+            }
+        });
+    }
+
+    /**
      * Reserva vigente en este instante (para calcular ocupación en el tablero).
      */
     public function currentBooking(): ?Booking

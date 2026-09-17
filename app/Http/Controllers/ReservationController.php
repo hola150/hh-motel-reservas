@@ -26,10 +26,12 @@ class ReservationController extends Controller
 {
     public function create(Request $request, RoomBoardService $board, RateRuleResolver $rates): View
     {
+        $operationalSetting = \App\Models\OperationalSetting::current();
         $rooms = Room::with('category')
             ->where('operational_status', 'activa')
-            ->wingEnabled(\App\Models\OperationalSetting::current()->ala_sur_enabled)
+            ->wingEnabled($operationalSetting->ala_sur_enabled)
             ->categoryEnabled()
+            ->floorEnabled($operationalSetting->disabledFloors())
             ->orderBy('name')
             ->get()
             ->map(function (Room $room) use ($board) {
