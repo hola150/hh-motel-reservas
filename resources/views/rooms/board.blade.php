@@ -261,6 +261,24 @@
         @endif
     </div>
 
+    {{-- Mismo mecanismo que Ala Sur pero por categoría -- apaga is_active,
+         que ya es el mismo campo que controla si aparece en el catálogo
+         público, así que queda consistente en todos lados. --}}
+    <div class="wing-toggle-row" id="category-toggle-row">
+        @foreach ($categories as $cat)
+            <form method="POST" action="{{ route('rooms.category.toggle', $cat) }}">
+                @csrf
+                <button type="submit" class="wing-toggle {{ $cat->is_active ? 'on' : 'off' }}">
+                    <span class="wing-toggle-dot"></span>
+                    {{ $cat->name }} {{ $cat->is_active ? 'habilitada' : 'deshabilitada' }}
+                </button>
+            </form>
+        @endforeach
+        @if ($hiddenCategoryCount > 0)
+            <span class="wing-hidden-note">{{ $hiddenCategoryCount }} {{ Str::plural('habitación', $hiddenCategoryCount) }} libre{{ $hiddenCategoryCount === 1 ? '' : 's' }} oculta{{ $hiddenCategoryCount === 1 ? '' : 's' }} de Disponibles</span>
+        @endif
+    </div>
+
     <div class="summary">
         <div class="chip ocupadas"><b>{{ $grouped['ocupadas']->count() }}</b><span>Ocupadas</span></div>
         <div class="chip aseo"><b>{{ $grouped['en_aseo']->count() }}</b><span>En aseo</span></div>

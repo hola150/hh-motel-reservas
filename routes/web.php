@@ -68,6 +68,7 @@ Route::get('/habitaciones/{room}/reservas', [RoomBoardController::class, 'bookin
 Route::post('/habitaciones/{room}/estado', [RoomBoardController::class, 'updateStatus'])->name('rooms.status');
 Route::post('/habitaciones/{room}/aseo-listo', [RoomBoardController::class, 'markAseoReady'])->name('rooms.aseo_ready');
 Route::post('/habitaciones/ala-sur/toggle', [RoomBoardController::class, 'toggleAlaSur'])->name('rooms.ala_sur.toggle');
+Route::post('/categorias/{category}/toggle-tablero', [RoomBoardController::class, 'toggleCategory'])->name('rooms.category.toggle');
 Route::get('/mantencion', [RoomInspectionController::class, 'panel'])->name('rooms.inspections.panel');
 Route::get('/habitaciones/{room}/inspeccion', [RoomInspectionController::class, 'create'])->name('rooms.inspections.create');
 Route::post('/habitaciones/{room}/inspeccion', [RoomInspectionController::class, 'store'])->name('rooms.inspections.store');

@@ -6,6 +6,7 @@ use App\Models\Booking;
 use App\Models\Coupon;
 use App\Models\OperationalSetting;
 use App\Models\Room;
+use App\Models\RoomCategory;
 use App\Models\Staff;
 use App\Services\Booking\RoomBoardService;
 use App\Services\Pricing\RateRuleResolver;
@@ -35,6 +36,15 @@ class RoomBoardController extends Controller
         if (! $alaSurEnabled) {
             $disponibles = $disponibles->reject(fn (array $e) => $e['room']->wing === 'sur');
         }
+
+        // Mismo criterio que el Ala Sur pero por categoría: una categoría
+        // apagada solo saca sus habitaciones libres de "Disponibles", no
+        // toca lo que ya está ocupado, por llegar, en aseo o fuera de
+        // servicio en esa categoría.
+        $categories = RoomCategory::orderBy('display_order')->get();
+        $disabledCategoryIds = $categories->where('is_active', false)->pluck('id');
+        $hiddenCategoryCount = $disponibles->filter(fn (array $e) => $disabledCategoryIds->contains($e['room']->room_category_id))->count();
+        $disponibles = $disponibles->reject(fn (array $e) => $disabledCategoryIds->contains($e['room']->room_category_id));
 
         $grouped = [
             'ocupadas' => $entries->filter(
@@ -67,6 +77,8 @@ class RoomBoardController extends Controller
             'dailySummary' => $this->dailySummary(),
             'alaSurEnabled' => $alaSurEnabled,
             'hiddenSurCount' => $hiddenSurCount,
+            'categories' => $categories,
+            'hiddenCategoryCount' => $hiddenCategoryCount,
         ]);
     }
 
@@ -83,6 +95,20 @@ class RoomBoardController extends Controller
         return redirect()->route('rooms.board')->with('status', $setting->ala_sur_enabled
             ? 'Ala Sur habilitada — vuelve a ofrecerse en el tablero.'
             : 'Ala Sur deshabilitada — sus habitaciones libres ya no se ofrecen.');
+    }
+
+    /**
+     * Espejo de toggleAlaSur pero por categoría (mismo campo que ya
+     * controla si la categoría aparece en el catálogo público -- una
+     * categoría "inactiva" lo es en todos lados, no solo en el tablero).
+     */
+    public function toggleCategory(RoomCategory $category): RedirectResponse
+    {
+        $category->update(['is_active' => ! $category->is_active]);
+
+        return redirect()->route('rooms.board')->with('status', $category->is_active
+            ? "{$category->name} habilitada — vuelve a ofrecerse en el tablero y el catálogo."
+            : "{$category->name} deshabilitada — sus habitaciones libres ya no se ofrecen.");
     }
 
     /**

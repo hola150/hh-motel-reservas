@@ -67,6 +67,16 @@ class Room extends Model
     }
 
     /**
+     * Espejo de scopeWingEnabled pero por categoría: cuando se apaga una
+     * categoría entera desde el tablero (RoomCategory::is_active = false),
+     * sus habitaciones dejan de ofrecerse para reservas nuevas.
+     */
+    public function scopeCategoryEnabled($query)
+    {
+        return $query->whereHas('category', fn ($q) => $q->where('is_active', true));
+    }
+
+    /**
      * Reserva vigente en este instante (para calcular ocupación en el tablero).
      */
     public function currentBooking(): ?Booking
