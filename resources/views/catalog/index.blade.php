@@ -23,11 +23,11 @@
         a { color: inherit; }
         .wrap { max-width: 980px; margin: 0 auto; padding: 0 20px 60px; }
 
-        header.hero { text-align:center; padding: 34px 20px 32px; background:#111; border-radius:0 0 18px 18px; margin-bottom: 36px; box-shadow:0 5px 18px #0002; }
-        header.hero .brand { display:flex; justify-content:center; background:#111; border-radius:12px; width:min(340px, 86vw); margin:0 auto 18px; padding:12px 18px; }
-        header.hero .brand img { display:block; width:min(300px, 78vw); height:auto; max-height:92px; object-fit:contain; }
-        header.hero h1 { color:#fff; font-size: 26px; margin: 0 0 10px; letter-spacing: -.01em; }
-        header.hero p { color:#c9cbd0; font-size: 14.5px; max-width: 520px; margin: 0 auto 22px; }
+        header.hero { text-align:center; padding: 18px 16px 20px; background:#111; border-radius:0 0 18px 18px; margin-bottom: 26px; box-shadow:0 5px 18px #0002; overflow:hidden; }
+        header.hero .brand { display:flex; justify-content:center; width:100%; margin:0 auto 10px; padding:0; }
+        header.hero .brand img { display:block; width:min(250px, 72vw); max-width:100%; height:auto; max-height:76px; object-fit:contain; }
+        header.hero h1 { color:#fff; font-size: 24px; margin: 0 0 7px; letter-spacing: -.03em; }
+        header.hero p { color:#c9cbd0; font-size: 13.5px; max-width: 520px; margin: 0 auto 16px; }
         .hero-btn-row { display:flex; align-items:center; justify-content:center; gap:18px; flex-wrap:wrap; }
         a.hero-btn { display:inline-block; color:#555960; text-decoration:none; padding: 8px 2px; font-weight:700; font-size:14px; }
         a.hero-btn:hover { color:#1a1a1a; text-decoration:underline; text-underline-offset:4px; }
@@ -56,9 +56,15 @@
         .cat-max h2 { color:#f7b06a; }
         .cat-new-lite h2 { color:#f0d98a; }
 
-        .cat-gallery { display:grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: repeat(2, minmax(92px, 1fr)); gap:3px; background:#202122; padding:3px; }
+        .cat-gallery { display:grid; gap:3px; background:#202122; padding:3px; }
+        .cat-gallery.gallery-4 { grid-template-columns:2fr 1fr 1fr; grid-template-rows:repeat(2, minmax(92px, 1fr)); }
+        .cat-gallery.gallery-3 { grid-template-columns:2fr 1fr; grid-template-rows:repeat(2, minmax(92px, 1fr)); }
+        .cat-gallery.gallery-2 { grid-template-columns:repeat(2, 1fr); grid-template-rows:minmax(150px, 1fr); }
+        .cat-gallery.gallery-1 { grid-template-columns:1fr; grid-template-rows:minmax(220px, 1fr); }
         .cat-gallery a { display:block; aspect-ratio:auto; min-height:92px; overflow:hidden; position:relative; }
         .cat-gallery a:first-child { grid-row:1 / span 2; min-height:190px; }
+        .cat-gallery.gallery-4 a:nth-child(4) { grid-column:2 / span 2; }
+        .cat-gallery.gallery-3 a:nth-child(3) { grid-column:2; }
         .cat-gallery a::after { content:'Ver foto'; position:absolute; right:8px; bottom:8px; background:#111c; color:#fff; padding:4px 8px; border-radius:12px; font-size:10px; opacity:0; transition:opacity .2s ease; }
         .cat-gallery a:hover::after, .cat-gallery a:focus-visible::after { opacity:1; }
         .cat-gallery img { width:100%; height:100%; object-fit:cover; display:block; transition: transform .2s ease; }
@@ -96,10 +102,12 @@
         footer.catalog-footer { text-align:center; color:#8a8d93; font-size:12.5px; padding: 20px 0 10px; }
 
         @media (max-width: 560px) {
-            .cat-gallery { grid-template-columns: 2fr 1fr; grid-template-rows: repeat(2, minmax(84px, 1fr)); }
+            .cat-gallery.gallery-4, .cat-gallery.gallery-3 { grid-template-rows:repeat(2, minmax(84px, 1fr)); }
+            .cat-gallery.gallery-2 { grid-template-rows:minmax(120px, 1fr); }
+            .cat-gallery.gallery-1 { grid-template-rows:minmax(180px, 1fr); }
             .cat-gallery a:first-child { min-height:172px; }
             .cat-gallery a { min-height:84px; }
-            header.hero { padding: 32px 16px 26px; }
+            header.hero { padding: 16px 12px 18px; }
             header.hero h1 { font-size: 21px; }
         }
     </style>
@@ -109,7 +117,7 @@
         <header class="hero">
             <div class="brand"><img src="https://assets.cdn.filesafe.space/ksYYfSiY8nP4YFvkrJFJ/media/6aa2d058d1b3cd745b958c57.png" alt="HH Motel Santiago Playrooms"></div>
             <h1>Nuestras habitaciones</h1>
-            <p>Elegí la que más te acomode — reservá online al toque o escribinos por WhatsApp.</p>
+            <p>Elige la que más te guste — reserva online o escríbenos por WhatsApp.</p>
             <div class="hero-btn-row">
                 <a class="hero-btn primary" href="{{ route('catalog.reserve') }}">Reservar online →</a>
                 <a class="hero-btn secondary" href="{{ $whatsappUrl }}" target="_blank" rel="noopener">Escribir por WhatsApp</a>
@@ -120,7 +128,7 @@
             @php [$category, $photos, $videos, $prices, $catWhatsapp] = [$entry['category'], $entry['photos'], $entry['videos'], $entry['prices'], $entry['whatsappUrl']]; @endphp
             <section class="cat-card cat-{{ Str::slug($category->name) }}">
                 @if ($photos->isNotEmpty())
-                    <div class="cat-gallery">
+                    <div class="cat-gallery gallery-{{ min($photos->count(), 4) }}">
                         @foreach ($photos->take(4) as $url)
                             <a href="{{ $url }}" class="photo-trigger" data-photo="{{ $url }}" aria-label="Ver foto {{ $category->name }}"><img src="{{ $url }}" alt="Foto {{ $category->name }}" loading="lazy"></a>
                         @endforeach

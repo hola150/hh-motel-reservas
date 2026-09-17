@@ -45,7 +45,7 @@
         <a class="back" href="{{ route('catalog.index') }}">← Volver al catálogo</a>
         <div class="brand">HH MOTEL</div>
         <h1>Reservá tu Playroom</h1>
-        <p class="sub">Elegí tu fecha y horario. Te mostraremos una opción disponible y recibirás la confirmación al finalizar.</p>
+        <p class="sub">Elige tu fecha y horario. Te mostraremos una opción disponible y recibirás la confirmación al finalizar.</p>
 
         @if ($errors->any())
             <div class="errors">
@@ -66,7 +66,7 @@
                 <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
             </div>
 
-            <label for="room_category_id">Elegí tu Playroom</label>
+            <label for="room_category_id">Elige tu Playroom</label>
             <select id="room_category_id" name="room_category_id" required onchange="hhUpdateDurations()">
                 @foreach ($categories as $cat)
                     <option value="{{ $cat->id }}" @selected(old('room_category_id', $selectedCategoryId) == $cat->id)>{{ $cat->name }}</option>
