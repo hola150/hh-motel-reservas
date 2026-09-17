@@ -27,11 +27,12 @@
         header.hero .brand { font-size: 15px; font-weight: 800; letter-spacing: .1em; color: var(--hh-accent); margin-bottom: 10px; }
         header.hero h1 { font-size: 26px; margin: 0 0 10px; letter-spacing: -.01em; }
         header.hero p { color:#62656c; font-size: 14.5px; max-width: 520px; margin: 0 auto 22px; }
-        .hero-btn-row { display:inline-flex; gap:10px; flex-wrap:wrap; justify-content:center; }
-        a.hero-btn { display:inline-block; background:#fff; border:1px solid #d1d3d8; color:#42464e; text-decoration:none; padding: 13px 26px; border-radius: 30px; font-weight:700; font-size:14.5px; }
-        a.hero-btn:hover { border-color:#25d366; color:#1a1a1a; }
-        a.hero-btn.primary { background:var(--hh-accent); border-color:var(--hh-accent); color:#21170e; }
-        a.hero-btn.primary:hover { background:var(--hh-accent-hover); }
+        .hero-btn-row { display:flex; align-items:center; justify-content:center; gap:18px; flex-wrap:wrap; }
+        a.hero-btn { display:inline-block; color:#555960; text-decoration:none; padding: 8px 2px; font-weight:700; font-size:14px; }
+        a.hero-btn:hover { color:#1a1a1a; text-decoration:underline; text-underline-offset:4px; }
+        a.hero-btn.primary { background:var(--hh-accent); color:#21170e; padding:14px 30px; border-radius:10px; box-shadow:0 5px 12px #ff79183d; }
+        a.hero-btn.primary:hover { background:var(--hh-accent-hover); text-decoration:none; }
+        a.hero-btn.secondary::before { content:'◉'; color:#25b95b; margin-right:6px; font-size:11px; }
 
         /* Mismo lenguaje visual que las tarjetas del tablero interno (rooms/board.blade.php):
            superficie oscura, borde izquierdo de color por categoría, elevación al hover. */
@@ -54,10 +55,17 @@
         .cat-max h2 { color:#f7b06a; }
         .cat-new-lite h2 { color:#f0d98a; }
 
-        .cat-gallery { display:grid; grid-template-columns: repeat(4, 1fr); gap:2px; background:#202122; }
-        .cat-gallery a { display:block; aspect-ratio: 4/3; overflow:hidden; }
+        .cat-gallery { display:grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: repeat(2, minmax(92px, 1fr)); gap:3px; background:#202122; padding:3px; }
+        .cat-gallery a { display:block; aspect-ratio:auto; min-height:92px; overflow:hidden; position:relative; }
+        .cat-gallery a:first-child { grid-row:1 / span 2; min-height:190px; }
+        .cat-gallery a::after { content:'Ver foto'; position:absolute; right:8px; bottom:8px; background:#111c; color:#fff; padding:4px 8px; border-radius:12px; font-size:10px; opacity:0; transition:opacity .2s ease; }
+        .cat-gallery a:hover::after, .cat-gallery a:focus-visible::after { opacity:1; }
         .cat-gallery img { width:100%; height:100%; object-fit:cover; display:block; transition: transform .2s ease; }
         .cat-gallery a:hover img { transform: scale(1.05); }
+        .photo-modal { display:none; position:fixed; inset:0; z-index:20; background:rgba(10,10,10,.92); align-items:center; justify-content:center; padding:24px; }
+        .photo-modal.is-open { display:flex; }
+        .photo-modal img { max-width:min(920px, 96vw); max-height:86vh; object-fit:contain; border-radius:10px; box-shadow:0 12px 40px #000; }
+        .photo-close { position:fixed; top:18px; right:18px; border:1px solid #ffffff66; background:#222; color:#fff; border-radius:24px; padding:10px 16px; font-weight:700; cursor:pointer; }
         .cat-gallery.empty { aspect-ratio: 16/5; display:flex; align-items:center; justify-content:center; color:#8a8c90; font-size:13px; grid-template-columns:none; }
 
         .cat-body { padding: 22px 24px 26px; }
@@ -87,7 +95,9 @@
         footer.catalog-footer { text-align:center; color:#8a8d93; font-size:12.5px; padding: 20px 0 10px; }
 
         @media (max-width: 560px) {
-            .cat-gallery { grid-template-columns: repeat(2, 1fr); }
+            .cat-gallery { grid-template-columns: 2fr 1fr; grid-template-rows: repeat(2, minmax(84px, 1fr)); }
+            .cat-gallery a:first-child { min-height:172px; }
+            .cat-gallery a { min-height:84px; }
             header.hero { padding: 32px 16px 26px; }
             header.hero h1 { font-size: 21px; }
         }
@@ -101,7 +111,7 @@
             <p>Elegí la que más te acomode — reservá online al toque o escribinos por WhatsApp.</p>
             <div class="hero-btn-row">
                 <a class="hero-btn primary" href="{{ route('catalog.reserve') }}">Reservar online →</a>
-                <a class="hero-btn" href="{{ $whatsappUrl }}" target="_blank" rel="noopener">Por WhatsApp →</a>
+                <a class="hero-btn secondary" href="{{ $whatsappUrl }}" target="_blank" rel="noopener">Escribir por WhatsApp</a>
             </div>
         </header>
 
@@ -111,7 +121,7 @@
                 @if ($photos->isNotEmpty())
                     <div class="cat-gallery">
                         @foreach ($photos->take(4) as $url)
-                            <a href="{{ $url }}" target="_blank" rel="noopener"><img src="{{ $url }}" alt="Foto {{ $category->name }}" loading="lazy"></a>
+                            <a href="{{ $url }}" class="photo-trigger" data-photo="{{ $url }}" aria-label="Ver foto {{ $category->name }}"><img src="{{ $url }}" alt="Foto {{ $category->name }}" loading="lazy"></a>
                         @endforeach
                     </div>
                 @else
@@ -175,5 +185,22 @@
 
         <footer class="catalog-footer">HH Motel</footer>
     </div>
+    <div class="photo-modal" id="photo-modal" role="dialog" aria-modal="true" aria-label="Vista ampliada de la foto">
+        <button class="photo-close" type="button" id="photo-close">Cerrar ✕</button>
+        <img id="photo-modal-image" src="" alt="Foto ampliada">
+    </div>
+    <script>
+        const photoModal = document.getElementById('photo-modal');
+        const photoModalImage = document.getElementById('photo-modal-image');
+        function closePhoto() { photoModal.classList.remove('is-open'); photoModalImage.src = ''; }
+        document.querySelectorAll('.photo-trigger').forEach((link) => link.addEventListener('click', (event) => {
+            event.preventDefault();
+            photoModalImage.src = link.dataset.photo;
+            photoModal.classList.add('is-open');
+        }));
+        document.getElementById('photo-close').addEventListener('click', closePhoto);
+        photoModal.addEventListener('click', (event) => { if (event.target === photoModal) closePhoto(); });
+        document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closePhoto(); });
+    </script>
 </body>
 </html>
