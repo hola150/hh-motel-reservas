@@ -23,10 +23,11 @@
         a { color: inherit; }
         .wrap { max-width: 980px; margin: 0 auto; padding: 0 20px 60px; }
 
-        header.hero { text-align:center; padding: 44px 20px 32px; border-bottom: 1px solid #e2e2e0; margin-bottom: 36px; }
-        header.hero .brand { font-size: 15px; font-weight: 800; letter-spacing: .1em; color: var(--hh-accent); margin-bottom: 10px; }
-        header.hero h1 { font-size: 26px; margin: 0 0 10px; letter-spacing: -.01em; }
-        header.hero p { color:#62656c; font-size: 14.5px; max-width: 520px; margin: 0 auto 22px; }
+        header.hero { text-align:center; padding: 34px 20px 32px; background:#111; border-radius:0 0 18px 18px; margin-bottom: 36px; box-shadow:0 5px 18px #0002; }
+        header.hero .brand { display:flex; justify-content:center; background:#111; border-radius:12px; width:min(340px, 86vw); margin:0 auto 18px; padding:12px 18px; }
+        header.hero .brand img { display:block; width:min(300px, 78vw); height:auto; max-height:92px; object-fit:contain; }
+        header.hero h1 { color:#fff; font-size: 26px; margin: 0 0 10px; letter-spacing: -.01em; }
+        header.hero p { color:#c9cbd0; font-size: 14.5px; max-width: 520px; margin: 0 auto 22px; }
         .hero-btn-row { display:flex; align-items:center; justify-content:center; gap:18px; flex-wrap:wrap; }
         a.hero-btn { display:inline-block; color:#555960; text-decoration:none; padding: 8px 2px; font-weight:700; font-size:14px; }
         a.hero-btn:hover { color:#1a1a1a; text-decoration:underline; text-underline-offset:4px; }
@@ -106,7 +107,7 @@
 <body>
     <div class="wrap">
         <header class="hero">
-            <div class="brand">HH MOTEL</div>
+            <div class="brand"><img src="https://assets.cdn.filesafe.space/ksYYfSiY8nP4YFvkrJFJ/media/6aa2d058d1b3cd745b958c57.png" alt="HH Motel Santiago Playrooms"></div>
             <h1>Nuestras habitaciones</h1>
             <p>Elegí la que más te acomode — reservá online al toque o escribinos por WhatsApp.</p>
             <div class="hero-btn-row">
