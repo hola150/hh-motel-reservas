@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="color-scheme" content="light">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Habitaciones — HH Motel</title>
+    <title>Playrooms — HH Motel</title>
     <style>
         /* Mismos tokens que public/css/hh-theme.css (el tema real del tablero
            interno): lienzo gris claro, tarjetas en superficie oscura, acento
@@ -116,7 +116,7 @@
     <div class="wrap">
         <header class="hero">
             <div class="brand"><img src="https://assets.cdn.filesafe.space/ksYYfSiY8nP4YFvkrJFJ/media/6aab44cf9f8b31b6ab530587.png" alt="HH Motel Santiago Playrooms"></div>
-            <h1>Nuestras habitaciones</h1>
+            <h1>Nuestras Playrooms</h1>
             <p>Elige la que más te guste — reserva online o escríbenos por WhatsApp.</p>
             <div class="hero-btn-row">
                 <a class="hero-btn primary" href="{{ route('catalog.reserve') }}">Reservar online →</a>
