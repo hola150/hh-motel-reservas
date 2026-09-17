@@ -282,17 +282,8 @@
                     @endforeach
                 </div>
 
-                <div class="row">
-                    <div>
-                        <label>Personas</label>
-                        <input type="number" name="guests_count" min="1" max="10" value="{{ old('guests_count', 2) }}" required>
-                    </div>
-                    <div>
-                        <label>Abono (opcional, en CLP)</label>
-                        <input type="number" name="deposit_amount" min="0" value="{{ old('deposit_amount', 0) }}">
-                        <div class="hint" style="margin-top:4px;">Es solo el monto sugerido — el método de pago (efectivo, transferencia, etc.) se elige en el siguiente paso, al registrar el pago.</div>
-                    </div>
-                </div>
+                <label>Personas</label>
+                <input type="number" name="guests_count" min="1" max="10" value="{{ old('guests_count', 2) }}" required>
             </div>
 
             <div class="panel">
@@ -731,8 +722,6 @@
             if (codeEl && codeEl.value) params.set('coupon_code', codeEl.value);
             const birthEl = document.getElementById('customer-birth-date');
             if (birthEl && birthEl.value) params.set('birth_date', birthEl.value);
-            const depEl = document.querySelector('input[name="deposit_amount"]');
-            const deposit = depEl && depEl.value ? Number(depEl.value) : 0;
             try {
                 const r = await fetch('{{ route('reservations.price') }}?' + params.toString(), { headers: { 'Accept': 'application/json' } });
                 if (!r.ok) { box.className = 'price-box'; box.innerHTML = '<div class="p-wait">—</div>'; return; }
@@ -750,14 +739,10 @@
 
                 let rows = '<div class="p-sum"><span>Precio habitación</span><span>' + fmt(d.price_original) + '</span></div>';
                 if (applied) {
-                    const tag = applied.kind === 'offer' ? '🏷️ Oferta: ' + applied.label : '🎫 Código: ' + applied.label;
+                    const tag = applied.kind === 'offer' ? 'Oferta: ' + applied.label : 'Código: ' + applied.label;
                     rows += '<div class="p-sum disc"><span>' + tag + '</span><span>−' + fmt(applied.discount).slice(1) + '</span></div>';
                 }
                 rows += '<div class="p-sum total"><span>Total a pagar</span><span class="' + (hasDiscount ? 'offer' : '') + '">' + fmt(finalPrice) + '</span></div>';
-                if (deposit > 0) {
-                    rows += '<div class="p-sum sub"><span>Abono</span><span>' + fmt(deposit) + '</span></div>';
-                    rows += '<div class="p-sum sub"><span>Saldo</span><span>' + fmt(Math.max(0, finalPrice - deposit)) + '</span></div>';
-                }
                 let note = '';
                 if (d.code_blocked) {
                     note = '<div class="p-note">El código no aplica — esta habitación ya está en oferta.</div>';
@@ -872,7 +857,7 @@
             const el = document.getElementById(id);
             if (el) el.addEventListener('change', hhQuotePrice);
         });
-        document.querySelectorAll('input[name="guests_count"], input[name="deposit_amount"]').forEach(el => {
+        document.querySelectorAll('input[name="guests_count"]').forEach(el => {
             el.addEventListener('input', hhQuotePrice);
         });
         hhQuotePrice();
