@@ -33,6 +33,14 @@
         .time-parts { display:grid; grid-template-columns:1fr 1fr 1fr; gap:7px; }
         input:focus, select:focus { outline:none; border-color:var(--hh-accent); box-shadow: 0 0 0 3px #ff791833; }
         .row2 { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+        /* Fecha + Hora compartiendo fila deja los 3 selectores de hora con
+           tan poco ancho en el celular que el texto ("AM/PM") se corta
+           ("AI") -- se apilan uno debajo del otro para que la hora tenga
+           todo el ancho de la tarjeta. Tiene que ir DESPUÉS de ".row2" acá
+           arriba -- misma especificidad, así que gana el que aparece último. */
+        @media (max-width: 640px) {
+            .row2-datetime { grid-template-columns: 1fr; }
+        }
         .honey-field { position:absolute; left:-9999px; top:-9999px; }
         button.submit { width:100%; margin-top:26px; background:var(--hh-accent); color:#21170e; border:none; padding:14px; border-radius:9px; font-size:15px; font-weight:750; cursor:pointer; }
         button.submit:hover { background:var(--hh-accent-hover); }
@@ -86,7 +94,7 @@
                 @endforeach
             </select>
 
-            <div class="row2">
+            <div class="row2 row2-datetime">
                 <div>
                     <label for="date">Fecha</label>
                     <input type="date" id="date" name="date" min="{{ now()->toDateString() }}" value="{{ old('date', now()->toDateString()) }}" required>
