@@ -79,10 +79,10 @@
         .sales-tip { display:flex; gap:8px; align-items:flex-start; background:#242527; border:1px solid #505257; color:#f0d18a; border-radius:9px; padding:9px 11px; margin:10px 0 14px; font-size:12px; line-height:1.35; }
         .sales-tip::before { content:'✦'; color:var(--hh-accent); font-weight:800; }
 
-        .coupons-section { margin:0 0 26px; }
-        .coupons-section h2 { color:#fff; font-size:16px; margin:0 0 10px; }
+        .coupons-section { background:#191a1c; border:1px solid #3a5a72; border-radius:14px; padding:16px; margin:0 0 26px; }
+        .coupons-section h2 { color:#9edaff; font-size:16px; margin:0 0 10px; }
         .coupons-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; }
-        .coupon-card { display:block; background:#191a1c; border:1px solid #3a5a72; border-radius:12px; padding:14px 16px; text-decoration:none; color:inherit; -webkit-tap-highlight-color:transparent; }
+        .coupon-card { display:block; background:#111214; border:1px solid #3a5a72; border-radius:12px; padding:14px 16px; text-decoration:none; color:inherit; -webkit-tap-highlight-color:transparent; }
         .coupon-card:hover, .coupon-card:active, .coupon-card:focus-visible { border-color:#9edaff; }
         .coupon-benefit { color:#9edaff; font-size:20px; font-weight:800; }
         .coupon-name { color:#fff; font-size:13.5px; font-weight:700; margin-top:2px; }
