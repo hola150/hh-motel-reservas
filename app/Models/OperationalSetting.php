@@ -8,16 +8,21 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Fila única (id=1) con interruptores operativos globales del motel.
  */
-#[Fillable(['ala_sur_enabled', 'piso_1_enabled', 'piso_2_enabled', 'piso_3_enabled'])]
+#[Fillable([
+    'piso_1_enabled',
+    'piso_2_norte_enabled', 'piso_2_sur_enabled',
+    'piso_3_norte_enabled', 'piso_3_sur_enabled',
+])]
 class OperationalSetting extends Model
 {
     protected function casts(): array
     {
         return [
-            'ala_sur_enabled' => 'boolean',
             'piso_1_enabled' => 'boolean',
-            'piso_2_enabled' => 'boolean',
-            'piso_3_enabled' => 'boolean',
+            'piso_2_norte_enabled' => 'boolean',
+            'piso_2_sur_enabled' => 'boolean',
+            'piso_3_norte_enabled' => 'boolean',
+            'piso_3_sur_enabled' => 'boolean',
         ];
     }
 
@@ -27,15 +32,26 @@ class OperationalSetting extends Model
     }
 
     /**
-     * Pisos actualmente deshabilitados (1, 2 y/o 3) según los interruptores.
+     * Combinaciones piso+ala actualmente deshabilitadas. El piso 1 (GO
+     * 101-103) no tiene ala física -- wing null ahí, así que va con
+     * wing => null. Se usa tanto para el scope de Eloquent (asignación de
+     * habitación al crear una reserva) como para el filtro en memoria del
+     * tablero -- misma fuente de verdad en los dos lugares.
      *
-     * @return array<int, int>
+     * @return array<int, array{floor: int, wing: ?string}>
      */
-    public function disabledFloors(): array
+    public function disabledFloorWings(): array
     {
-        return collect([1 => $this->piso_1_enabled, 2 => $this->piso_2_enabled, 3 => $this->piso_3_enabled])
-            ->reject(fn (bool $enabled) => $enabled)
-            ->keys()
+        return collect([
+            ['floor' => 1, 'wing' => null, 'enabled' => $this->piso_1_enabled],
+            ['floor' => 2, 'wing' => 'norte', 'enabled' => $this->piso_2_norte_enabled],
+            ['floor' => 2, 'wing' => 'sur', 'enabled' => $this->piso_2_sur_enabled],
+            ['floor' => 3, 'wing' => 'norte', 'enabled' => $this->piso_3_norte_enabled],
+            ['floor' => 3, 'wing' => 'sur', 'enabled' => $this->piso_3_sur_enabled],
+        ])
+            ->reject(fn (array $row) => $row['enabled'])
+            ->map(fn (array $row) => ['floor' => $row['floor'], 'wing' => $row['wing']])
+            ->values()
             ->all();
     }
 }

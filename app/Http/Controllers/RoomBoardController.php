@@ -24,20 +24,18 @@ class RoomBoardController extends Controller
 
         $isProxima = fn (array $e) => $e['status']['occupancy'] === 'libre' && $e['status']['imminent'];
 
-        // Los interruptores de Ala Sur / categoría / piso viven en el panel
-        // de administración (Categorías) -- acá solo se aplica su efecto,
+        // Los interruptores de piso+ala / categoría viven en el panel de
+        // administración (Categorías) -- acá solo se aplica su efecto,
         // sacando de "Disponibles" lo que corresponda. No es responsabilidad
         // de quien está en el tablero prender o apagar nada de esto.
         $setting = OperationalSetting::current();
         $disabledCategoryIds = RoomCategory::where('is_active', false)->pluck('id');
-        $disabledFloors = $setting->disabledFloors();
 
         $disponibles = $entries->filter(
             fn (array $e) => $e['room']->operational_status === 'activa' && $e['status']['occupancy'] === 'libre' && ! $isProxima($e)
         )->reject(
-            fn (array $e) => (! $setting->ala_sur_enabled && $e['room']->wing === 'sur')
-                || $disabledCategoryIds->contains($e['room']->room_category_id)
-                || in_array($e['room']->floor, $disabledFloors, true)
+            fn (array $e) => $disabledCategoryIds->contains($e['room']->room_category_id)
+                || ! $e['room']->isFloorWingEnabled($setting)
         );
 
         $grouped = [

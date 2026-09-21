@@ -57,19 +57,9 @@ class Room extends Model
     }
 
     /**
-     * Cuando el Ala Sur está apagada (ver OperationalSetting), sus
-     * habitaciones dejan de ofrecerse para reservas nuevas. Las de "siempre
-     * activas" (wing null) y Ala Norte nunca se filtran acá.
-     */
-    public function scopeWingEnabled($query, bool $alaSurEnabled)
-    {
-        return $alaSurEnabled ? $query : $query->where(fn ($q) => $q->whereNull('wing')->orWhere('wing', '!=', 'sur'));
-    }
-
-    /**
-     * Espejo de scopeWingEnabled pero por categoría: cuando se apaga una
-     * categoría entera desde el tablero (RoomCategory::is_active = false),
-     * sus habitaciones dejan de ofrecerse para reservas nuevas.
+     * Espejo de scopeFloorWingEnabled pero por categoría: cuando se apaga
+     * una categoría entera desde el tablero (RoomCategory::is_active =
+     * false), sus habitaciones dejan de ofrecerse para reservas nuevas.
      */
     public function scopeCategoryEnabled($query)
     {
@@ -91,20 +81,44 @@ class Room extends Model
     }
 
     /**
-     * Espejo de scopeWingEnabled/scopeCategoryEnabled pero por piso (1/2/3,
-     * según OperationalSetting::disabledFloors()).
+     * El motel prioriza el Ala Norte y va abriendo el Ala Sur piso por piso
+     * según la capacidad que necesite (ver OperationalSetting) -- cuando un
+     * piso+ala está apagado, sus habitaciones dejan de ofrecerse para
+     * reservas nuevas. Se usa tanto acá (query SQL, para asignar habitación
+     * al crear una reserva) como en isFloorWingEnabled() (en memoria, para
+     * el tablero) -- misma fuente de verdad (OperationalSetting::disabledFloorWings()).
      */
-    public function scopeFloorEnabled($query, array $disabledFloors)
+    public function scopeFloorWingEnabled($query, OperationalSetting $setting)
     {
-        if (empty($disabledFloors)) {
+        $disabled = $setting->disabledFloorWings();
+        if (empty($disabled)) {
             return $query;
         }
 
-        return $query->where(function ($q) use ($disabledFloors) {
-            foreach ($disabledFloors as $floor) {
-                $q->whereRaw("NOT (name ~ '\\d{3}$' AND (right(name, 3))::int BETWEEN ? AND ?)", [$floor * 100, $floor * 100 + 99]);
+        return $query->where(function ($q) use ($disabled) {
+            foreach ($disabled as $row) {
+                $q->whereRaw(
+                    "NOT (name ~ '\\d{3}$' AND (right(name, 3))::int BETWEEN ? AND ? AND wing IS NOT DISTINCT FROM ?)",
+                    [$row['floor'] * 100, $row['floor'] * 100 + 99, $row['wing']]
+                );
             }
         });
+    }
+
+    /**
+     * Igual que scopeFloorWingEnabled pero para una habitación ya cargada
+     * en memoria (usado por el tablero, que arma "Disponibles" filtrando
+     * una colección en vez de una query).
+     */
+    public function isFloorWingEnabled(OperationalSetting $setting): bool
+    {
+        foreach ($setting->disabledFloorWings() as $row) {
+            if ($this->floor === $row['floor'] && $this->wing === $row['wing']) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

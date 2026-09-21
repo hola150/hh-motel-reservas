@@ -111,8 +111,9 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/categorias/{category}/editar', [RoomCategoryController::class, 'edit'])->name('categories.edit');
     Route::put('/categorias/{category}', [RoomCategoryController::class, 'update'])->name('categories.update');
     Route::post('/categorias/{category}/toggle', [RoomCategoryController::class, 'toggleCategory'])->name('categories.toggle');
-    Route::post('/ala-sur/toggle', [RoomCategoryController::class, 'toggleAlaSur'])->name('ala_sur.toggle');
-    Route::post('/pisos/{floor}/toggle', [RoomCategoryController::class, 'toggleFloor'])->name('floors.toggle');
+    Route::post('/pisos/{field}/toggle', [RoomCategoryController::class, 'toggleFloor'])
+        ->whereIn('field', ['piso_1_enabled', 'piso_2_norte_enabled', 'piso_2_sur_enabled', 'piso_3_norte_enabled', 'piso_3_sur_enabled'])
+        ->name('floors.toggle');
 
     Route::get('/habitaciones', [AdminRoomController::class, 'index'])->name('rooms.index');
     Route::get('/habitaciones/crear', [AdminRoomController::class, 'create'])->name('rooms.create');

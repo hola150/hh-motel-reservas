@@ -74,8 +74,7 @@ class PublicBookingController extends Controller
         $operationalSetting = \App\Models\OperationalSetting::current();
         $room = Room::where('room_category_id', $validated['room_category_id'])
             ->where('operational_status', 'activa')
-            ->wingEnabled($operationalSetting->ala_sur_enabled)
-            ->floorEnabled($operationalSetting->disabledFloors())
+            ->floorWingEnabled($operationalSetting)
             ->orderBy('name')
             ->get()
             ->first(fn (Room $r) => $availability->isAvailable($r, $startsAt, $endsAt));

@@ -21,23 +21,7 @@ class RoomCategoryController extends Controller
     }
 
     /**
-     * Prende/apaga la oferta del Ala Sur -- deja de ofrecerse para reservas
-     * nuevas sin tocar las habitaciones que ya estan ocupadas, por llegar,
-     * en aseo o fuera de servicio ahi. Antes vivia en el tablero; se mueve
-     * acá para que no sea responsabilidad de quien está en recepción.
-     */
-    public function toggleAlaSur(): RedirectResponse
-    {
-        $setting = OperationalSetting::current();
-        $setting->update(['ala_sur_enabled' => ! $setting->ala_sur_enabled]);
-
-        return redirect()->route('admin.categories.index')->with('status', $setting->ala_sur_enabled
-            ? 'Ala Sur habilitada — vuelve a ofrecerse en el tablero.'
-            : 'Ala Sur deshabilitada — sus habitaciones libres ya no se ofrecen.');
-    }
-
-    /**
-     * Espejo de toggleAlaSur pero por categoría (mismo campo que ya
+     * Espejo de toggleFloor pero por categoría (mismo campo que ya
      * controla si la categoría aparece en el catálogo público -- una
      * categoría "inactiva" lo es en todos lados, no solo en el tablero).
      */
@@ -51,20 +35,30 @@ class RoomCategoryController extends Controller
     }
 
     /**
-     * Espejo de toggleAlaSur pero por piso (1/2/3, según los últimos 3
-     * dígitos del nombre de la habitación).
+     * Prende/apaga la oferta de un piso, o de un piso+ala en el caso de los
+     * pisos 2 y 3 (el motel prioriza el Ala Norte y abre el Ala Sur piso
+     * por piso según la capacidad que necesite) -- deja de ofrecerse para
+     * reservas nuevas sin tocar lo que ya está ocupado, por llegar, en aseo
+     * o fuera de servicio ahí. $field llega ya validado por la ruta contra
+     * esta misma lista, así que el whitelist de acá es defensa en profundidad.
      */
-    public function toggleFloor(int $floor): RedirectResponse
+    public function toggleFloor(string $field): RedirectResponse
     {
-        abort_unless(in_array($floor, [1, 2, 3], true), 404);
+        $labels = [
+            'piso_1_enabled' => 'Piso 1',
+            'piso_2_norte_enabled' => 'Piso 2 Norte',
+            'piso_2_sur_enabled' => 'Piso 2 Sur',
+            'piso_3_norte_enabled' => 'Piso 3 Norte',
+            'piso_3_sur_enabled' => 'Piso 3 Sur',
+        ];
+        abort_unless(isset($labels[$field]), 404);
 
         $setting = OperationalSetting::current();
-        $field = "piso_{$floor}_enabled";
         $setting->update([$field => ! $setting->$field]);
 
         return redirect()->route('admin.categories.index')->with('status', $setting->$field
-            ? "Piso {$floor} habilitado — vuelve a ofrecerse en el tablero."
-            : "Piso {$floor} deshabilitado — sus habitaciones libres ya no se ofrecen.");
+            ? "{$labels[$field]} habilitado — vuelve a ofrecerse en el tablero."
+            : "{$labels[$field]} deshabilitado — sus habitaciones libres ya no se ofrecen.");
     }
 
     public function create(): View
