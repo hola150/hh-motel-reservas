@@ -45,7 +45,10 @@
             <label for="item-name">Nombre del elemento</label>
             <input id="item-name" name="name" maxlength="100" required placeholder="Ej. Sillón tántrico">
             <label for="item-icon">Ícono</label>
-            <select id="item-icon" name="icon"><option value="🛏️">🛏️ Cama</option><option value="🪑">🪑 Sillón</option><option value="🪞">🪞 Espejo</option><option value="🚿">🚿 Ducha</option><option value="📺">📺 TV</option><option value="📶">📶 Wi‑Fi</option><option value="🎲">🎲 Juegos</option><option value="💡">💡 Iluminación</option><option value="🔊">🔊 Audio</option><option value="🧴">🧴 Accesorios</option></select>
+            <input id="item-icon" name="icon" list="icon-suggestions" maxlength="12" placeholder="Pegá un emoji, ej. 🛏️">
+            <datalist id="icon-suggestions">
+                @foreach ($iconSuggestions as $icon)<option value="{{ $icon }}"></option>@endforeach
+            </datalist>
             <button class="btn" type="submit" @disabled($categories->isEmpty())>Crear elemento</button>
             @if ($categories->isEmpty())<p>Primero crea una categoría.</p>@endif
         </form>
@@ -84,7 +87,7 @@
                     <form method="POST" action="{{ route('admin.furniture.items.update', $item) }}">
                         @csrf @method('PUT')
                         <label>Nombre <input name="name" value="{{ $item->name }}" maxlength="100" required></label>
-                        <label>Ícono <select name="icon">@foreach(['🛏️'=>'Cama','🪑'=>'Sillón','🪞'=>'Espejo','🚿'=>'Ducha','📺'=>'TV','📶'=>'Wi‑Fi','🎲'=>'Juegos','💡'=>'Iluminación','🔊'=>'Audio','🧴'=>'Accesorios'] as $icon => $label)<option value="{{ $icon }}" @selected(($item->icon ?? '✦') === $icon)>{{ $icon }} {{ $label }}</option>@endforeach</select></label>
+                        <label>Ícono <input name="icon" value="{{ $item->icon }}" list="icon-suggestions" maxlength="12"></label>
                         <label>Categoría <select name="furniture_category_id">
                             @foreach ($categories as $option)<option value="{{ $option->id }}" @selected($option->id === $category->id)>{{ $option->name }}</option>@endforeach
                         </select></label>

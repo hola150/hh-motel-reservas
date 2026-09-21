@@ -21,6 +21,17 @@ class FurnitureController extends Controller
         $items = $categories->flatMap->items;
         return view('admin.furniture.index', [
             'categories' => $categories,
+            // El selector de ícono era una lista fija de 10 emojis genéricos
+            // de hotel (cama, sillón, TV...) que no cubría el mobiliario real
+            // que se carga acá (caballetes, cruces, guillotina...) -- cuando
+            // el ícono guardado no calzaba con ninguna opción, el <select>
+            // caía en silencio a la primera de la lista, mostrando "Cama"
+            // sin importar cuál fuera el mueble real. Ahora es un campo de
+            // texto con sugerencias: los íconos ya en uso, más algunos
+            // genéricos de partida.
+            'iconSuggestions' => $items->pluck('icon')->filter()->unique()
+                ->merge(['🛏️', '🪑', '🪞', '🚿', '📺', '📶', '🎲', '💡', '🔊', '🧴'])
+                ->unique()->values(),
             'summary' => [
                 'types' => $items->count(),
                 'units' => $items->sum(fn ($item) => $item->rooms->sum(fn ($room) => (int) $room->pivot->quantity)),
