@@ -22,7 +22,7 @@ class CatalogController extends Controller
     {
         $today = Carbon::today();
         $liveOffers = Coupon::offers()->where('is_active', true)
-            ->with(['rooms:id,room_category_id', 'roomCategories:id'])
+            ->with(['rooms:id,name,room_category_id,photos', 'roomCategories:id'])
             ->get()
             ->filter(fn (Coupon $offer) => (!$offer->starts_at || $today->greaterThanOrEqualTo($offer->starts_at)) && (!$offer->ends_at || $today->lessThanOrEqualTo($offer->ends_at)));
         $categories = RoomCategory::where('is_active', true)
@@ -49,7 +49,7 @@ class CatalogController extends Controller
                     'offer' => $offer ? [
                         'label' => $offer->discount_type === 'percentage' ? $offer->discount_value.'% de descuento' : 'Desde $'.number_format($offer->discount_value, 0, ',', '.'),
                         'name' => $offer->internal_name,
-                        'rooms' => $offer->rooms->filter(fn ($room) => $room->room_category_id === $category->id)->map(fn ($room) => ['id' => $room->id, 'name' => $room->name])->values()->all(),
+                        'rooms' => $offer->rooms->filter(fn ($room) => $room->room_category_id === $category->id)->map(fn ($room) => ['id' => $room->id, 'name' => $room->name, 'photo' => collect($room->photos ?? [])->first()])->values()->all(),
                     ] : null,
                     'salesTip' => $category->sales_tip ?: 'Conoce esta experiencia HH Motel.',
                     'whatsappUrl' => 'https://wa.me/'.self::WHATSAPP_NUMBER.'?text='.rawurlencode("Hola! Tengo una duda sobre el Playroom {$category->name} en HH Motel."),
@@ -69,7 +69,7 @@ class CatalogController extends Controller
      */
     public function room(Room $room): View
     {
-        $room->load('category');
+        $room->load('category', 'furniture');
 
         return view('catalog.room', [
             'room' => $room,
@@ -77,6 +77,9 @@ class CatalogController extends Controller
             'salesTip' => $room->category->sales_tip,
             'photos' => collect($room->photos ?? [])->values(),
             'videos' => collect($room->videos ?? [])->values(),
+            // Solo lo operativo -- si algo está en reparación o fuera de uso
+            // no se le puede ofrecer al cliente, aunque siga cargado acá.
+            'equipment' => $room->furniture->where('pivot.condition', 'operativo')->values(),
             'prices' => $this->pricesFromRows(
                 $room->category->rateRulePrices()->whereHas('rateRule', fn ($r) => $r->where('is_active', true))->with('rateRule')->get()
             ),

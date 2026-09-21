@@ -49,6 +49,8 @@
         .sales-tip::before { content:'✦'; color:var(--hh-accent); font-weight:800; }
         .features { display:flex; flex-wrap:wrap; gap: 7px; margin-bottom: 18px; }
         .features span { display:inline-block; font-family: ui-monospace, monospace; background:#262729; border:1px solid #56585d; color:#e0e2e5; font-size: 11px; font-weight:600; padding: 3px 11px; border-radius: 20px; }
+        .equip-label { font-size: 11px; color:#9edaff; font-weight:700; text-transform:uppercase; letter-spacing:.03em; margin: 4px 0 8px; }
+        .equip-features span { font-family:inherit; background:#1c2f3a; border-color:#3a5a72; }
 
         .video-links { display:flex; flex-wrap:wrap; gap:10px; margin: -6px 0 18px; }
         .video-links a { font-size: 12.5px; color:#9edaff; text-decoration:none; border:1px solid #3a5a72; padding:5px 11px; border-radius:20px; }
@@ -116,6 +118,15 @@
                     <div class="features">
                         @foreach ($category->features as $feature)
                             <span>{{ $feature }}</span>
+                        @endforeach
+                    </div>
+                @endif
+
+                @if ($equipment->isNotEmpty())
+                    <div class="equip-label">Equipamiento de esta habitación</div>
+                    <div class="features equip-features">
+                        @foreach ($equipment as $item)
+                            <span>{{ $item->icon }} {{ $item->name }}</span>
                         @endforeach
                     </div>
                 @endif
