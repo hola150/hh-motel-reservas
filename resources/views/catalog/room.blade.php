@@ -144,8 +144,7 @@
                 @endif
 
                 <div class="btn-row">
-                    <a class="btn primary" href="{{ route('catalog.reserve', ['categoria' => $category->id]) }}">Reservar online →</a>
-                    <a class="btn" href="{{ $whatsappUrl }}" target="_blank" rel="noopener">Por WhatsApp →</a>
+                    <a class="btn primary" href="{{ route('catalog.reserve', ['categoria' => $category->id]) }}" style="flex:none; width:100%;">Reservar online →</a>
                 </div>
             </div>
         </section>
@@ -154,11 +153,35 @@
             <div class="label">Link de esta ficha</div>
             <div class="share-row">
                 <input type="text" readonly value="{{ route('catalog.room', $room) }}" id="room-link" onclick="this.select()">
-                <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('room-link').value); this.textContent='¡Copiado!'; setTimeout(() => this.textContent='Copiar', 1500);">Copiar</button>
+                <button type="button" id="room-link-copy" onclick="hhCopyRoomLink()">Copiar</button>
             </div>
         </div>
 
         <footer class="catalog-footer">HH Motel</footer>
     </div>
+    <script>
+        // navigator.clipboard falla callado (sin lanzar error visible) en
+        // varios navegadores embebidos -- como el de WhatsApp -- y sin
+        // .catch() el botón igual decía "¡Copiado!" aunque no copió nada.
+        // Con execCommand('copy') como respaldo, y mostrando el resultado
+        // real, no el optimista.
+        function hhCopyRoomLink() {
+            const input = document.getElementById('room-link');
+            const btn = document.getElementById('room-link-copy');
+            const show = (ok) => {
+                btn.textContent = ok ? '¡Copiado!' : 'No se pudo — mantené tocado el link';
+                setTimeout(() => { btn.textContent = 'Copiar'; }, 2000);
+            };
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(input.value).then(() => show(true)).catch(() => {
+                    input.select();
+                    try { show(document.execCommand('copy')); } catch (e) { show(false); }
+                });
+            } else {
+                input.select();
+                try { show(document.execCommand('copy')); } catch (e) { show(false); }
+            }
+        }
+    </script>
 </body>
 </html>

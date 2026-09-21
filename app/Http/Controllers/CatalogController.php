@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Room;
 use App\Models\RoomCategory;
+use App\Models\Coupon;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
@@ -18,6 +20,11 @@ class CatalogController extends Controller
 
     public function index(): View
     {
+        $today = Carbon::today();
+        $liveOffers = Coupon::offers()->where('is_active', true)
+            ->with(['rooms:id,room_category_id', 'roomCategories:id'])
+            ->get()
+            ->filter(fn (Coupon $offer) => (!$offer->starts_at || $today->greaterThanOrEqualTo($offer->starts_at)) && (!$offer->ends_at || $today->lessThanOrEqualTo($offer->ends_at)));
         $categories = RoomCategory::where('is_active', true)
             ->orderBy('display_order')
             ->with([
@@ -25,16 +32,34 @@ class CatalogController extends Controller
                 'rateRulePrices' => fn ($q) => $q->whereHas('rateRule', fn ($r) => $r->where('is_active', true))->with('rateRule'),
             ])
             ->get()
-            ->map(function (RoomCategory $category) {
+            ->map(function (RoomCategory $category) use ($liveOffers) {
                 $photos = $category->rooms->flatMap(fn ($room) => $room->photos ?? [])->unique()->values();
                 $videos = $category->rooms->flatMap(fn ($room) => $room->videos ?? [])->unique()->values();
 
+                $offer = $liveOffers->first(function (Coupon $offer) use ($category) {
+                    $categoryIds = $offer->roomCategories->pluck('id');
+                    $roomCategoryIds = $offer->rooms->pluck('room_category_id');
+                    return ($categoryIds->isEmpty() && $roomCategoryIds->isEmpty()) || $categoryIds->contains($category->id) || $roomCategoryIds->contains($category->id);
+                });
+                $salesTips = [
+                    'GO' => 'Ambiente íntimo con mobiliario seleccionado para disfrutar una experiencia diferente.',
+                    'LITE' => 'Privacidad y comodidad en un ambiente equipado para compartir sin apuros.',
+                    'NEW LITE' => 'Baño interior con ducha integrada al ambiente, visible desde la cama.',
+                    'PLUS' => 'Un espacio preparado para disfrutar su mobiliario y vivir una experiencia más intensa.',
+                    'MAX' => 'Ambiente amplio para explorar y disfrutar en compañía; una de las preferidas para grupos de más de dos personas.',
+                ];
                 return [
                     'category' => $category,
                     'photos' => $photos,
                     'videos' => $videos,
                     'prices' => $this->pricesFromRows($category->rateRulePrices),
-                    'whatsappUrl' => 'https://wa.me/'.self::WHATSAPP_NUMBER.'?text='.rawurlencode("Hola! Quiero reservar una habitación {$category->name} en HH Motel."),
+                    'offer' => $offer ? [
+                        'label' => $offer->discount_type === 'percentage' ? $offer->discount_value.'% de descuento' : 'Desde $'.number_format($offer->discount_value, 0, ',', '.'),
+                        'name' => $offer->internal_name,
+                        'rooms' => $offer->rooms->filter(fn ($room) => $room->room_category_id === $category->id)->map(fn ($room) => ['id' => $room->id, 'name' => $room->name])->values()->all(),
+                    ] : null,
+                    'salesTip' => $salesTips[strtoupper($category->name)] ?? 'Conoce esta experiencia HH Motel.',
+                    'whatsappUrl' => 'https://wa.me/'.self::WHATSAPP_NUMBER.'?text='.rawurlencode("Hola! Tengo una duda sobre el Playroom {$category->name} en HH Motel."),
                 ];
             });
 
@@ -61,7 +86,6 @@ class CatalogController extends Controller
             'prices' => $this->pricesFromRows(
                 $room->category->rateRulePrices()->whereHas('rateRule', fn ($r) => $r->where('is_active', true))->with('rateRule')->get()
             ),
-            'whatsappUrl' => 'https://wa.me/'.self::WHATSAPP_NUMBER.'?text='.rawurlencode("Hola! Quiero reservar la habitación {$room->name} en HH Motel."),
         ]);
     }
 
