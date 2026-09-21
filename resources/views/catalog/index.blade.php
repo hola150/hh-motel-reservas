@@ -74,8 +74,8 @@
         .offer-price-new { color:#6ee7b7; font-weight:800; font-size:16px; }
         .offer-save-badge { background:#123a28; color:#6ee7b7; border-radius:6px; padding:2px 6px; font-size:10.5px; font-weight:800; }
         .offer-viewers { display:block; color:#ffb078; font-size:11px; margin-top:3px; min-height:14px; }
-        .featured-offer a { flex:none; background:#ff7918; color:#21170e; border-radius:8px; padding:9px 12px; text-decoration:none; font-size:12px; font-weight:800; }
-        @media (max-width:560px) { .featured-offer { align-items:flex-start; flex-direction:column; } .featured-offer a { width:100%; text-align:center; } }
+        .featured-offer-cta { flex:none; background:#ff7918; color:#21170e; border-radius:8px; padding:9px 12px; text-decoration:none; font-size:12px; font-weight:800; }
+        @media (max-width:560px) { .featured-offer { align-items:flex-start; flex-direction:column; } .featured-offer-cta { width:100%; text-align:center; } }
         .sales-tip { display:flex; gap:8px; align-items:flex-start; background:#242527; border:1px solid #505257; color:#f0d18a; border-radius:9px; padding:9px 11px; margin:10px 0 14px; font-size:12px; line-height:1.35; }
         .sales-tip::before { content:'✦'; color:var(--hh-accent); font-weight:800; }
 
@@ -178,7 +178,7 @@
                                         <span class="offer-viewers" data-hh-viewers></span>
                                     </div>
                                 </a>
-                                <a href="{{ route('catalog.reserve', ['categoria' => $entry['category']->id, 'room_id' => $offerRoom['id']]) }}">Reservar oferta →</a>
+                                <a class="featured-offer-cta" href="{{ route('catalog.reserve', ['categoria' => $entry['category']->id, 'room_id' => $offerRoom['id']]) }}">Reservar oferta →</a>
                             </div>
                         @endforeach
                     @else
@@ -189,7 +189,7 @@
                                 <small>Disponible en esta categoría</small>
                                 <span class="offer-viewers" data-hh-viewers></span>
                             </div>
-                            <a href="{{ route('catalog.reserve', ['categoria' => $entry['category']->id]) }}">Reservar oferta →</a>
+                            <a class="featured-offer-cta" href="{{ route('catalog.reserve', ['categoria' => $entry['category']->id]) }}">Reservar oferta →</a>
                         </div>
                     @endif
                 @endforeach
