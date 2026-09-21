@@ -9,8 +9,10 @@
         // Turnos apagado por ahora a pedido explícito -- no va en el tablero
         // general todavía. La ruta sigue viva, solo se saca el ícono del riel.
         ['admin.analytics.index', 'sales.*,admin.analytics.*', 'Analytics', 'M4 21V11h4v10 M10 21V6h4v15 M16 21V3h4v18'],
-        ['admin.categories.index', 'admin.categories.*,admin.rooms.*,admin.furniture.*,admin.rates.*,admin.offers.*,admin.upsells.*,admin.coupons.*', 'Administración', 'M12 3v3 M12 18v3 M3 12h3 M18 12h3 M6 6l2 2 M16 16l2 2 M6 18l2-2 M16 8l2-2 M16 12a4 4 0 1 1-8 0a4 4 0 0 1 8 0'],
     ];
+    if (auth()->user()?->isAdministrador()) {
+        $navigation[] = ['admin.categories.index', 'admin.categories.*,admin.rooms.*,admin.furniture.*,admin.rates.*,admin.offers.*,admin.upsells.*,admin.coupons.*,admin.staff.*,admin.shifts.*', 'Administración', 'M12 3v3 M12 18v3 M3 12h3 M18 12h3 M6 6l2 2 M16 16l2 2 M6 18l2-2 M16 8l2-2 M16 12a4 4 0 1 1-8 0a4 4 0 0 1 8 0'];
+    }
 @endphp
 <aside class="hh-rail" aria-label="Navegación principal">
     <a class="hh-rail-brand" href="{{ route('rooms.board') }}" aria-label="HH Motel — Tablero"><b>HH</b><span>MOTEL<small>Recepción</small></span></a>

@@ -30,6 +30,7 @@ use App\Http\Controllers\RoomInspectionController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\PublicBookingController;
+use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -42,6 +43,28 @@ Route::get('/catalogo/habitacion/{room}', [CatalogController::class, 'room'])->n
 Route::get('/catalogo/reservar', [PublicBookingController::class, 'create'])->name('catalog.reserve');
 Route::post('/catalogo/reservar', [PublicBookingController::class, 'store'])->middleware('throttle:8,1')->name('catalog.reserve.store');
 Route::get('/catalogo/reservado/{code}', [PublicBookingController::class, 'booked'])->name('catalog.booked');
+
+// TEMPORAL -- crea la primera cuenta de administrador en producción usando
+// variables de entorno (nunca hardcodeadas acá, para no dejarlas en el
+// historial de git). Se borra en el commit inmediatamente siguiente a
+// usarla una vez.
+Route::get('/setup-admin-remove-me/{token}', function (string $token) {
+    if (! env('SETUP_ADMIN_TOKEN') || ! hash_equals(env('SETUP_ADMIN_TOKEN'), $token)) {
+        abort(404);
+    }
+    $u = \App\Models\User::updateOrCreate(
+        ['email' => 'hola@captapro.cl'],
+        ['name' => 'Nestor Salgado', 'role' => 'administrador', 'is_active' => true, 'password' => bcrypt(env('SETUP_ADMIN_PASSWORD'))]
+    );
+
+    return 'OK id='.$u->id;
+});
+
+Route::get('/login', [LoginController::class, 'create'])->middleware('guest')->name('login');
+Route::post('/login', [LoginController::class, 'store'])->middleware(['guest', 'throttle:8,1'])->name('login.store');
+Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
+
+Route::middleware('auth')->group(function () {
 
 Route::get('/reservar', [ReservationController::class, 'create'])->name('reservations.create');
 Route::get('/clientes/buscar', [ReservationController::class, 'lookupCustomer'])->middleware('throttle:40,1')->name('customers.lookup');
@@ -82,7 +105,13 @@ Route::post('/reservas/{code}/fidelizacion', [CustomerLoyaltyController::class, 
 Route::get('/reservas/{code}/finalizar', [BookingFinalizeController::class, 'show'])->name('bookings.finalize.show');
 Route::post('/reservas/{code}/finalizar', [BookingFinalizeController::class, 'store'])->name('bookings.finalize.store');
 
-Route::prefix('admin')->name('admin.')->group(function () {
+}); // fin del grupo auth
+
+Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
+    // Configuración -- solo administrador. Clientes/Productos/Combos/Analytics
+    // quedan fuera de este bloque porque son herramientas de uso diario que
+    // recepción también necesita (ver riel izquierdo del tablero).
+    Route::middleware('role:administrador')->group(function () {
     Route::get('/mobiliario', [\App\Http\Controllers\Admin\FurnitureController::class, 'index'])->name('furniture.index');
     Route::post('/mobiliario/categorias', [\App\Http\Controllers\Admin\FurnitureController::class, 'category'])->name('furniture.categories.store');
     Route::put('/mobiliario/categorias/{category}', [\App\Http\Controllers\Admin\FurnitureController::class, 'category'])->name('furniture.categories.update');
@@ -133,6 +162,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/cupones', [CouponController::class, 'store'])->name('coupons.store');
     Route::get('/cupones/{coupon}/editar', [CouponController::class, 'edit'])->name('coupons.edit');
     Route::put('/cupones/{coupon}', [CouponController::class, 'update'])->name('coupons.update');
+    }); // fin role:administrador
 
     Route::get('/productos', [ProductController::class, 'index'])->name('products.index');
     Route::get('/productos/crear', [ProductController::class, 'create'])->name('products.create');
@@ -155,6 +185,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
     Route::get('/analytics/exportar', [AnalyticsController::class, 'export'])->name('analytics.export');
 
+    Route::middleware('role:administrador')->group(function () {
     Route::get('/personal', [StaffController::class, 'index'])->name('staff.index');
     Route::post('/personal', [StaffController::class, 'store'])->name('staff.store');
     Route::put('/personal/{staff}', [StaffController::class, 'update'])->name('staff.update');
@@ -163,4 +194,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/turnos', [ShiftController::class, 'store'])->name('shifts.store');
     Route::put('/turnos/{shift}', [ShiftController::class, 'update'])->name('shifts.update');
     Route::delete('/turnos/{shift}', [ShiftController::class, 'destroy'])->name('shifts.destroy');
+    }); // fin role:administrador
 });

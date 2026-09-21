@@ -18,6 +18,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // el visitante haya entrado por https://, y el navegador bloquea
         // esos recursos como "Mixed Content".
         $middleware->trustProxies(at: '*');
+
+        $middleware->alias([
+            'role' => \App\Http\Middleware\EnsureUserHasRole::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

@@ -6,6 +6,7 @@ use App\Models\FurnitureCategory;
 use App\Models\FurnitureItem;
 use App\Models\Room;
 use App\Models\RoomCategory;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -19,6 +20,7 @@ class FurnitureTest extends TestCase
         $this->assertSame(':memory:', DB::connection()->getDatabaseName());
         foreach ([
             '0001_01_01_000000_create_users_table.php',
+            '2026_08_18_120001_add_role_to_users_table.php',
             '2026_08_18_120002_create_room_categories_table.php',
             '2026_08_18_120003_create_rooms_table.php',
             '2026_08_18_120018_create_audit_logs_table.php',
@@ -26,6 +28,7 @@ class FurnitureTest extends TestCase
         ] as $migration) {
             (require database_path('migrations/'.$migration))->up();
         }
+        $this->actingAs(User::factory()->create(['role' => 'administrador']));
     }
 
     public function test_catalog_and_room_assignment_are_persisted_and_audited(): void

@@ -60,8 +60,15 @@
         @endif
         @stack('nav-actions')
         <a class="hh-new-btn" href="{{ route('reservations.create') }}">+ Nueva reserva</a>
+        @auth
+            <span style="color:#777; font-size:12.5px; padding:0 4px;">{{ auth()->user()->name }}</span>
+            <form method="POST" action="{{ route('logout') }}" style="display:inline;">
+                @csrf
+                <button type="submit" class="hh-danger" style="background:none; border:none; cursor:pointer; font:inherit;">Salir</button>
+            </form>
+        @endauth
     </div>
-    @if (request()->routeIs('admin.*'))
+    @if (request()->routeIs('admin.*') && auth()->user()?->isAdministrador())
         {{-- Solo configuraciones generales acá, agrupadas por tema. Clientes,
              Analytics y Personal/Turnos ya tienen su propio ícono en el riel
              izquierdo -- repetirlos acá era puro ruido. --}}
