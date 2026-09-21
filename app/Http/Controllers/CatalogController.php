@@ -18,9 +18,51 @@ class CatalogController extends Controller
      */
     private const WHATSAPP_NUMBER = '56977683108';
 
+    private const WEEKDAY_LABELS = [0 => 'Dom', 1 => 'Lun', 2 => 'Mar', 3 => 'Mié', 4 => 'Jue', 5 => 'Vie', 6 => 'Sáb'];
+
     public function index(): View
     {
         $today = Carbon::today();
+        // Cupones con código (no las ofertas automáticas) que el cliente
+        // puede autoaplicarse desde un banner -- la verificación de
+        // identidad/edad la sigue haciendo recepción al check-in, así que
+        // acá solo se filtra por vigencia de fecha.
+        $coupons = Coupon::where('auto_apply', false)->where('is_active', true)
+            ->get()
+            ->filter(fn (Coupon $c) => (!$c->starts_at || $today->greaterThanOrEqualTo($c->starts_at)) && (!$c->ends_at || $today->lessThanOrEqualTo($c->ends_at)))
+            ->map(function (Coupon $c) {
+                $benefit = $c->discount_type === 'percentage'
+                    ? '-'.$c->discount_value.'%'
+                    : '-$'.number_format($c->discount_value, 0, ',', '.');
+                $hints = [];
+                if ($c->allowed_weekdays) {
+                    $days = collect($c->allowed_weekdays)->sort()->values();
+                    // Si son consecutivos (ej. lun-mar-mié-jue) se lee mejor
+                    // como rango que como lista de cada día suelto.
+                    $isConsecutive = $days->count() > 1 && $days->values()->every(fn ($d, $i) => $i === 0 || $d === $days[$i - 1] + 1);
+                    $hints[] = $isConsecutive
+                        ? self::WEEKDAY_LABELS[$days->first()].' a '.self::WEEKDAY_LABELS[$days->last()]
+                        : $days->map(fn ($d) => self::WEEKDAY_LABELS[$d])->implode(', ');
+                }
+                if ($c->allowed_time_start && $c->allowed_time_end) {
+                    $hints[] = substr($c->allowed_time_start, 0, 5).' a '.substr($c->allowed_time_end, 0, 5);
+                }
+                if ($c->min_age) {
+                    $hints[] = $c->min_age.'+ años';
+                }
+                if ($c->requires_verification) {
+                    $hints[] = 'pide verificar en recepción';
+                }
+                return [
+                    'code' => $c->code,
+                    'name' => $c->internal_name,
+                    'benefit' => $benefit,
+                    'hint' => implode(' · ', $hints),
+                    'needsBirthDate' => (bool) $c->min_age,
+                ];
+            })
+            ->values();
+
         $liveOffers = Coupon::offers()->where('is_active', true)
             ->with(['rooms:id,name,room_category_id,photos', 'roomCategories:id'])
             ->get()
@@ -71,6 +113,7 @@ class CatalogController extends Controller
 
         return view('catalog.index', [
             'categories' => $categories,
+            'coupons' => $coupons,
             'whatsappUrl' => 'https://wa.me/'.self::WHATSAPP_NUMBER.'?text='.rawurlencode('Hola! Quiero reservar una habitación en HH.'),
         ]);
     }

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\InvalidCouponException;
 use App\Exceptions\PricingException;
 use App\Exceptions\RoomNotAvailableException;
+use App\Models\Coupon;
 use App\Models\Customer;
 use App\Models\RateRulePrice;
 use App\Models\Room;
@@ -19,9 +21,11 @@ use Illuminate\View\View;
 
 /**
  * Reserva self-service desde el catálogo público -- sin login, sin
- * documento (se verifica en persona al check-in), sin cupones ni upsells.
- * Recepción ve la reserva igual que si hubiera entrado por teléfono: queda
- * PENDIENTE_PAGO, sin nada cobrado todavía.
+ * documento (se verifica en persona al check-in). Recepción ve la reserva
+ * igual que si hubiera entrado por teléfono: queda PENDIENTE_PAGO, sin nada
+ * cobrado todavía. Los cupones con código (no las ofertas automáticas) sí
+ * se pueden aplicar acá si el cliente llega con el link de un banner de
+ * cupón -- la verificación de edad/identidad queda para el check-in.
  */
 class PublicBookingController extends Controller
 {
@@ -30,6 +34,11 @@ class PublicBookingController extends Controller
         $categories = RoomCategory::where('is_active', true)->orderBy('display_order')->get();
         $selectedCategoryId = (int) $request->query('categoria', $categories->first()?->id);
         $selectedRoomId = $request->integer('room_id') ?: null;
+        $selectedCoupon = $request->filled('cupon')
+            ? Coupon::where('auto_apply', false)->where('is_active', true)
+                ->whereRaw('UPPER(code) = ?', [mb_strtoupper(trim($request->query('cupon')))])
+                ->first()
+            : null;
 
         $durationsByCategory = RateRulePrice::select('room_category_id', 'duration_minutes')
             ->distinct()
@@ -41,6 +50,7 @@ class PublicBookingController extends Controller
             'categories' => $categories,
             'selectedCategoryId' => $selectedCategoryId,
             'selectedRoomId' => $selectedRoomId,
+            'selectedCoupon' => $selectedCoupon,
             'durationsByCategory' => $durationsByCategory,
         ]);
     }
@@ -66,6 +76,8 @@ class PublicBookingController extends Controller
             'last_name' => ['required', 'string', 'max:100'],
             'phone' => ['required', 'string', 'max:20'],
             'email' => ['nullable', 'email'],
+            'coupon_code' => ['nullable', 'string', 'max:50'],
+            'birth_date' => ['nullable', 'date', 'before_or_equal:today'],
             // Campo trampa para bots -- invisible para una persona real
             // (oculto por CSS), un bot que autocompleta todo lo llena.
             'website' => ['prohibited'],
@@ -91,8 +103,13 @@ class PublicBookingController extends Controller
         $customerName = trim($validated['first_name'].' '.$validated['last_name']);
         $customer = Customer::firstOrCreate(
             ['phone_e164' => $phone],
-            ['name' => $customerName, 'email' => $validated['email'] ?? null]
+            ['name' => $customerName, 'email' => $validated['email'] ?? null, 'birth_date' => $validated['birth_date'] ?? null]
         );
+        // Cliente ya existía pero le faltaba la fecha de nacimiento (ej.
+        // para el cupón de Expertos en Vida) -- se completa ahora.
+        if (! empty($validated['birth_date']) && ! $customer->birth_date) {
+            $customer->update(['birth_date' => $validated['birth_date']]);
+        }
 
         try {
             $booking = $bookingService->create([
@@ -101,13 +118,13 @@ class PublicBookingController extends Controller
                 'starts_at' => $startsAt,
                 'duration_minutes' => (int) $validated['duration_minutes'],
                 'guests_count' => (int) $validated['guests_count'],
-                'coupon_code' => null,
+                'coupon_code' => $validated['coupon_code'] ?? null,
                 'deposit_amount' => 0,
                 'created_by' => null,
                 'verified_by' => null,
                 'notes' => 'Reserva online desde el catálogo público.',
             ]);
-        } catch (RoomNotAvailableException|PricingException $e) {
+        } catch (RoomNotAvailableException|PricingException|InvalidCouponException $e) {
             return back()->withInput()->withErrors(['duration_minutes' => $e->getMessage()]);
         }
 

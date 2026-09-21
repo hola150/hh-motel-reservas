@@ -40,6 +40,8 @@
         .summary strong { display:block; font-size:15px; margin-bottom:3px; }
         .summary small { color:#62656c; }
         .legal { font-size:11.5px; color:#8a8d93; margin-top:14px; text-align:center; }
+        .coupon-applied { display:flex; align-items:center; justify-content:space-between; gap:10px; background:#12202b; border:1px solid #2e5a72; color:#9edaff; border-radius:9px; padding:11px 14px; font-size:12.5px; margin-bottom:22px; }
+        .coupon-applied a { color:#9edaff; text-decoration:underline; flex:none; font-size:12px; }
     </style>
 </head>
 <body>
@@ -61,9 +63,17 @@
         <div class="steps" aria-label="Pasos de la reserva"><span>1. Estadía</span><span>2. Tus datos</span><span>3. Confirmación</span></div>
         <div class="hint-box">Horario: lunes a jueves 10:30 a 03:00 · viernes a domingo 10:30 a 22:30 corrido.</div>
 
+        @if ($selectedCoupon)
+            <div class="coupon-applied">
+                <span>🏷️ Cupón aplicado: <strong>{{ $selectedCoupon->internal_name }}</strong></span>
+                <a href="{{ route('catalog.reserve', request()->except('cupon')) }}">Quitar</a>
+            </div>
+        @endif
+
         <form method="POST" action="{{ route('catalog.reserve.store') }}" id="reserve-form">
             @csrf
             <input type="hidden" name="room_id" value="{{ $selectedRoomId ?? '' }}">
+            <input type="hidden" name="coupon_code" value="{{ $selectedCoupon->code ?? '' }}">
             <div class="honey-field" aria-hidden="true">
                 <label for="website">No completar</label>
                 <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
@@ -116,6 +126,11 @@
 
             <label for="email">Email (opcional)</label>
             <input type="email" id="email" name="email" value="{{ old('email') }}">
+
+            @if ($selectedCoupon && $selectedCoupon->min_age)
+                <label for="birth_date">Fecha de nacimiento <span style="color:#9edaff; font-weight:400;">— para aplicar el cupón ({{ $selectedCoupon->min_age }}+ años)</span></label>
+                <input type="date" id="birth_date" name="birth_date" value="{{ old('birth_date') }}" max="{{ now()->toDateString() }}" required>
+            @endif
 
             <div class="summary" id="booking-summary" aria-live="polite"><strong>Resumen de tu reserva</strong><small>Selecciona Playroom, fecha, hora y duración para ver el detalle.</small></div>
             <button class="submit" type="submit">Solicitar reserva</button>
