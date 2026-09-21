@@ -39,23 +39,42 @@ class PaymentController extends Controller
     {
         $booking = Booking::where('code', $code)->firstOrFail();
 
+        $request->validate(['payment_method_id' => ['required', 'exists:payment_methods,id']]);
+        $method = PaymentMethod::findOrFail($request->input('payment_method_id'));
+
+        // Efectivo/transferencia solo traen boleta; débito/crédito solo
+        // traen voucher -- no tiene sentido pedir el otro. Para medios sin
+        // esta convención clara (Mercado Pago, Otro) basta con uno de los
+        // dos, como antes.
+        $referenceRules = match ($method->code) {
+            'efectivo', 'transferencia' => [
+                'receipt_number' => ['required', 'string', 'max:100'],
+                'voucher_number' => ['nullable', 'string', 'max:100'],
+            ],
+            'debito', 'credito' => [
+                'voucher_number' => ['required', 'string', 'max:100'],
+                'receipt_number' => ['nullable', 'string', 'max:100'],
+            ],
+            default => [
+                'voucher_number' => ['nullable', 'required_without:receipt_number', 'string', 'max:100'],
+                'receipt_number' => ['nullable', 'required_without:voucher_number', 'string', 'max:100'],
+            ],
+        };
+
         $validated = $request->validate([
             'payment_method_id' => ['required', 'exists:payment_methods,id'],
             'amount' => ['required', 'integer', 'min:1', 'max:'.max($booking->balanceDue(), 1)],
             'external_id' => ['nullable', 'string', 'max:255'],
-            // Basta con uno de los dos — no siempre hay voucher Y boleta para
-            // el mismo pago (ej. una transferencia solo trae comprobante).
-            'voucher_number' => ['nullable', 'required_without:receipt_number', 'string', 'max:100'],
-            'receipt_number' => ['nullable', 'required_without:voucher_number', 'string', 'max:100'],
             'notes' => ['nullable', 'string', 'max:255'],
             'after' => ['nullable', 'in:board'],
+            ...$referenceRules,
         ], [
             'amount.max' => 'El monto no puede superar el saldo pendiente ($'.number_format($booking->balanceDue(), 0, ',', '.').').',
+            'voucher_number.required' => 'Ingresa el N° de voucher.',
+            'receipt_number.required' => 'Ingresa el N° de boleta.',
             'voucher_number.required_without' => 'Ingresa el N° de voucher o el N° de boleta (al menos uno de los dos).',
             'receipt_number.required_without' => 'Ingresa el N° de voucher o el N° de boleta (al menos uno de los dos).',
         ]);
-
-        $method = PaymentMethod::findOrFail($validated['payment_method_id']);
 
         // Si recepción no anota una referencia propia (ej. N° de operación de
         // una transferencia), generamos una nosotros -- así todo pago manual

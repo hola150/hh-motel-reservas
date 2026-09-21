@@ -54,7 +54,7 @@
         <select id="payment-method" name="payment_method_id" required>
             <option value="" disabled selected>— Elegí un medio —</option>
             @foreach ($methods as $method)
-                <option value="{{ $method->id }}">{{ $method->name }}</option>
+                <option value="{{ $method->id }}" data-code="{{ $method->code }}" @selected(old('payment_method_id') == $method->id)>{{ $method->name }}</option>
             @endforeach
         </select>
 
@@ -65,11 +65,15 @@
         <label for="payment-reference">Referencia / N° de operación (opcional — si la dejas vacía, generamos una)</label>
         <input id="payment-reference" type="text" name="external_id" value="{{ old('external_id') }}">
 
-        <label for="voucher-number">N° voucher <span style="color:#777; font-weight:400;">(uno de los dos)</span></label>
-        <input id="voucher-number" type="text" name="voucher_number" value="{{ old('voucher_number') }}" placeholder="Ej. 146">
+        <div id="voucher-field">
+            <label for="voucher-number">N° voucher <span id="voucher-hint" style="color:#777; font-weight:400;"></span></label>
+            <input id="voucher-number" type="text" name="voucher_number" value="{{ old('voucher_number') }}" placeholder="Ej. 146">
+        </div>
 
-        <label for="receipt-number">N° boleta <span style="color:#777; font-weight:400;">(uno de los dos)</span></label>
-        <input id="receipt-number" type="text" name="receipt_number" value="{{ old('receipt_number') }}" placeholder="Ej. 96302">
+        <div id="receipt-field">
+            <label for="receipt-number">N° boleta <span id="receipt-hint" style="color:#777; font-weight:400;"></span></label>
+            <input id="receipt-number" type="text" name="receipt_number" value="{{ old('receipt_number') }}" placeholder="Ej. 96302">
+        </div>
 
         <label for="payment-notes">Observaciones (opcional)</label>
         <input id="payment-notes" type="text" name="notes" value="{{ old('notes') }}">
@@ -106,6 +110,38 @@
                 hidden.value = raw;
                 display.value = fmt(raw);
             });
+        })();
+
+        // Efectivo/transferencia solo piden boleta; débito/crédito solo
+        // piden voucher -- se oculta el que no corresponde para no
+        // confundir a recepción. Con otros medios (Mercado Pago, Otro) se
+        // muestran los dos, basta con uno.
+        (function () {
+            const select = document.getElementById('payment-method');
+            const voucherField = document.getElementById('voucher-field');
+            const receiptField = document.getElementById('receipt-field');
+            const voucherInput = document.getElementById('voucher-number');
+            const receiptInput = document.getElementById('receipt-number');
+            const voucherHint = document.getElementById('voucher-hint');
+            const receiptHint = document.getElementById('receipt-hint');
+            if (!select) return;
+
+            function apply() {
+                const code = select.selectedOptions[0]?.dataset.code;
+                const cashLike = code === 'efectivo' || code === 'transferencia';
+                const cardLike = code === 'debito' || code === 'credito';
+
+                voucherField.style.display = cashLike ? 'none' : '';
+                receiptField.style.display = cardLike ? 'none' : '';
+                if (cashLike) voucherInput.value = '';
+                if (cardLike) receiptInput.value = '';
+
+                voucherHint.textContent = cardLike ? '' : (!code ? '(uno de los dos)' : '');
+                receiptHint.textContent = cashLike ? '' : (!code ? '(uno de los dos)' : '');
+            }
+
+            select.addEventListener('change', apply);
+            apply();
         })();
     </script>
 </body>
