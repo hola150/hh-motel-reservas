@@ -45,10 +45,8 @@
             <label for="item-name">Nombre del elemento</label>
             <input id="item-name" name="name" maxlength="100" required placeholder="Ej. Sillón tántrico">
             <label for="item-icon">Ícono</label>
-            <input id="item-icon" name="icon" list="icon-suggestions" maxlength="12" placeholder="Pegá un emoji, ej. 🛏️">
-            <datalist id="icon-suggestions">
-                @foreach ($iconSuggestions as $icon)<option value="{{ $icon }}"></option>@endforeach
-            </datalist>
+            <input id="item-icon" name="icon" maxlength="12" placeholder="Pegá un emoji, ej. 🛏️">
+            <p class="sub" style="margin:-8px 0 0;">Sugerencias: {{ $iconSuggestions->implode(' ') }}</p>
             <button class="btn" type="submit" @disabled($categories->isEmpty())>Crear elemento</button>
             @if ($categories->isEmpty())<p>Primero crea una categoría.</p>@endif
         </form>
@@ -87,7 +85,7 @@
                     <form method="POST" action="{{ route('admin.furniture.items.update', $item) }}">
                         @csrf @method('PUT')
                         <label>Nombre <input name="name" value="{{ $item->name }}" maxlength="100" required></label>
-                        <label>Ícono <input name="icon" value="{{ $item->icon }}" list="icon-suggestions" maxlength="12"></label>
+                        <label>Ícono <input name="icon" value="{{ $item->icon }}" maxlength="12"></label>
                         <label>Categoría <select name="furniture_category_id">
                             @foreach ($categories as $option)<option value="{{ $option->id }}" @selected($option->id === $category->id)>{{ $option->name }}</option>@endforeach
                         </select></label>
