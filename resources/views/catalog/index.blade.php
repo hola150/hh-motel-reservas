@@ -62,8 +62,9 @@
         .limited-badge .dot { width:6px; height:6px; border-radius:50%; background:#ff7918; animation: hh-pulse 1.6s ease-in-out infinite; }
         @keyframes hh-pulse { 0%, 100% { opacity:1; } 50% { opacity:.25; } }
         .featured-offer { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-top:1px solid #ffffff22; }
-        .featured-offer-info { display:flex; align-items:center; gap:10px; text-decoration:none; flex:1; min-width:0; }
+        .featured-offer-info { display:flex; align-items:center; gap:10px; text-decoration:none; flex:1; min-width:0; border-radius:8px; margin:-6px; padding:6px; -webkit-tap-highlight-color:transparent; }
         .featured-offer-text { flex:1; min-width:0; }
+        .featured-offer-info:hover, .featured-offer-info:active, .featured-offer-info:focus-visible { background:#ffffff14; }
         .featured-offer-info:hover strong { text-decoration:underline; }
         .featured-offer-thumb { width:58px; height:48px; border-radius:7px; object-fit:cover; background:#303136; border:1px solid #ffffff33; flex:none; }
         .featured-offer strong { display:block; font-size:15px; margin-bottom:3px; }
