@@ -162,11 +162,11 @@
         a.checkout-btn:hover { border-color:#ff7918; color:#ff7918; }
         a.checkout-btn.pending-balance { background:#2a2010; border-color:#6b5a1e; color:#e8a23f; }
         a.checkout-btn.pending-balance:hover { border-color:#e8a23f; color:#ffcf7a; }
-        a.bookings-btn { display:block; text-align:center; margin-top:8px; text-decoration:none; padding:8px; border-radius:7px; font-size:12.5px; font-weight:600; }
-        a.bookings-btn.has-bookings { background:#1c2f3a; border:1px solid #3a5a72; color:#7fbcdc; }
-        a.bookings-btn.has-bookings:hover { border-color:#7fbcdc; }
-        a.bookings-btn.empty { background:transparent; border:1px dashed #333; color:#666; font-weight:500; }
-        a.bookings-btn.empty:hover { border-color:#555; color:#999; }
+        .bookings-btn { display:block; width:100%; box-sizing:border-box; text-align:center; margin-top:8px; text-decoration:none; padding:8px; border-radius:7px; font-size:12.5px; font-weight:600; background:none; font-family:inherit; cursor:pointer; }
+        .bookings-btn.has-bookings { background:#1c2f3a; border:1px solid #3a5a72; color:#7fbcdc; }
+        .bookings-btn.has-bookings:hover { border-color:#7fbcdc; }
+        .bookings-btn.empty { background:transparent; border:1px dashed #333; color:#666; font-weight:500; }
+        .bookings-btn.empty:hover { border-color:#555; color:#999; }
 
         /* Vista compacta — para cuando hay muchas habitaciones y hay que ver más de un vistazo. */
         .compact-toggle { background:#1c1c1c; border:1px solid #333; color:#ccc; border-radius:7px; padding:8px 13px; font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap; }
@@ -178,7 +178,7 @@
         .compact .pill { font-size: 9.5px; padding: 2px 7px; margin-bottom: 3px; }
         .compact .eta { font-size: 10px; margin-top: 3px; }
         .compact .code { font-size: 9px; }
-        .compact a.reserve-btn, .compact .aseo-ready-btn, .compact a.bookings-btn, .compact a.checkout-btn, .compact .checkin-btn, .compact a.consumo-btn { padding: 5px; font-size: 10.5px; margin-top: 5px; }
+        .compact a.reserve-btn, .compact .aseo-ready-btn, .compact .bookings-btn, .compact a.checkout-btn, .compact .checkin-btn, .compact a.consumo-btn { padding: 5px; font-size: 10.5px; margin-top: 5px; }
         .compact .aseo-cleaner-input { padding: 5px 7px; font-size: 10.5px; margin-bottom: 5px; }
         .compact details { margin-top: 5px; }
         .compact summary { padding: 5px; font-size: 10.5px; }
@@ -200,7 +200,7 @@
         .chips .cat { font-size: 9.5px; margin-bottom: 5px; }
         .chips .pill { font-size: 9px; padding: 2px 6px; margin-bottom: 0; }
         .chips .eta, .chips .code, .chips .offer-badge, .chips .maintenance-badge,
-        .chips a.reserve-btn, .chips .aseo-ready-btn, .chips a.bookings-btn,
+        .chips a.reserve-btn, .chips .aseo-ready-btn, .chips .bookings-btn,
         .chips a.checkout-btn, .chips .checkin-btn, .chips a.consumo-btn, .chips a.inspect-btn,
         /* Acotado a las tarjetas -- un selector ".chips form" a secas también
            escondía los formularios de los toggles de Ala Sur/categoría de
@@ -394,6 +394,33 @@
             hhSetCompactLabel();
         }
         hhSetCompactLabel();
+
+        // Copiar el link de la ficha pública sin salir del tablero -- antes
+        // el único camino era abrir la ficha en otra pestaña y copiarlo ahí,
+        // lo que sacaba a recepción del flujo. navigator.clipboard falla
+        // callado en algunos navegadores embebidos, así que hay respaldo
+        // con execCommand('copy').
+        function hhCopyRoomLink(btn) {
+            const url = btn.dataset.roomLink;
+            const original = btn.textContent;
+            const show = (ok) => {
+                btn.textContent = ok ? '¡Copiado!' : 'No se pudo copiar';
+                setTimeout(() => { btn.textContent = original; }, 1800);
+            };
+            const fallback = () => {
+                const tmp = document.createElement('input');
+                tmp.value = url;
+                document.body.appendChild(tmp);
+                tmp.select();
+                try { show(document.execCommand('copy')); } catch (e) { show(false); }
+                document.body.removeChild(tmp);
+            };
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(url).then(() => show(true)).catch(fallback);
+            } else {
+                fallback();
+            }
+        }
 
         // Vista chips: la tarjeta entera es clickeable hacia el detalle de
         // la habitación (sus botones quedan ocultos por CSS en ese modo).
