@@ -93,7 +93,8 @@
                 <div class="linen-chip">Sin salidas con cama este día</div>
             @endforelse
         </div>
-        <p class="hint">Un juego por cada salida de LITE, PLUS o MAX, siempre asociado a la habitación puntual — las GO son cápsulas sin cama y no suman acá.</p>
+        <p class="hint">Un juego por cada salida de LITE, PLUS o MAX, siempre asociado a la habitación puntual — las GO (201, 301) son cápsulas sin cama y solo llevan toallas.</p>
+        <p class="hint">Un juego de sábanas = bajera + sábana encimera + frazadas + dúvet (cubrecama) + 2 cabeceras. Toallas = 2 grandes + 1 por cada persona adicional sobre 2 (todas las categorías, incluida GO).</p>
     </div>
 
     <div class="table-wrap">
@@ -103,7 +104,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Habitación</th><th>Reserva</th><th>Salida (check-out)</th><th>Aseo listo</th><th>Quién limpió</th><th>Estado</th><th>Ropa de cama</th>
+                        <th>Habitación</th><th>Reserva</th><th>Salida (check-out)</th><th>Aseo listo</th><th>Quién limpió</th><th>Estado</th><th>Ropa de cama</th><th>Toallas</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -128,6 +129,7 @@
                                     <span class="pill auto">1 juego</span>
                                 @endif
                             </td>
+                            <td>{{ 2 + max(0, $row['booking']->guests_count - 2) }}</td>
                         </tr>
                     @endforeach
                 </tbody>

@@ -94,7 +94,7 @@
                 <div class="linen-chip">Sin salidas con cama en el rango</div>
             @endforelse
         </div>
-        <p class="hint">Un juego por cada salida de LITE, PLUS o MAX — las GO son cápsulas sin cama y no suman acá.</p>
+        <p class="hint">Un juego por cada salida de LITE, PLUS o MAX — las GO (201, 301) son cápsulas sin cama y solo llevan toallas. Detalle de toallas por reserva en la vista diaria.</p>
     </div>
 
     <div class="table-wrap">
