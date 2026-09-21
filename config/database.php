@@ -97,6 +97,11 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
+            // Sin esto, Postgres asume UTC para interpretar/devolver las
+            // columnas timestamptz (starts_at, ends_at, etc.), aunque PHP
+            // ya sepa que estamos en Chile -- eso causaba que las reservas
+            // quedaran guardadas 3 horas antes de la hora real ingresada.
+            'timezone' => env('DB_TIMEZONE', 'America/Santiago'),
         ],
 
         'sqlsrv' => [

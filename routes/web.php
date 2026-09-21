@@ -1,22 +1,5 @@
 <?php
 
-// TEMPORAL -- diagnostico de timezone, se saca apenas terminamos de revisar.
-Route::get('/debug-tz-check-remove-me', function () {
-    $raw = \Illuminate\Support\Facades\DB::selectOne(
-        "SELECT code, starts_at::text AS starts_at_text, starts_at AT TIME ZONE 'UTC' AS starts_at_utc_text, created_at::text AS created_at_text, current_setting('TIMEZONE') AS session_tz, now() AS db_now FROM bookings WHERE code = ?",
-        ['HH-20260921-00001']
-    );
-
-    return response()->json([
-        'php_default_tz' => date_default_timezone_get(),
-        'config_app_timezone' => config('app.timezone'),
-        'php_now' => now()->toDateTimeString(),
-        'php_now_iso' => now()->toIso8601String(),
-        'raw_row' => $raw,
-        'eloquent_starts_at' => \App\Models\Booking::where('code', 'HH-20260921-00001')->value('starts_at')?->toIso8601String(),
-    ]);
-});
-
 use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\ComboController;
 use App\Http\Controllers\Admin\OfferController;
