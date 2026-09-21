@@ -45,6 +45,8 @@
         h1 { font-size: 22px; margin: 0 0 4px; letter-spacing:-.02em; }
         .cat-label { font-size: 12.5px; color:#9edaff; font-weight:600; margin-bottom: 12px; }
         .cap { font-size: 14px; color: #d5d8de; margin-bottom: 14px; }
+        .sales-tip { display:flex; gap:8px; align-items:flex-start; background:#262729; border:1px solid #56585d; color:#f0d18a; border-radius:9px; padding:9px 11px; margin:0 0 14px; font-size:12.5px; line-height:1.35; }
+        .sales-tip::before { content:'✦'; color:var(--hh-accent); font-weight:800; }
         .features { display:flex; flex-wrap:wrap; gap: 7px; margin-bottom: 18px; }
         .features span { display:inline-block; font-family: ui-monospace, monospace; background:#262729; border:1px solid #56585d; color:#e0e2e5; font-size: 11px; font-weight:600; padding: 3px 11px; border-radius: 20px; }
 
@@ -101,6 +103,10 @@
                 <h1>{{ $room->name }}</h1>
                 <div class="cat-label">Categoría {{ $category->name }}</div>
                 <div class="cap">Hasta {{ $category->base_capacity }} personas{{ $category->extra_guest_from ? ' · desde la '.$category->extra_guest_from.'ª persona, cargo adicional' : '' }}</div>
+
+                @if ($salesTip)
+                    <div class="sales-tip">{{ $salesTip }}</div>
+                @endif
 
                 @if ($category->description)
                     <div class="cap">{{ $category->description }}</div>

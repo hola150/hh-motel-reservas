@@ -41,13 +41,6 @@ class CatalogController extends Controller
                     $roomCategoryIds = $offer->rooms->pluck('room_category_id');
                     return ($categoryIds->isEmpty() && $roomCategoryIds->isEmpty()) || $categoryIds->contains($category->id) || $roomCategoryIds->contains($category->id);
                 });
-                $salesTips = [
-                    'GO' => 'Ambiente íntimo con mobiliario seleccionado para disfrutar una experiencia diferente.',
-                    'LITE' => 'Privacidad y comodidad en un ambiente equipado para compartir sin apuros.',
-                    'NEW LITE' => 'Baño interior con ducha integrada al ambiente, visible desde la cama.',
-                    'PLUS' => 'Un espacio preparado para disfrutar su mobiliario y vivir una experiencia más intensa.',
-                    'MAX' => 'Ambiente amplio para explorar y disfrutar en compañía; una de las preferidas para grupos de más de dos personas.',
-                ];
                 return [
                     'category' => $category,
                     'photos' => $photos,
@@ -58,7 +51,7 @@ class CatalogController extends Controller
                         'name' => $offer->internal_name,
                         'rooms' => $offer->rooms->filter(fn ($room) => $room->room_category_id === $category->id)->map(fn ($room) => ['id' => $room->id, 'name' => $room->name])->values()->all(),
                     ] : null,
-                    'salesTip' => $salesTips[strtoupper($category->name)] ?? 'Conoce esta experiencia HH Motel.',
+                    'salesTip' => $category->sales_tip ?: 'Conoce esta experiencia HH Motel.',
                     'whatsappUrl' => 'https://wa.me/'.self::WHATSAPP_NUMBER.'?text='.rawurlencode("Hola! Tengo una duda sobre el Playroom {$category->name} en HH Motel."),
                 ];
             });
@@ -81,6 +74,7 @@ class CatalogController extends Controller
         return view('catalog.room', [
             'room' => $room,
             'category' => $room->category,
+            'salesTip' => $room->category->sales_tip,
             'photos' => collect($room->photos ?? [])->values(),
             'videos' => collect($room->videos ?? [])->values(),
             'prices' => $this->pricesFromRows(

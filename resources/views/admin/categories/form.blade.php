@@ -19,6 +19,9 @@
             </div>
         </div>
 
+        <label>Frase de venta corta (opcional) <span style="color:#888; font-weight:400;">— la que se ve destacada arriba en el catálogo público</span></label>
+        <input type="text" name="sales_tip" maxlength="300" value="{{ old('sales_tip', $category->sales_tip) }}" placeholder="Ej. Ambiente íntimo con mobiliario seleccionado...">
+
         <label>Descripción (opcional)</label>
         <textarea name="description" rows="2">{{ old('description', $category->description) }}</textarea>
 

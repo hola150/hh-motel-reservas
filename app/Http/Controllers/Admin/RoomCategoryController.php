@@ -87,6 +87,7 @@ class RoomCategoryController extends Controller
             'name' => ['required', 'string', 'max:50'],
             'former_name' => ['nullable', 'string', 'max:50'],
             'description' => ['nullable', 'string'],
+            'sales_tip' => ['nullable', 'string', 'max:300'],
             'features' => ['nullable', 'string'],
             'base_capacity' => ['required', 'integer', 'min:1'],
             'extra_guest_from' => ['required', 'integer', 'min:1'],
