@@ -119,7 +119,7 @@
 
             <div class="summary" id="booking-summary" aria-live="polite"><strong>Resumen de tu reserva</strong><small>Selecciona Playroom, fecha, hora y duración para ver el detalle.</small></div>
             <button class="submit" type="submit">Solicitar reserva</button>
-            <p class="legal">Al reservar aceptás presentar tu documento de identidad al llegar. HH Motel se reserva el derecho de admisión.</p>
+            <p class="legal">Al reservar aceptás presentar tu documento de identidad al llegar. HH se reserva el derecho de admisión.</p>
         </form>
         </div>
     </div>

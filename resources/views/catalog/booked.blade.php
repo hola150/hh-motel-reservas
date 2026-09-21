@@ -44,7 +44,7 @@
             <div class="row"><span class="muted">Total</span><span>${{ number_format($booking->price_final, 0, ',', '.') }}</span></div>
         </div>
 
-        <a class="btn" href="https://wa.me/56977683108?text={{ rawurlencode('Hola! Tengo la reserva '.$booking->code.' en HH Motel.') }}" target="_blank" rel="noopener">Avisar por WhatsApp que ya reservé →</a>
+        <a class="btn" href="https://wa.me/56977683108?text={{ rawurlencode('Hola! Tengo la reserva '.$booking->code.' en HH.') }}" target="_blank" rel="noopener">Avisar por WhatsApp que ya reservé →</a>
         <a class="back" href="{{ route('catalog.index') }}">← Volver al catálogo</a>
     </div>
 </body>

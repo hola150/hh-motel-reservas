@@ -51,14 +51,14 @@ class CatalogController extends Controller
                         'name' => $offer->internal_name,
                         'rooms' => $offer->rooms->filter(fn ($room) => $room->room_category_id === $category->id)->map(fn ($room) => ['id' => $room->id, 'name' => $room->name, 'photo' => collect($room->photos ?? [])->first()])->values()->all(),
                     ] : null,
-                    'salesTip' => $category->sales_tip ?: 'Conoce esta experiencia HH Motel.',
-                    'whatsappUrl' => 'https://wa.me/'.self::WHATSAPP_NUMBER.'?text='.rawurlencode("Hola! Tengo una duda sobre el Playroom {$category->name} en HH Motel."),
+                    'salesTip' => $category->sales_tip ?: 'Conoce esta experiencia HH.',
+                    'whatsappUrl' => 'https://wa.me/'.self::WHATSAPP_NUMBER.'?text='.rawurlencode("Hola! Tengo una duda sobre el Playroom {$category->name} en HH."),
                 ];
             });
 
         return view('catalog.index', [
             'categories' => $categories,
-            'whatsappUrl' => 'https://wa.me/'.self::WHATSAPP_NUMBER.'?text='.rawurlencode('Hola! Quiero reservar una habitación en HH Motel.'),
+            'whatsappUrl' => 'https://wa.me/'.self::WHATSAPP_NUMBER.'?text='.rawurlencode('Hola! Quiero reservar una habitación en HH.'),
         ]);
     }
 
