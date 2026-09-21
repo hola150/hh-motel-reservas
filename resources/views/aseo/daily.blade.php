@@ -94,7 +94,7 @@
             @endforelse
         </div>
         <p class="hint">Un juego por cada salida de LITE, PLUS o MAX, siempre asociado a la habitación puntual — las GO (201, 301) son cápsulas sin cama y solo llevan toallas.</p>
-        <p class="hint">Un juego de sábanas = bajera + sábana encimera + frazadas + dúvet (cubrecama) + 2 cabeceras. Toallas = 2 grandes + 1 por cada persona adicional sobre 2 (todas las categorías, incluida GO).</p>
+        <p class="hint">Un juego de sábanas = bajera + sábana encimera + dúvet (cubrecama) + 2 cabeceras. Las frazadas no se cambian en cada salida — la mucama revisa si están ocupadas/sucias y decide si van a lavar. Toallas = 2 grandes + 1 por cada persona adicional sobre 2 (todas las categorías, incluida GO).</p>
     </div>
 
     <div class="table-wrap">
