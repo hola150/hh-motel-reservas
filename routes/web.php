@@ -44,22 +44,6 @@ Route::get('/catalogo/reservar', [PublicBookingController::class, 'create'])->na
 Route::post('/catalogo/reservar', [PublicBookingController::class, 'store'])->middleware('throttle:8,1')->name('catalog.reserve.store');
 Route::get('/catalogo/reservado/{code}', [PublicBookingController::class, 'booked'])->name('catalog.booked');
 
-// TEMPORAL -- crea la primera cuenta de administrador en producción usando
-// variables de entorno (nunca hardcodeadas acá, para no dejarlas en el
-// historial de git). Se borra en el commit inmediatamente siguiente a
-// usarla una vez.
-Route::get('/setup-admin-remove-me/{token}', function (string $token) {
-    if (! env('SETUP_ADMIN_TOKEN') || ! hash_equals(env('SETUP_ADMIN_TOKEN'), $token)) {
-        abort(404);
-    }
-    $u = \App\Models\User::updateOrCreate(
-        ['email' => 'hola@captapro.cl'],
-        ['name' => 'Nestor Salgado', 'role' => 'administrador', 'is_active' => true, 'password' => bcrypt(env('SETUP_ADMIN_PASSWORD'))]
-    );
-
-    return 'OK id='.$u->id;
-});
-
 Route::get('/login', [LoginController::class, 'create'])->middleware('guest')->name('login');
 Route::post('/login', [LoginController::class, 'store'])->middleware(['guest', 'throttle:8,1'])->name('login.store');
 Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
