@@ -167,6 +167,8 @@
         .bookings-btn.has-bookings:hover { border-color:#7fbcdc; }
         .bookings-btn.empty { background:transparent; border:1px dashed #333; color:#666; font-weight:500; }
         .bookings-btn.empty:hover { border-color:#555; color:#999; }
+        .copy-link-btn { display:block; width:100%; box-sizing:border-box; text-align:center; margin-top:8px; padding:8px; border-radius:7px; font-size:12.5px; font-weight:600; font-family:inherit; cursor:pointer; background:#1c2f3a; border:1px solid #3a5a72; color:#7fbcdc; }
+        .copy-link-btn:hover { border-color:#7fbcdc; background:#213847; }
 
         /* Vista compacta — para cuando hay muchas habitaciones y hay que ver más de un vistazo. */
         .compact-toggle { background:#1c1c1c; border:1px solid #333; color:#ccc; border-radius:7px; padding:8px 13px; font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap; }
@@ -178,7 +180,7 @@
         .compact .pill { font-size: 9.5px; padding: 2px 7px; margin-bottom: 3px; }
         .compact .eta { font-size: 10px; margin-top: 3px; }
         .compact .code { font-size: 9px; }
-        .compact a.reserve-btn, .compact .aseo-ready-btn, .compact .bookings-btn, .compact a.checkout-btn, .compact .checkin-btn, .compact a.consumo-btn { padding: 5px; font-size: 10.5px; margin-top: 5px; }
+        .compact a.reserve-btn, .compact .aseo-ready-btn, .compact .bookings-btn, .compact a.checkout-btn, .compact .checkin-btn, .compact a.consumo-btn, .compact .copy-link-btn { padding: 5px; font-size: 10.5px; margin-top: 5px; }
         .compact .aseo-cleaner-input { padding: 5px 7px; font-size: 10.5px; margin-bottom: 5px; }
         .compact details { margin-top: 5px; }
         .compact summary { padding: 5px; font-size: 10.5px; }
@@ -200,7 +202,7 @@
         .chips .cat { font-size: 9.5px; margin-bottom: 5px; }
         .chips .pill { font-size: 9px; padding: 2px 6px; margin-bottom: 0; }
         .chips .eta, .chips .code, .chips .offer-badge, .chips .maintenance-badge,
-        .chips a.reserve-btn, .chips .aseo-ready-btn, .chips .bookings-btn,
+        .chips a.reserve-btn, .chips .aseo-ready-btn, .chips .bookings-btn, .chips .copy-link-btn,
         .chips a.checkout-btn, .chips .checkin-btn, .chips a.consumo-btn, .chips a.inspect-btn,
         /* Acotado a las tarjetas -- un selector ".chips form" a secas también
            escondía los formularios de los toggles de Ala Sur/categoría de

@@ -80,8 +80,7 @@
     @else
         <a class="bookings-btn empty" href="{{ route('rooms.bookings', $room) }}">Sin reservas próximas</a>
     @endif
-    <button type="button" class="bookings-btn empty" data-room-link="{{ route('catalog.room', $room) }}" onclick="hhCopyRoomLink(this)">Copiar link de ficha</button>
-    <a class="bookings-btn empty" href="{{ route('catalog.room', $room) }}" target="_blank" rel="noopener" style="font-size:11px;">Ver ficha ↗</a>
+    <button type="button" class="copy-link-btn" data-room-link="{{ route('catalog.room', $room) }}" onclick="hhCopyRoomLink(this)">📋 Copiar link de ficha</button>
 
     <details>
         <summary>Cambiar estado</summary>
