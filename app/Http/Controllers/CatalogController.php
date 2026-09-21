@@ -18,8 +18,6 @@ class CatalogController extends Controller
      */
     private const WHATSAPP_NUMBER = '56977683108';
 
-    private const WEEKDAY_LABELS = [0 => 'Dom', 1 => 'Lun', 2 => 'Mar', 3 => 'Mié', 4 => 'Jue', 5 => 'Vie', 6 => 'Sáb'];
-
     public function index(): View
     {
         $today = Carbon::today();
@@ -34,25 +32,11 @@ class CatalogController extends Controller
                 $benefit = $c->discount_type === 'percentage'
                     ? '-'.$c->discount_value.'%'
                     : '-$'.number_format($c->discount_value, 0, ',', '.');
-                $hints = [];
-                if ($c->allowed_weekdays) {
-                    $days = collect($c->allowed_weekdays)->sort()->values();
-                    // Si son consecutivos (ej. lun-mar-mié-jue) se lee mejor
-                    // como rango que como lista de cada día suelto.
-                    $isConsecutive = $days->count() > 1 && $days->values()->every(fn ($d, $i) => $i === 0 || $d === $days[$i - 1] + 1);
-                    $hints[] = $isConsecutive
-                        ? self::WEEKDAY_LABELS[$days->first()].' a '.self::WEEKDAY_LABELS[$days->last()]
-                        : $days->map(fn ($d) => self::WEEKDAY_LABELS[$d])->implode(', ');
-                }
-                if ($c->allowed_time_start && $c->allowed_time_end) {
-                    $hints[] = substr($c->allowed_time_start, 0, 5).' a '.substr($c->allowed_time_end, 0, 5);
-                }
-                if ($c->min_age) {
-                    $hints[] = $c->min_age.'+ años';
-                }
-                if ($c->requires_verification) {
-                    $hints[] = 'pide verificar en recepción';
-                }
+                $hints = array_filter([
+                    $c->constraintsLabel(),
+                    $c->min_age ? $c->min_age.'+ años' : null,
+                    $c->requires_verification ? 'pide verificar en recepción' : null,
+                ]);
                 return [
                     'code' => $c->code,
                     'name' => $c->internal_name,

@@ -40,6 +40,36 @@ class Coupon extends Model
         return $this->auto_apply ? $this->internal_name : ($this->code ?? $this->internal_name);
     }
 
+    private const WEEKDAY_LABELS = [0 => 'Dom', 1 => 'Lun', 2 => 'Mar', 3 => 'Mié', 4 => 'Jue', 5 => 'Vie', 6 => 'Sáb'];
+
+    /**
+     * Texto legible de a qué día/horario aplica este cupón -- usado tanto
+     * en el banner del catálogo como para avisar en vivo en el formulario
+     * de reserva si lo que el cliente eligió no va a calificar.
+     */
+    public function constraintsLabel(): string
+    {
+        $parts = [];
+        if ($this->allowed_weekdays) {
+            $days = collect($this->allowed_weekdays)->sort()->values();
+            $isConsecutive = $days->count() > 1 && $days->every(fn ($d, $i) => $i === 0 || $d === $days[$i - 1] + 1);
+            $parts[] = $isConsecutive
+                ? self::WEEKDAY_LABELS[$days->first()].' a '.self::WEEKDAY_LABELS[$days->last()]
+                : $days->map(fn ($d) => self::WEEKDAY_LABELS[$d])->implode(', ');
+        }
+        if ($this->allowed_time_start && $this->allowed_time_end) {
+            $parts[] = substr($this->allowed_time_start, 0, 5).' a '.substr($this->allowed_time_end, 0, 5);
+        }
+
+        return implode(' · ', $parts);
+    }
+
+    /** Días de la semana permitidos (0=Dom..6=Sáb), vacío = todos. */
+    public function allowedWeekdaysArray(): array
+    {
+        return $this->allowed_weekdays ?? [];
+    }
+
     public function scopeOffers($query)
     {
         return $query->where('auto_apply', true);

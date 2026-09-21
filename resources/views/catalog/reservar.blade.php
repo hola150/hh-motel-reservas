@@ -50,6 +50,8 @@
         .legal { font-size:11.5px; color:#8a8d93; margin-top:14px; text-align:center; }
         .coupon-applied { display:flex; align-items:center; justify-content:space-between; gap:10px; background:#12202b; border:1px solid #2e5a72; color:#9edaff; border-radius:9px; padding:11px 14px; font-size:12.5px; margin-bottom:22px; }
         .coupon-applied a { color:#9edaff; text-decoration:underline; flex:none; font-size:12px; }
+        .coupon-warning { display:none; background:#3a2a12; border:1px solid #7a5a1f; color:#ffd699; border-radius:9px; padding:11px 14px; font-size:12.5px; margin-top:10px; }
+        .coupon-warning.show { display:block; }
     </style>
 </head>
 <body>
@@ -76,6 +78,7 @@
                 <span>🏷️ Cupón aplicado: <strong>{{ $selectedCoupon->internal_name }}</strong></span>
                 <a href="{{ route('catalog.reserve', request()->except('cupon')) }}">Quitar</a>
             </div>
+            <div class="coupon-warning" id="coupon-warning"></div>
         @endif
 
         <form method="POST" action="{{ route('catalog.reserve.store') }}" id="reserve-form">
@@ -148,6 +151,7 @@
     </div>
     <script>
         const hhDurationsByCategory = @json($durationsByCategory->mapWithKeys(fn ($v, $k) => [(string) $k => $v]));
+        const hhCouponConstraints = @json($couponConstraints);
         const hhDurationLabel = (min) => min >= 60 ? (min / 60) + ' h' : min + ' min';
 
         function hhUpdateDurations() {
@@ -177,6 +181,26 @@
             document.getElementById('time_minute').value = minute;
         }
 
+        function hhCheckCouponWindow() {
+            if (!hhCouponConstraints) return;
+            const warning = document.getElementById('coupon-warning');
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+            if (!date || !time) { warning.classList.remove('show'); return; }
+            // new Date('YYYY-MM-DDT12:00:00').getDay() da 0=Dom..6=Sáb, igual
+            // que allowed_weekdays en el modelo -- por eso el mediodía fijo,
+            // para no depender de la zona horaria del navegador.
+            const weekday = new Date(date + 'T12:00:00').getDay();
+            const weekdayOk = hhCouponConstraints.weekdays.length === 0 || hhCouponConstraints.weekdays.includes(weekday);
+            const timeOk = !hhCouponConstraints.timeStart || !hhCouponConstraints.timeEnd || (time >= hhCouponConstraints.timeStart && time <= hhCouponConstraints.timeEnd);
+            if (weekdayOk && timeOk) {
+                warning.classList.remove('show');
+            } else {
+                warning.textContent = `⚠️ El cupón aplica solo ${hhCouponConstraints.label} — con la fecha/hora elegida no vas a poder usarlo.`;
+                warning.classList.add('show');
+            }
+        }
+
         function hhUpdateSummary() {
             const cat = document.getElementById('room_category_id');
             const date = document.getElementById('date').value;
@@ -189,9 +213,10 @@
         }
 
         document.getElementById('reserve-form').addEventListener('submit', hhSyncTime);
-        ['room_category_id','date','time-hour12','time-minute','time-period','duration_minutes'].forEach(id => document.getElementById(id).addEventListener('change', () => { hhSyncTime(); hhUpdateSummary(); }));
+        ['room_category_id','date','time-hour12','time-minute','time-period','duration_minutes'].forEach(id => document.getElementById(id).addEventListener('change', () => { hhSyncTime(); hhUpdateSummary(); hhCheckCouponWindow(); }));
         hhUpdateDurations();
         hhUpdateSummary();
+        hhCheckCouponWindow();
     </script>
 </body>
 </html>

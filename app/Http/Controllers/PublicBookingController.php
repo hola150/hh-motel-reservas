@@ -52,6 +52,12 @@ class PublicBookingController extends Controller
             'selectedRoomId' => $selectedRoomId,
             'selectedCoupon' => $selectedCoupon,
             'durationsByCategory' => $durationsByCategory,
+            'couponConstraints' => $selectedCoupon ? [
+                'weekdays' => $selectedCoupon->allowedWeekdaysArray(),
+                'timeStart' => $selectedCoupon->allowed_time_start ? substr($selectedCoupon->allowed_time_start, 0, 5) : null,
+                'timeEnd' => $selectedCoupon->allowed_time_end ? substr($selectedCoupon->allowed_time_end, 0, 5) : null,
+                'label' => $selectedCoupon->constraintsLabel(),
+            ] : null,
         ]);
     }
 
