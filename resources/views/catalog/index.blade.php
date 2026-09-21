@@ -83,7 +83,10 @@
         .photo-modal { display:none; position:fixed; inset:0; z-index:20; background:rgba(10,10,10,.92); align-items:center; justify-content:center; padding:24px; }
         .photo-modal.is-open { display:flex; }
         .photo-modal img { max-width:min(920px, 96vw); max-height:86vh; object-fit:contain; border-radius:10px; box-shadow:0 12px 40px #000; }
-        .photo-close { position:fixed; top:18px; right:18px; border:1px solid #ffffff66; background:#222; color:#fff; border-radius:24px; padding:10px 16px; font-weight:700; cursor:pointer; }
+        .photo-close { position:fixed; top:18px; right:18px; border:1px solid #ffffff66; background:#222; color:#fff; border-radius:24px; padding:10px 16px; font-weight:700; cursor:pointer; z-index:21; }
+        .video-modal { display:none; position:fixed; inset:0; z-index:20; background:rgba(10,10,10,.92); align-items:center; justify-content:center; padding:24px; }
+        .video-modal.is-open { display:flex; }
+        .video-modal video { max-width:min(920px, 96vw); max-height:86vh; border-radius:10px; box-shadow:0 12px 40px #000; }
         .cat-gallery.empty { aspect-ratio: 16/5; display:flex; align-items:center; justify-content:center; color:#8a8c90; font-size:13px; grid-template-columns:none; }
 
         .cat-body { padding: 22px 24px 26px; }
@@ -194,7 +197,7 @@
                     @if ($videos->isNotEmpty())
                         <div class="video-links">
                             @foreach ($videos as $url)
-                                <a href="{{ $url }}" target="_blank" rel="noopener">Ver video {{ $loop->index + 1 }} →</a>
+                                <a href="{{ $url }}" class="video-trigger" data-video="{{ $url }}" target="_blank" rel="noopener">Ver video {{ $loop->index + 1 }} →</a>
                             @endforeach
                         </div>
                     @endif
@@ -239,6 +242,10 @@
         <button class="photo-close" type="button" id="photo-close">Cerrar ✕</button>
         <img id="photo-modal-image" src="" alt="Foto ampliada">
     </div>
+    <div class="video-modal" id="video-modal" role="dialog" aria-modal="true" aria-label="Reproductor de video">
+        <button class="photo-close" type="button" id="video-close">Cerrar ✕</button>
+        <video id="video-modal-player" controls playsinline></video>
+    </div>
     <script>
         const photoModal = document.getElementById('photo-modal');
         const photoModalImage = document.getElementById('photo-modal-image');
@@ -250,7 +257,27 @@
         }));
         document.getElementById('photo-close').addEventListener('click', closePhoto);
         photoModal.addEventListener('click', (event) => { if (event.target === photoModal) closePhoto(); });
-        document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closePhoto(); });
+
+        // Antes el video abría en pestaña nueva (target="_blank") sin ningún
+        // botón para volver al catálogo -- ahora se reproduce en un modal
+        // con su propio "Cerrar", igual que las fotos.
+        const videoModal = document.getElementById('video-modal');
+        const videoModalPlayer = document.getElementById('video-modal-player');
+        function closeVideo() { videoModal.classList.remove('is-open'); videoModalPlayer.pause(); videoModalPlayer.removeAttribute('src'); videoModalPlayer.load(); }
+        document.querySelectorAll('.video-trigger').forEach((link) => link.addEventListener('click', (event) => {
+            event.preventDefault();
+            videoModalPlayer.src = link.dataset.video;
+            videoModal.classList.add('is-open');
+            videoModalPlayer.play().catch(() => {});
+        }));
+        document.getElementById('video-close').addEventListener('click', closeVideo);
+        videoModal.addEventListener('click', (event) => { if (event.target === videoModal) closeVideo(); });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key !== 'Escape') return;
+            closePhoto();
+            closeVideo();
+        });
     </script>
 </body>
 </html>

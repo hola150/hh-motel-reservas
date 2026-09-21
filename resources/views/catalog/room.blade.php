@@ -55,6 +55,10 @@
         .video-links { display:flex; flex-wrap:wrap; gap:10px; margin: -6px 0 18px; }
         .video-links a { font-size: 12.5px; color:#9edaff; text-decoration:none; border:1px solid #3a5a72; padding:5px 11px; border-radius:20px; }
         .video-links a:hover { border-color:#9edaff; }
+        .video-modal { display:none; position:fixed; inset:0; z-index:20; background:rgba(10,10,10,.92); align-items:center; justify-content:center; padding:24px; }
+        .video-modal.is-open { display:flex; }
+        .video-modal video { max-width:min(920px, 96vw); max-height:86vh; border-radius:10px; box-shadow:0 12px 40px #000; }
+        .video-close { position:fixed; top:18px; right:18px; border:1px solid #ffffff66; background:#222; color:#fff; border-radius:24px; padding:10px 16px; font-weight:700; cursor:pointer; z-index:21; }
 
         table.price-table { width:100%; border-collapse:collapse; margin-bottom: 20px; font-size: 13.5px; }
         table.price-table th { text-align:left; color:#bbbfc6; font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.03em; padding: 0 10px 8px 0; }
@@ -134,7 +138,7 @@
                 @if ($videos->isNotEmpty())
                     <div class="video-links">
                         @foreach ($videos as $url)
-                            <a href="{{ $url }}" target="_blank" rel="noopener">Ver video {{ $loop->index + 1 }} →</a>
+                            <a href="{{ $url }}" class="video-trigger" data-video="{{ $url }}" target="_blank" rel="noopener">Ver video {{ $loop->index + 1 }} →</a>
                         @endforeach
                     </div>
                 @endif
@@ -176,7 +180,27 @@
 
         <footer class="catalog-footer">HH Motel</footer>
     </div>
+    <div class="video-modal" id="video-modal" role="dialog" aria-modal="true" aria-label="Reproductor de video">
+        <button class="video-close" type="button" id="video-close">Cerrar ✕</button>
+        <video id="video-modal-player" controls playsinline></video>
+    </div>
     <script>
+        // Antes el video abría en pestaña nueva (target="_blank") sin ningún
+        // botón para volver a la ficha -- ahora se reproduce en un modal con
+        // su propio "Cerrar".
+        const videoModal = document.getElementById('video-modal');
+        const videoModalPlayer = document.getElementById('video-modal-player');
+        function closeVideo() { videoModal.classList.remove('is-open'); videoModalPlayer.pause(); videoModalPlayer.removeAttribute('src'); videoModalPlayer.load(); }
+        document.querySelectorAll('.video-trigger').forEach((link) => link.addEventListener('click', (event) => {
+            event.preventDefault();
+            videoModalPlayer.src = link.dataset.video;
+            videoModal.classList.add('is-open');
+            videoModalPlayer.play().catch(() => {});
+        }));
+        document.getElementById('video-close').addEventListener('click', closeVideo);
+        videoModal.addEventListener('click', (event) => { if (event.target === videoModal) closeVideo(); });
+        document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeVideo(); });
+
         // navigator.clipboard falla callado (sin lanzar error visible) en
         // varios navegadores embebidos -- como el de WhatsApp -- y sin
         // .catch() el botón igual decía "¡Copiado!" aunque no copió nada.
