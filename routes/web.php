@@ -148,20 +148,25 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::put('/cupones/{coupon}', [CouponController::class, 'update'])->name('coupons.update');
     }); // fin role:administrador
 
+    // Ver el stock queda para recepción (lo necesitan para saber qué ofrecer);
+    // crear, editar y reponer inventario queda solo para administrador.
     Route::get('/productos', [ProductController::class, 'index'])->name('products.index');
+    Route::get('/combos', [ComboController::class, 'index'])->name('combos.index');
+
+    Route::middleware('role:administrador')->group(function () {
     Route::get('/productos/crear', [ProductController::class, 'create'])->name('products.create');
     Route::post('/productos', [ProductController::class, 'store'])->name('products.store');
     Route::get('/productos/{product}/editar', [ProductController::class, 'edit'])->name('products.edit');
     Route::put('/productos/{product}', [ProductController::class, 'update'])->name('products.update');
     Route::post('/productos/{product}/stock', [ProductController::class, 'restock'])->name('products.restock');
 
-    Route::get('/combos', [ComboController::class, 'index'])->name('combos.index');
     Route::get('/combos/crear', [ComboController::class, 'create'])->name('combos.create');
     Route::post('/combos', [ComboController::class, 'store'])->name('combos.store');
     Route::get('/combos/{combo}/editar', [ComboController::class, 'edit'])->name('combos.edit');
     Route::put('/combos/{combo}', [ComboController::class, 'update'])->name('combos.update');
     Route::post('/combos/{combo}/items', [ComboController::class, 'storeItem'])->name('combos.items.store');
     Route::delete('/combos/{combo}/items/{item}', [ComboController::class, 'destroyItem'])->name('combos.items.destroy');
+    }); // fin role:administrador
 
     Route::get('/clientes', [AdminCustomerController::class, 'index'])->name('customers.index');
     Route::get('/clientes/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
@@ -173,6 +178,9 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/personal', [StaffController::class, 'index'])->name('staff.index');
     Route::post('/personal', [StaffController::class, 'store'])->name('staff.store');
     Route::put('/personal/{staff}', [StaffController::class, 'update'])->name('staff.update');
+
+    Route::post('/cuentas', [\App\Http\Controllers\Admin\AccountController::class, 'store'])->name('accounts.store');
+    Route::put('/cuentas/{user}', [\App\Http\Controllers\Admin\AccountController::class, 'update'])->name('accounts.update');
 
     Route::get('/turnos', [ShiftController::class, 'index'])->name('shifts.index');
     Route::post('/turnos', [ShiftController::class, 'store'])->name('shifts.store');

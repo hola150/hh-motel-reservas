@@ -2,7 +2,78 @@
 @section('title', 'Personal')
 @section('content')
     <h1>Personal</h1>
-    <p class="sub">Anfitriones, mucamas y cualquier otro rol -- se usa para armar los turnos y calcular horas extra.</p>
+
+    <div class="card">
+        <h2>Cuentas de acceso al sistema</h2>
+        <p class="sub">Quién puede entrar a este panel (tablero, reservas, caja) con su propio email y contraseña. <b>Administrador</b> ve todo, <b>recepción</b> no entra a Administración (categorías, tarifas, ofertas, personal, etc). Las mucamas no necesitan cuenta acá -- van abajo, en el listado de Personal para turnos.</p>
+        @if (session('status') && str_contains(session('status'), 'contraseña'))
+            <div class="pill" style="display:block; padding:10px 14px; margin-bottom:14px; background:#0f2b22; border:1px solid #1c9169; color:#6ee7b7;">{{ session('status') }}</div>
+        @endif
+        <form method="POST" action="{{ route('admin.accounts.store') }}">
+            @csrf
+            <div class="row2">
+                <div>
+                    <label>Nombre</label>
+                    <input name="name" maxlength="100" required placeholder="Ej. Camila">
+                </div>
+                <div>
+                    <label>Email</label>
+                    <input type="email" name="email" maxlength="255" required placeholder="camila@hhmotel.cl">
+                </div>
+                <div>
+                    <label>Rol</label>
+                    <select name="role" required>
+                        <option value="recepcion">Recepción</option>
+                        <option value="administrador">Administrador</option>
+                        <option value="marketing">Marketing</option>
+                    </select>
+                </div>
+            </div>
+            <div class="actions" style="margin-top:16px;"><button class="btn" type="submit">Crear cuenta</button></div>
+        </form>
+    </div>
+
+    <div class="card">
+        <table>
+            <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+                @forelse ($accounts as $account)
+                    <tr>
+                        <td>{{ $account->name }}</td>
+                        <td>{{ $account->email }}</td>
+                        <td>{{ ucfirst($account->role) }}</td>
+                        <td><span class="pill">{{ $account->is_active ? 'ACTIVA' : 'DESACTIVADA' }}</span></td>
+                        <td>
+                            <details>
+                                <summary>Editar</summary>
+                                <form method="POST" action="{{ route('admin.accounts.update', $account) }}">
+                                    @csrf @method('PUT')
+                                    <input name="name" value="{{ $account->name }}" maxlength="100" required>
+                                    <input type="email" name="email" value="{{ $account->email }}" maxlength="255" required>
+                                    <select name="role">
+                                        <option value="recepcion" @selected($account->role === 'recepcion')>Recepción</option>
+                                        <option value="administrador" @selected($account->role === 'administrador')>Administrador</option>
+                                        <option value="marketing" @selected($account->role === 'marketing')>Marketing</option>
+                                    </select>
+                                    <select name="is_active">
+                                        <option value="1" @selected($account->is_active)>Activa</option>
+                                        <option value="0" @selected(!$account->is_active)>Desactivada</option>
+                                    </select>
+                                    <input type="password" name="password" placeholder="Nueva contraseña (opcional)" autocomplete="new-password">
+                                    <button class="btn secondary" type="submit" style="padding:6px 12px; font-size:12.5px;">Guardar</button>
+                                </form>
+                            </details>
+                        </td>
+                    </tr>
+                @empty
+                    <tr><td colspan="5" style="color:#666;">Todavía no hay cuentas creadas.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <h1 style="margin-top:36px;">Personal para turnos</h1>
+    <p class="sub">Anfitriones, mucamas y cualquier otro rol -- se usa para armar los turnos y calcular horas extra. No es una cuenta de acceso al sistema.</p>
 
     <div class="card">
         <h2>Agregar persona</h2>

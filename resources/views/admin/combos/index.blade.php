@@ -3,11 +3,13 @@
 @section('content')
     <div class="actions" style="justify-content:space-between; margin-bottom:18px;">
         <div><h1>Combos</h1><p class="sub">Paquetes de productos a un precio especial — "2 cervezas por $5.000", "Combo Deseo", etc.</p></div>
-        <a class="btn" href="{{ route('admin.combos.create') }}">+ Nuevo combo</a>
+        @if (auth()->user()->isAdministrador())
+            <a class="btn" href="{{ route('admin.combos.create') }}">+ Nuevo combo</a>
+        @endif
     </div>
     <div class="card">
         <table>
-            <thead><tr><th>Combo</th><th>Incluye</th><th>Precio</th><th>Stock</th><th>Estado</th><th></th></tr></thead>
+            <thead><tr><th>Combo</th><th>Incluye</th><th>Precio</th><th>Stock</th><th>Estado</th>@if(auth()->user()->isAdministrador())<th></th>@endif</tr></thead>
             <tbody>
                 @forelse ($combos as $combo)
                     <tr>
@@ -31,7 +33,9 @@
                             @endif
                         </td>
                         <td><span class="pill">{{ $combo->is_active ? 'ACTIVO' : 'INACTIVO' }}</span></td>
-                        <td><a class="link" href="{{ route('admin.combos.edit', $combo) }}">Editar</a></td>
+                        @if (auth()->user()->isAdministrador())
+                            <td><a class="link" href="{{ route('admin.combos.edit', $combo) }}">Editar</a></td>
+                        @endif
                     </tr>
                 @empty
                     <tr><td colspan="6" style="color:#666;">Todavía no hay combos creados.</td></tr>

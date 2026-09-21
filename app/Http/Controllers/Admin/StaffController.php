@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Staff;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -15,6 +16,7 @@ class StaffController extends Controller
     {
         return view('admin.staff.index', [
             'staff' => Staff::orderBy('role')->orderBy('name')->get(),
+            'accounts' => User::orderBy('role')->orderBy('name')->get(),
         ]);
     }
 

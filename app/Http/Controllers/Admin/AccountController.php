@@ -1,0 +1,60 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+
+class AccountController extends Controller
+{
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'role' => ['required', Rule::in(['administrador', 'recepcion', 'marketing'])],
+        ]);
+
+        $password = Str::password(12);
+
+        $user = User::create([
+            ...$validated,
+            'is_active' => true,
+            'password' => $password,
+        ]);
+
+        AuditLog::record(auth()->id(), 'cuenta.crear', 'User', $user->id, null, $user->only(['name', 'email', 'role']));
+
+        return redirect()->route('admin.staff.index')
+            ->with('status', "Cuenta creada para {$user->email} — contraseña temporal: {$password} (avísale que la cambie apenas entre).");
+    }
+
+    public function update(Request $request, User $user): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'role' => ['required', Rule::in(['administrador', 'recepcion', 'marketing'])],
+            'is_active' => ['sometimes', 'boolean'],
+            'password' => ['nullable', 'string', 'min:8'],
+        ]);
+        $validated['is_active'] = $request->boolean('is_active');
+
+        $old = $user->only(['name', 'email', 'role', 'is_active']);
+        $newPassword = $validated['password'] ?? null;
+        unset($validated['password']);
+        $user->update($validated);
+        if ($newPassword) {
+            $user->update(['password' => $newPassword]);
+        }
+
+        AuditLog::record(auth()->id(), 'cuenta.editar', 'User', $user->id, $old, $user->only(['name', 'email', 'role', 'is_active']));
+
+        return redirect()->route('admin.staff.index')->with('status', 'Cuenta actualizada.'.($newPassword ? ' Contraseña reseteada a: '.$newPassword : ''));
+    }
+}

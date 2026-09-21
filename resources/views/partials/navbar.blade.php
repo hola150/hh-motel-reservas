@@ -90,6 +90,10 @@
                 <a href="{{ route('admin.products.index') }}" class="{{ request()->routeIs('admin.products.*') ? 'hh-active' : '' }}">Productos</a>
                 <a href="{{ route('admin.combos.index') }}" class="{{ request()->routeIs('admin.combos.*') ? 'hh-active' : '' }}">Combos</a>
             </span>
+            <span class="hh-subnav-sep"></span>
+            <span class="hh-subnav-group">
+                <a href="{{ route('admin.staff.index') }}" class="{{ request()->routeIs('admin.staff.*') ? 'hh-active' : '' }}">Personal</a>
+            </span>
         </div>
     @endif
 </div>
