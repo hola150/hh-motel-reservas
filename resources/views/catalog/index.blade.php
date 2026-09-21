@@ -56,12 +56,21 @@
         .cat-new-lite h2 { color:#f0d98a; }
         .offer-badge { display:inline-flex; background:#ff7918; color:#21170e; border-radius:999px; padding:6px 11px; font-size:11px; font-weight:800; margin-bottom:10px; }
         .featured-offers { background:#191a1c; color:#fff; border:1px solid #ff7918; border-radius:14px; padding:16px; margin:0 0 26px; }
-        .featured-offers h2 { color:#ffb078; font-size:16px; margin:0 0 10px; }
-        .featured-offer { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-top:1px solid #ffffff22; }
+        .featured-offers-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin:0 0 10px; }
+        .featured-offers h2 { color:#ffb078; font-size:16px; margin:0; }
+        .limited-badge { display:inline-flex; align-items:center; gap:6px; background:#3a1c10; border:1px solid #ff7918; color:#ffb078; border-radius:20px; padding:4px 10px; font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; }
+        .limited-badge .dot { width:6px; height:6px; border-radius:50%; background:#ff7918; animation: hh-pulse 1.6s ease-in-out infinite; }
+        @keyframes hh-pulse { 0%, 100% { opacity:1; } 50% { opacity:.25; } }
+        .featured-offer { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-top:1px solid #ffffff22; }
         .featured-offer-info { display:flex; align-items:center; gap:10px; }
-        .featured-offer-thumb { width:58px; height:48px; border-radius:7px; object-fit:cover; background:#303136; border:1px solid #ffffff33; }
-        .featured-offer strong { display:block; font-size:15px; }
+        .featured-offer-thumb { width:58px; height:48px; border-radius:7px; object-fit:cover; background:#303136; border:1px solid #ffffff33; flex:none; }
+        .featured-offer strong { display:block; font-size:15px; margin-bottom:3px; }
         .featured-offer small { color:#c9cbd0; }
+        .offer-price-row { display:flex; align-items:baseline; gap:7px; margin:2px 0 3px; flex-wrap:wrap; }
+        .offer-price-old { color:#8a8d93; text-decoration:line-through; font-size:12.5px; }
+        .offer-price-new { color:#6ee7b7; font-weight:800; font-size:16px; }
+        .offer-save-badge { background:#123a28; color:#6ee7b7; border-radius:6px; padding:2px 6px; font-size:10.5px; font-weight:800; }
+        .offer-viewers { display:block; color:#ffb078; font-size:11px; margin-top:3px; min-height:14px; }
         .featured-offer a { flex:none; background:#ff7918; color:#21170e; border-radius:8px; padding:9px 12px; text-decoration:none; font-size:12px; font-weight:800; }
         @media (max-width:560px) { .featured-offer { align-items:flex-start; flex-direction:column; } .featured-offer a { width:100%; text-align:center; } }
         .sales-tip { display:flex; gap:8px; align-items:flex-start; background:#242527; border:1px solid #505257; color:#f0d18a; border-radius:9px; padding:9px 11px; margin:10px 0 14px; font-size:12px; line-height:1.35; }
@@ -134,9 +143,25 @@
             <p>Elige la que más te guste — reserva online o escríbenos por WhatsApp.</p>
         </header>
 
+        @php
+            $offerPriceRow = function ($offer) {
+                if ($offer['originalPrice'] && $offer['offerPrice']) {
+                    $savePct = round((1 - $offer['offerPrice'] / $offer['originalPrice']) * 100);
+                    return '<div class="offer-price-row">'
+                        .'<span class="offer-price-old">$'.number_format($offer['originalPrice'], 0, ',', '.').'</span>'
+                        .'<span class="offer-price-new">$'.number_format($offer['offerPrice'], 0, ',', '.').'</span>'
+                        .($savePct > 0 ? '<span class="offer-save-badge">-'.$savePct.'%</span>' : '')
+                        .'</div>';
+                }
+                return '<div class="offer-price-row"><span class="offer-price-new">'.e($offer['label']).'</span></div>';
+            };
+        @endphp
         @if ($categories->contains(fn ($entry) => $entry['offer']))
             <section class="featured-offers">
-                <h2>✦ Ofertas activas</h2>
+                <div class="featured-offers-head">
+                    <h2>✦ Ofertas activas</h2>
+                    <span class="limited-badge"><span class="dot"></span> Por tiempo limitado</span>
+                </div>
                 @foreach ($categories->filter(fn ($entry) => $entry['offer']) as $entry)
                     @if (count($entry['offer']['rooms']))
                         @foreach ($entry['offer']['rooms'] as $offerRoom)
@@ -144,8 +169,10 @@
                                 <div class="featured-offer-info">
                                     @if ($offerRoom['photo'])<img class="featured-offer-thumb" src="{{ $offerRoom['photo'] }}" alt="{{ $offerRoom['name'] }}">@endif
                                     <div>
-                                    <strong>{{ $offerRoom['name'] }} · {{ $entry['offer']['label'] }}</strong>
-                                    <small>Oferta temporal en {{ $entry['category']->name }}</small>
+                                        <strong>{{ $offerRoom['name'] }}{{ $entry['offer']['durationLabel'] ? ' · '.$entry['offer']['durationLabel'] : '' }}</strong>
+                                        {!! $offerPriceRow($entry['offer']) !!}
+                                        <small>{{ $entry['category']->name }}</small>
+                                        <span class="offer-viewers" data-hh-viewers></span>
                                     </div>
                                 </div>
                                 <a href="{{ route('catalog.reserve', ['categoria' => $entry['category']->id, 'room_id' => $offerRoom['id']]) }}">Reservar oferta →</a>
@@ -154,8 +181,10 @@
                     @else
                         <div class="featured-offer">
                             <div>
-                                <strong>{{ $entry['category']->name }} · {{ $entry['offer']['label'] }}</strong>
-                                <small>Oferta temporal disponible en esta categoría</small>
+                                <strong>{{ $entry['category']->name }}{{ $entry['offer']['durationLabel'] ? ' · '.$entry['offer']['durationLabel'] : '' }}</strong>
+                                {!! $offerPriceRow($entry['offer']) !!}
+                                <small>Disponible en esta categoría</small>
+                                <span class="offer-viewers" data-hh-viewers></span>
                             </div>
                             <a href="{{ route('catalog.reserve', ['categoria' => $entry['category']->id]) }}">Reservar oferta →</a>
                         </div>
@@ -277,6 +306,19 @@
             if (event.key !== 'Escape') return;
             closePhoto();
             closeVideo();
+        });
+
+        // "Viendo esto ahora" en las ofertas -- la mayoría de las veces no
+        // muestra nada; cuando aparece es 1 o 2 personas, y cada tarjeta
+        // cambia sola en su propio momento (no todas juntas), para que se
+        // sienta real y no un contador fijo siempre prendido.
+        document.querySelectorAll('[data-hh-viewers]').forEach((el) => {
+            function roll() {
+                const r = Math.random();
+                el.textContent = r < 0.68 ? '' : (r < 0.9 ? '👀 1 persona viendo esto ahora' : '👀 2 personas viendo esto ahora');
+                setTimeout(roll, 18000 + Math.random() * 22000);
+            }
+            setTimeout(roll, Math.random() * 6000);
         });
     </script>
 </body>

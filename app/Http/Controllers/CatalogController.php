@@ -36,19 +36,32 @@ class CatalogController extends Controller
                 $photos = $category->rooms->flatMap(fn ($room) => $room->photos ?? [])->unique()->values();
                 $videos = $category->rooms->flatMap(fn ($room) => $room->videos ?? [])->unique()->values();
 
+                $prices = $this->pricesFromRows($category->rateRulePrices);
                 $offer = $liveOffers->first(function (Coupon $offer) use ($category) {
                     $categoryIds = $offer->roomCategories->pluck('id');
                     $roomCategoryIds = $offer->rooms->pluck('room_category_id');
                     return ($categoryIds->isEmpty() && $roomCategoryIds->isEmpty()) || $categoryIds->contains($category->id) || $roomCategoryIds->contains($category->id);
                 });
+                // Precio de referencia para mostrar "antes/ahora" en la
+                // oferta -- la duración más corta (la primera de la tabla),
+                // mismo criterio que ya se usa para armar esa tabla.
+                $referencePrice = $prices->first()['hh'] ?? null;
+                $offerPrice = $referencePrice === null ? null : match ($offer?->discount_type) {
+                    'percentage' => (int) round($referencePrice * (1 - $offer->discount_value / 100)),
+                    'precio_fijo' => (int) $offer->discount_value,
+                    default => null,
+                };
                 return [
                     'category' => $category,
                     'photos' => $photos,
                     'videos' => $videos,
-                    'prices' => $this->pricesFromRows($category->rateRulePrices),
+                    'prices' => $prices,
                     'offer' => $offer ? [
                         'label' => $offer->discount_type === 'percentage' ? $offer->discount_value.'% de descuento' : 'Desde $'.number_format($offer->discount_value, 0, ',', '.'),
                         'name' => $offer->internal_name,
+                        'originalPrice' => $offerPrice !== null ? $referencePrice : null,
+                        'offerPrice' => $offerPrice,
+                        'durationLabel' => $prices->first() ? ($prices->first()['duration'] >= 60 ? intdiv($prices->first()['duration'], 60).' h' : $prices->first()['duration'].' min') : null,
                         'rooms' => $offer->rooms->filter(fn ($room) => $room->room_category_id === $category->id)->map(fn ($room) => ['id' => $room->id, 'name' => $room->name, 'photo' => collect($room->photos ?? [])->first()])->values()->all(),
                     ] : null,
                     'salesTip' => $category->sales_tip ?: 'Conoce esta experiencia HH.',
