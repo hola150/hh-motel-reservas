@@ -62,7 +62,8 @@
         .limited-badge .dot { width:6px; height:6px; border-radius:50%; background:#ff7918; animation: hh-pulse 1.6s ease-in-out infinite; }
         @keyframes hh-pulse { 0%, 100% { opacity:1; } 50% { opacity:.25; } }
         .featured-offer { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-top:1px solid #ffffff22; }
-        .featured-offer-info { display:flex; align-items:center; gap:10px; }
+        .featured-offer-info { display:flex; align-items:center; gap:10px; text-decoration:none; flex:1; min-width:0; }
+        .featured-offer-info:hover strong { text-decoration:underline; }
         .featured-offer-thumb { width:58px; height:48px; border-radius:7px; object-fit:cover; background:#303136; border:1px solid #ffffff33; flex:none; }
         .featured-offer strong { display:block; font-size:15px; margin-bottom:3px; }
         .featured-offer small { color:#c9cbd0; }
@@ -166,15 +167,15 @@
                     @if (count($entry['offer']['rooms']))
                         @foreach ($entry['offer']['rooms'] as $offerRoom)
                             <div class="featured-offer">
-                                <div class="featured-offer-info">
+                                <a class="featured-offer-info" href="{{ route('catalog.room', $offerRoom['id']) }}">
                                     @if ($offerRoom['photo'])<img class="featured-offer-thumb" src="{{ $offerRoom['photo'] }}" alt="{{ $offerRoom['name'] }}">@endif
                                     <div>
                                         <strong>{{ $offerRoom['name'] }}{{ $entry['offer']['durationLabel'] ? ' · '.$entry['offer']['durationLabel'] : '' }}</strong>
                                         {!! $offerPriceRow($entry['offer']) !!}
-                                        <small>{{ $entry['category']->name }}</small>
+                                        <small>{{ $entry['category']->name }} · Ver ficha y fotos →</small>
                                         <span class="offer-viewers" data-hh-viewers></span>
                                     </div>
-                                </div>
+                                </a>
                                 <a href="{{ route('catalog.reserve', ['categoria' => $entry['category']->id, 'room_id' => $offerRoom['id']]) }}">Reservar oferta →</a>
                             </div>
                         @endforeach
