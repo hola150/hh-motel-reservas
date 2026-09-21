@@ -29,6 +29,8 @@
         .steps span:first-child { color:var(--hh-accent); border-color:var(--hh-accent); }
         label { display:block; font-size: 12.5px; color:#c1c3c7; margin: 16px 0 6px; }
         input, select { width:100%; box-sizing:border-box; background:#202123; border:1px solid #62656b; color:#f4f5f7; padding:11px 12px; border-radius:8px; font-size:15px; min-height:46px; }
+        input[type="date"], input[type="time"] { color-scheme: dark; }
+        .time-parts { display:grid; grid-template-columns:1fr 1fr 1fr; gap:7px; }
         input:focus, select:focus { outline:none; border-color:var(--hh-accent); box-shadow: 0 0 0 3px #ff791833; }
         .row2 { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
         .honey-field { position:absolute; left:-9999px; top:-9999px; }
@@ -61,6 +63,7 @@
 
         <form method="POST" action="{{ route('catalog.reserve.store') }}" id="reserve-form">
             @csrf
+            <input type="hidden" name="room_id" value="{{ $selectedRoomId ?? '' }}">
             <div class="honey-field" aria-hidden="true">
                 <label for="website">No completar</label>
                 <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
@@ -80,7 +83,12 @@
                 </div>
                 <div>
                     <label for="time">Hora</label>
-                    <input type="time" id="time" required onchange="hhSyncTime()" value="{{ old('time_hour') !== null ? sprintf('%02d:%02d', old('time_hour'), old('time_minute')) : '' }}">
+                    <div class="time-parts" aria-label="Selecciona la hora">
+                        <select id="time-hour12" aria-label="Hora"><option value="">Hora</option>@for ($h = 1; $h <= 12; $h++)<option value="{{ $h }}">{{ $h }}</option>@endfor</select>
+                        <select id="time-minute" aria-label="Minutos"><option value="">Min</option>@foreach ([0,15,30,45] as $m)<option value="{{ $m }}">{{ sprintf('%02d', $m) }}</option>@endforeach</select>
+                        <select id="time-period" aria-label="AM o PM"><option value="">AM/PM</option><option value="AM">AM</option><option value="PM">PM</option></select>
+                    </div>
+                    <input type="hidden" id="time" value="">
                     <input type="hidden" name="time_hour" id="time_hour" value="{{ old('time_hour') }}">
                     <input type="hidden" name="time_minute" id="time_minute" value="{{ old('time_minute') }}">
                 </div>
@@ -135,9 +143,15 @@
         }
 
         function hhSyncTime() {
-            const [h, m] = document.getElementById('time').value.split(':');
-            document.getElementById('time_hour').value = h;
-            document.getElementById('time_minute').value = m;
+            const h12 = parseInt(document.getElementById('time-hour12').value || '0', 10);
+            const minute = parseInt(document.getElementById('time-minute').value || '0', 10);
+            const period = document.getElementById('time-period').value;
+            if (!h12 || !period) return;
+            let hour = h12 % 12;
+            if (period === 'PM') hour += 12;
+            document.getElementById('time').value = `${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`;
+            document.getElementById('time_hour').value = hour;
+            document.getElementById('time_minute').value = minute;
         }
 
         function hhUpdateSummary() {
@@ -152,7 +166,7 @@
         }
 
         document.getElementById('reserve-form').addEventListener('submit', hhSyncTime);
-        ['room_category_id','date','time','duration_minutes'].forEach(id => document.getElementById(id).addEventListener('change', hhUpdateSummary));
+        ['room_category_id','date','time-hour12','time-minute','time-period','duration_minutes'].forEach(id => document.getElementById(id).addEventListener('change', () => { hhSyncTime(); hhUpdateSummary(); }));
         hhUpdateDurations();
         hhUpdateSummary();
     </script>

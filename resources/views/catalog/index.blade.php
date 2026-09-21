@@ -28,7 +28,6 @@
         header.hero .brand img { display:block; width:min(220px, 64vw); max-width:100%; height:auto; max-height:58px; object-fit:contain; }
         header.hero h1 { color:#fff; font-size: 24px; margin: 0 0 7px; letter-spacing: -.03em; }
         header.hero p { color:#c9cbd0; font-size: 13.5px; max-width: 520px; margin: 0 auto 16px; }
-        .hero-btn-row { display:flex; align-items:center; justify-content:center; gap:18px; flex-wrap:wrap; }
         a.hero-btn { display:inline-block; color:#555960; text-decoration:none; padding: 8px 2px; font-weight:700; font-size:14px; }
         a.hero-btn:hover { color:#1a1a1a; text-decoration:underline; text-underline-offset:4px; }
         a.hero-btn.primary { background:var(--hh-accent); color:#21170e; padding:14px 30px; border-radius:10px; box-shadow:0 5px 12px #ff79183d; }
@@ -55,6 +54,18 @@
         .cat-plus h2 { color:#c9a6f5; }
         .cat-max h2 { color:#f7b06a; }
         .cat-new-lite h2 { color:#f0d98a; }
+        .offer-badge { display:inline-flex; background:#ff7918; color:#21170e; border-radius:999px; padding:6px 11px; font-size:11px; font-weight:800; margin-bottom:10px; }
+        .featured-offers { background:#191a1c; color:#fff; border:1px solid #ff7918; border-radius:14px; padding:16px; margin:0 0 26px; }
+        .featured-offers h2 { color:#ffb078; font-size:16px; margin:0 0 10px; }
+        .featured-offer { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-top:1px solid #ffffff22; }
+        .featured-offer-info { display:flex; align-items:center; gap:10px; }
+        .featured-offer-thumb { width:58px; height:48px; border-radius:7px; object-fit:cover; background:#303136; border:1px solid #ffffff33; }
+        .featured-offer strong { display:block; font-size:15px; }
+        .featured-offer small { color:#c9cbd0; }
+        .featured-offer a { flex:none; background:#ff7918; color:#21170e; border-radius:8px; padding:9px 12px; text-decoration:none; font-size:12px; font-weight:800; }
+        @media (max-width:560px) { .featured-offer { align-items:flex-start; flex-direction:column; } .featured-offer a { width:100%; text-align:center; } }
+        .sales-tip { display:flex; gap:8px; align-items:flex-start; background:#242527; border:1px solid #505257; color:#f0d18a; border-radius:9px; padding:9px 11px; margin:10px 0 14px; font-size:12px; line-height:1.35; }
+        .sales-tip::before { content:'✦'; color:var(--hh-accent); font-weight:800; }
 
         .cat-gallery { display:grid; gap:3px; background:#202122; padding:3px; }
         .cat-gallery.gallery-4 { grid-template-columns:2fr 1fr 1fr; grid-template-rows:repeat(2, minmax(92px, 1fr)); aspect-ratio:16/7; }
@@ -118,11 +129,37 @@
             <div class="brand"><img src="https://assets.cdn.filesafe.space/ksYYfSiY8nP4YFvkrJFJ/media/6aab44cf9f8b31b6ab530587.png" alt="HH Motel Santiago Playrooms"></div>
             <h1>Nuestras Playrooms</h1>
             <p>Elige la que más te guste — reserva online o escríbenos por WhatsApp.</p>
-            <div class="hero-btn-row">
-                <a class="hero-btn primary" href="{{ route('catalog.reserve') }}">Reservar online →</a>
-                <a class="hero-btn secondary" href="{{ $whatsappUrl }}" target="_blank" rel="noopener">Escribir por WhatsApp</a>
-            </div>
         </header>
+
+        @if ($categories->contains(fn ($entry) => $entry['offer']))
+            <section class="featured-offers">
+                <h2>✦ Ofertas activas</h2>
+                @foreach ($categories->filter(fn ($entry) => $entry['offer']) as $entry)
+                    @if (count($entry['offer']['rooms']))
+                        @foreach ($entry['offer']['rooms'] as $offerRoom)
+                            <div class="featured-offer">
+                                <div class="featured-offer-info">
+                                    @if ($offerRoom['photo'])<img class="featured-offer-thumb" src="{{ $offerRoom['photo'] }}" alt="{{ $offerRoom['name'] }}">@endif
+                                    <div>
+                                    <strong>{{ $offerRoom['name'] }} · {{ $entry['offer']['label'] }}</strong>
+                                    <small>Oferta temporal en {{ $entry['category']->name }}</small>
+                                    </div>
+                                </div>
+                                <a href="{{ route('catalog.reserve', ['categoria' => $entry['category']->id, 'room_id' => $offerRoom['id']]) }}">Reservar oferta →</a>
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="featured-offer">
+                            <div>
+                                <strong>{{ $entry['category']->name }} · {{ $entry['offer']['label'] }}</strong>
+                                <small>Oferta temporal disponible en esta categoría</small>
+                            </div>
+                            <a href="{{ route('catalog.reserve', ['categoria' => $entry['category']->id]) }}">Reservar oferta →</a>
+                        </div>
+                    @endif
+                @endforeach
+            </section>
+        @endif
 
         @forelse ($categories as $entry)
             @php [$category, $photos, $videos, $prices, $catWhatsapp] = [$entry['category'], $entry['photos'], $entry['videos'], $entry['prices'], $entry['whatsappUrl']]; @endphp
@@ -140,6 +177,7 @@
                 <div class="cat-body">
                     <h2>{{ $category->name }}</h2>
                     <div class="cat-cap">Hasta {{ $category->base_capacity }} personas{{ $category->extra_guest_from ? ' · desde la '.$category->extra_guest_from.'ª persona, cargo adicional' : '' }}</div>
+                    <div class="sales-tip">{{ $entry['salesTip'] }}</div>
 
                     @if ($category->description)
                         <div class="cat-desc">{{ $category->description }}</div>
@@ -184,7 +222,6 @@
 
                     <div class="cat-btn-row">
                         <a class="cat-btn primary" href="{{ route('catalog.reserve', ['categoria' => $category->id]) }}">Reservar online →</a>
-                        <a class="cat-btn" href="{{ $catWhatsapp }}" target="_blank" rel="noopener">Por WhatsApp →</a>
                     </div>
                 </div>
             </section>
@@ -192,7 +229,11 @@
             <p style="text-align:center; color:#777;">Todavía no hay categorías activas para mostrar.</p>
         @endforelse
 
-        <footer class="catalog-footer">HH Motel</footer>
+        <footer class="catalog-footer">
+            <p>¿Tienes dudas sobre cuál elegir?</p>
+            <a class="hero-btn secondary" href="{{ $whatsappUrl }}" target="_blank" rel="noopener">Escribir por WhatsApp</a>
+            <div style="margin-top:18px">HH Motel</div>
+        </footer>
     </div>
     <div class="photo-modal" id="photo-modal" role="dialog" aria-modal="true" aria-label="Vista ampliada de la foto">
         <button class="photo-close" type="button" id="photo-close">Cerrar ✕</button>

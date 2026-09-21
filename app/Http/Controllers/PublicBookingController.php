@@ -29,6 +29,7 @@ class PublicBookingController extends Controller
     {
         $categories = RoomCategory::where('is_active', true)->orderBy('display_order')->get();
         $selectedCategoryId = (int) $request->query('categoria', $categories->first()?->id);
+        $selectedRoomId = $request->integer('room_id') ?: null;
 
         $durationsByCategory = RateRulePrice::select('room_category_id', 'duration_minutes')
             ->distinct()
@@ -39,6 +40,7 @@ class PublicBookingController extends Controller
         return view('catalog.reservar', [
             'categories' => $categories,
             'selectedCategoryId' => $selectedCategoryId,
+            'selectedRoomId' => $selectedRoomId,
             'durationsByCategory' => $durationsByCategory,
         ]);
     }
@@ -54,6 +56,7 @@ class PublicBookingController extends Controller
 
         $validated = $request->validate([
             'room_category_id' => ['required', 'exists:room_categories,id'],
+            'room_id' => ['nullable', 'integer', 'exists:rooms,id'],
             'date' => ['required', 'date', 'after_or_equal:today'],
             'time_hour' => ['required', 'integer', 'min:0', 'max:23'],
             'time_minute' => ['required', 'integer', 'min:0', 'max:59'],
@@ -72,12 +75,13 @@ class PublicBookingController extends Controller
         $endsAt = $startsAt->copy()->addMinutes((int) $validated['duration_minutes']);
 
         $operationalSetting = \App\Models\OperationalSetting::current();
-        $room = Room::where('room_category_id', $validated['room_category_id'])
+        $roomQuery = Room::where('room_category_id', $validated['room_category_id'])
             ->where('operational_status', 'activa')
-            ->floorWingEnabled($operationalSetting)
-            ->orderBy('name')
-            ->get()
-            ->first(fn (Room $r) => $availability->isAvailable($r, $startsAt, $endsAt));
+            ->floorWingEnabled($operationalSetting);
+        if (!empty($validated['room_id'])) {
+            $roomQuery->whereKey($validated['room_id']);
+        }
+        $room = $roomQuery->orderBy('name')->get()->first(fn (Room $r) => $availability->isAvailable($r, $startsAt, $endsAt));
 
         if (! $room) {
             return back()->withInput()->withErrors(['duration_minutes' => 'No hay habitaciones libres de ese tipo para ese horario — probá otra fecha, hora o duración.']);
