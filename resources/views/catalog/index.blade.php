@@ -63,6 +63,7 @@
         @keyframes hh-pulse { 0%, 100% { opacity:1; } 50% { opacity:.25; } }
         .featured-offer { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-top:1px solid #ffffff22; }
         .featured-offer-info { display:flex; align-items:center; gap:10px; text-decoration:none; flex:1; min-width:0; }
+        .featured-offer-text { flex:1; min-width:0; }
         .featured-offer-info:hover strong { text-decoration:underline; }
         .featured-offer-thumb { width:58px; height:48px; border-radius:7px; object-fit:cover; background:#303136; border:1px solid #ffffff33; flex:none; }
         .featured-offer strong { display:block; font-size:15px; margin-bottom:3px; }
@@ -169,7 +170,7 @@
                             <div class="featured-offer">
                                 <a class="featured-offer-info" href="{{ route('catalog.room', $offerRoom['id']) }}">
                                     @if ($offerRoom['photo'])<img class="featured-offer-thumb" src="{{ $offerRoom['photo'] }}" alt="{{ $offerRoom['name'] }}">@endif
-                                    <div>
+                                    <div class="featured-offer-text">
                                         <strong>{{ $offerRoom['name'] }}{{ $entry['offer']['durationLabel'] ? ' · '.$entry['offer']['durationLabel'] : '' }}</strong>
                                         {!! $offerPriceRow($entry['offer']) !!}
                                         <small>{{ $entry['category']->name }} · Ver ficha y fotos →</small>
@@ -181,7 +182,7 @@
                         @endforeach
                     @else
                         <div class="featured-offer">
-                            <div>
+                            <div class="featured-offer-text">
                                 <strong>{{ $entry['category']->name }}{{ $entry['offer']['durationLabel'] ? ' · '.$entry['offer']['durationLabel'] : '' }}</strong>
                                 {!! $offerPriceRow($entry['offer']) !!}
                                 <small>Disponible en esta categoría</small>
