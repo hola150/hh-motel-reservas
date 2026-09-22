@@ -73,7 +73,6 @@ class GhlClient
         [$firstName, $lastName] = $this->splitName($fullName);
 
         $payload = array_filter([
-            'locationId' => $this->locationId,
             'phone' => $phoneE164,
             'firstName' => $firstName,
             'lastName' => $lastName,
@@ -83,12 +82,15 @@ class GhlClient
         $existingId = $this->findContactIdByPhone($phoneE164);
 
         if ($existingId) {
+            // A diferencia de la creación, PUT /contacts/{id} rechaza
+            // locationId con 422 ("property locationId should not exist") --
+            // el contacto ya pertenece a esa location, no hace falta repetirlo.
             $this->http()->put("/contacts/{$existingId}", $payload)->throw();
 
             return $existingId;
         }
 
-        $response = $this->http()->post('/contacts/', $payload)->throw();
+        $response = $this->http()->post('/contacts/', ['locationId' => $this->locationId, ...$payload])->throw();
 
         return (string) $response->json('contact.id');
     }
