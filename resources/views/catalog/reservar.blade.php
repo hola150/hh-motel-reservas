@@ -59,6 +59,18 @@
         .avail-status.no { background:#3a1c1c; border:1px solid #7a2d2d; color:#f3b8b8; }
         .avail-status .spin { width:11px; height:11px; border-radius:50%; border:2px solid currentColor; border-top-color:transparent; animation:hh-spin .7s linear infinite; flex:none; }
         @keyframes hh-spin { to { transform:rotate(360deg); } }
+        .extras { margin-top:22px; padding-top:4px; }
+        .extras h2 { font-size:17px; margin:0 0 4px; }
+        .extras p { color:#c1c3c7; font-size:12px; margin:0 0 12px; }
+        .extra-list { display:grid; gap:9px; }
+        .extra-item { display:flex; align-items:center; gap:10px; background:#202123; border:1px solid #62656b; border-radius:9px; padding:10px 11px; }
+        .extra-item input { width:18px; min-height:18px; accent-color:var(--hh-accent); flex:none; }
+        .extra-copy { flex:1; min-width:0; }
+        .extra-name { color:#fff; font-size:13px; font-weight:700; }
+        .extra-detail { color:#aeb1b7; font-size:11px; margin-top:2px; }
+        .extra-price { color:#ffab72; font-size:13px; font-weight:750; white-space:nowrap; }
+        .extra-qty { width:58px; min-height:34px; padding:6px; font-size:13px; }
+        .extras-total { color:#ffbd91; font-size:12px; margin-top:10px; text-align:right; }
     </style>
 </head>
 <body>
@@ -128,6 +140,30 @@
 
             <label for="guests_count">Cantidad de personas</label>
             <input type="number" id="guests_count" name="guests_count" min="1" max="10" value="{{ old('guests_count', 2) }}" required>
+
+            @if ($products->isNotEmpty() || $combos->isNotEmpty())
+                <section class="extras" aria-labelledby="extras-title">
+                    <h2 id="extras-title">Haz tu experiencia aún más especial</h2>
+                    <p>Agrega productos o combos a tu reserva. Se suman al saldo de la estadía.</p>
+                    <div class="extra-list">
+                        @foreach ($combos as $combo)
+                            <label class="extra-item">
+                                <input type="checkbox" name="combo_quantities[{{ $combo->id }}]" value="1" data-extra-price="{{ $combo->price }}" data-extra-toggle>
+                                <span class="extra-copy"><span class="extra-name">{{ $combo->name }}</span><span class="extra-detail">{{ $combo->description ?: 'Combo especial' }}</span></span>
+                                <span class="extra-price">+ ${{ number_format($combo->price, 0, ',', '.') }}</span>
+                            </label>
+                        @endforeach
+                        @foreach ($products as $product)
+                            <label class="extra-item">
+                                <input type="checkbox" name="quantities[{{ $product->id }}]" value="1" data-extra-price="{{ $product->price }}" data-extra-toggle>
+                                <span class="extra-copy"><span class="extra-name">{{ $product->name }}</span><span class="extra-detail">Disponible para agregar a tu estadía</span></span>
+                                <span class="extra-price">+ ${{ number_format($product->price, 0, ',', '.') }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    <div class="extras-total" id="extras-total">Sin extras seleccionados</div>
+                </section>
+            @endif
 
             <div class="row2">
                 <div>
@@ -265,12 +301,21 @@
             summary.innerHTML = `<strong>${cat.selectedOptions[0].textContent} · ${duration}</strong><small>${formatted} a las ${time} · disponibilidad se confirma al enviar</small>`;
         }
 
+        function hhUpdateExtrasTotal() {
+            let total = 0;
+            document.querySelectorAll('[data-extra-toggle]:checked').forEach((input) => { total += Number(input.dataset.extraPrice || 0); });
+            const el = document.getElementById('extras-total');
+            if (el) el.textContent = total ? `Extras seleccionados: + $${total.toLocaleString('es-CL')}` : 'Sin extras seleccionados';
+        }
+
         document.getElementById('reserve-form').addEventListener('submit', hhSyncTime);
         ['room_category_id','date','time-hour12','time-minute','time-period','duration_minutes'].forEach(id => document.getElementById(id).addEventListener('change', () => { hhSyncTime(); hhUpdateSummary(); hhCheckCouponWindow(); hhCheckAvailability(); }));
         hhUpdateDurations();
         hhUpdateSummary();
         hhCheckCouponWindow();
         hhCheckAvailability();
+        document.querySelectorAll('[data-extra-toggle]').forEach((input) => input.addEventListener('change', hhUpdateExtrasTotal));
+        hhUpdateExtrasTotal();
     </script>
 </body>
 </html>

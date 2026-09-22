@@ -51,7 +51,10 @@
             @if ($booking->discount_amount > 0)
                 <div class="row discount-row"><span class="muted">Descuento aplicado{{ $booking->coupon_code_snapshot ? ' ('.$booking->coupon_code_snapshot.')' : '' }}</span><span>-${{ number_format($booking->discount_amount, 0, ',', '.') }}</span></div>
             @endif
-            <div class="row"><span class="muted">Total a pagar</span><span>${{ number_format($booking->price_final, 0, ',', '.') }}</span></div>
+            @foreach ($booking->addons as $addon)
+                <div class="row"><span class="muted">{{ $addon->description }}</span><span>${{ number_format($addon->amount, 0, ',', '.') }}</span></div>
+            @endforeach
+            <div class="row"><span class="muted">Total a pagar</span><span>${{ number_format($booking->balanceDue(), 0, ',', '.') }}</span></div>
         </div>
 
         <div class="next-steps">

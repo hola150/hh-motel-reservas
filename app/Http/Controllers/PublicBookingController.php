@@ -7,11 +7,15 @@ use App\Exceptions\PricingException;
 use App\Exceptions\RoomNotAvailableException;
 use App\Models\Coupon;
 use App\Models\Customer;
+use App\Models\Combo;
+use App\Models\Product;
 use App\Models\RateRulePrice;
 use App\Models\Room;
 use App\Models\RoomCategory;
 use App\Services\Booking\AvailabilityChecker;
 use App\Services\Booking\BookingService;
+use App\Services\Booking\ConsumptionService;
+use App\Exceptions\InsufficientStockException;
 use App\Support\Phone;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -47,12 +51,18 @@ class PublicBookingController extends Controller
             ->groupBy('room_category_id')
             ->map(fn ($rows) => $rows->pluck('duration_minutes')->map(fn ($m) => (int) $m)->unique()->sort()->values());
 
+        $products = Product::where('is_active', true)->orderBy('display_order')->orderBy('name')->get();
+        $combos = Combo::with('items.product')->where('is_active', true)->orderBy('display_order')->orderBy('name')->get()
+            ->filter(fn (Combo $combo) => ! $combo->isOutOfStock())->values();
+
         return view('catalog.reservar', [
             'categories' => $categories,
             'selectedCategoryId' => $selectedCategoryId,
             'selectedRoomId' => $selectedRoomId,
             'selectedCoupon' => $selectedCoupon,
             'durationsByCategory' => $durationsByCategory,
+            'products' => $products,
+            'combos' => $combos,
             'couponConstraints' => $selectedCoupon ? [
                 'weekdays' => $selectedCoupon->allowedWeekdaysArray(),
                 'timeStart' => $selectedCoupon->allowed_time_start ? substr($selectedCoupon->allowed_time_start, 0, 5) : null,
@@ -62,7 +72,7 @@ class PublicBookingController extends Controller
         ]);
     }
 
-    public function store(Request $request, BookingService $bookingService, AvailabilityChecker $availability): RedirectResponse
+    public function store(Request $request, BookingService $bookingService, ConsumptionService $consumption, AvailabilityChecker $availability): RedirectResponse
     {
         // "00" con cero a la izquierda no pasa la regla integer de Laravel
         // (FILTER_VALIDATE_INT la rechaza), y una hora en punto siempre manda "00".
@@ -85,6 +95,10 @@ class PublicBookingController extends Controller
             'email' => ['nullable', 'email'],
             'coupon_code' => ['nullable', 'string', 'max:50'],
             'birth_date' => ['nullable', 'date', 'before_or_equal:today'],
+            'quantities' => ['nullable', 'array'],
+            'quantities.*' => ['nullable', 'integer', 'min:0', 'max:10'],
+            'combo_quantities' => ['nullable', 'array'],
+            'combo_quantities.*' => ['nullable', 'integer', 'min:0', 'max:5'],
             // Campo trampa para bots -- invisible para una persona real
             // (oculto por CSS), un bot que autocompleta todo lo llena.
             'website' => ['prohibited'],
@@ -128,12 +142,44 @@ class PublicBookingController extends Controller
             return back()->withInput()->withErrors(['duration_minutes' => $e->getMessage()]);
         }
 
+        // Los extras se vuelven a resolver desde la base de datos: el navegador
+        // solo envía IDs y cantidades, nunca precios. Se guardan como consumo
+        // de la reserva y el stock se descuenta con la misma lógica de recepción.
+        try {
+            $productQuantities = collect($validated['quantities'] ?? [])
+                ->mapWithKeys(fn ($quantity, $id) => [(int) $id => (int) $quantity])
+                ->filter(fn ($quantity) => $quantity > 0);
+            $products = Product::where('is_active', true)->whereIn('id', $productQuantities->keys())->get()->keyBy('id');
+            foreach ($productQuantities as $productId => $quantity) {
+                if (! isset($products[$productId])) {
+                    continue;
+                }
+                $consumption->addProduct($booking, $products[$productId], $quantity, null);
+            }
+
+            $comboQuantities = collect($validated['combo_quantities'] ?? [])
+                ->mapWithKeys(fn ($quantity, $id) => [(int) $id => (int) $quantity])
+                ->filter(fn ($quantity) => $quantity > 0);
+            $combos = Combo::with('items.product')->where('is_active', true)->whereIn('id', $comboQuantities->keys())->get()->keyBy('id');
+            foreach ($comboQuantities as $comboId => $quantity) {
+                if (! isset($combos[$comboId]) || $combos[$comboId]->isOutOfStock()) {
+                    continue;
+                }
+                $consumption->addCombo($booking, $combos[$comboId], $quantity, null);
+            }
+        } catch (InsufficientStockException $e) {
+            // La reserva ya tiene su habitación bloqueada; informamos para que
+            // recepción pueda agregar el extra disponible manualmente.
+            return redirect()->route('catalog.booked', $booking->code)
+                ->with('warning', 'La reserva quedó creada, pero uno de los extras seleccionados se agotó. Recepción podrá ofrecerte otra alternativa.');
+        }
+
         return redirect()->route('catalog.booked', $booking->code);
     }
 
     public function booked(string $code): View
     {
-        $booking = \App\Models\Booking::with(['room.category'])->where('code', $code)->firstOrFail();
+        $booking = \App\Models\Booking::with(['room.category', 'addons'])->where('code', $code)->firstOrFail();
 
         return view('catalog.booked', ['booking' => $booking]);
     }
