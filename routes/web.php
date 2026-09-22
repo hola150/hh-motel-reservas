@@ -131,6 +131,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
     Route::get('/habitaciones', [AdminRoomController::class, 'index'])->name('rooms.index');
     Route::get('/habitaciones/crear', [AdminRoomController::class, 'create'])->name('rooms.create');
+    Route::get('/habitaciones/qr', [AdminRoomController::class, 'qrSheet'])->name('rooms.qr_sheet');
     Route::post('/habitaciones', [AdminRoomController::class, 'store'])->name('rooms.store');
     Route::get('/habitaciones/{room}/editar', [AdminRoomController::class, 'edit'])->name('rooms.edit');
     Route::put('/habitaciones/{room}', [AdminRoomController::class, 'update'])->name('rooms.update');

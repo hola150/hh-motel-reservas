@@ -5,6 +5,7 @@
         <div><h1>Playrooms</h1><p class="sub">Inventario real de Playrooms — reemplaza los de ejemplo aquí.</p></div>
         <div class="actions">
             <a class="btn secondary" href="{{ route('catalog.index') }}" target="_blank" rel="noopener">Ver catálogo público ↗</a>
+            <a class="btn secondary" href="{{ route('admin.rooms.qr_sheet') }}">QR de habitaciones →</a>
             <a class="btn" href="{{ route('admin.rooms.create') }}">+ Nuevo Playroom</a>
         </div>
     </div>

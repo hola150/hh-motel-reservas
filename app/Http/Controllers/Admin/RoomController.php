@@ -27,6 +27,19 @@ class RoomController extends Controller
         return view('admin.rooms.index', ['rooms' => $rooms]);
     }
 
+    /**
+     * Hoja imprimible con el QR de cada Playroom -- para no tener que entrar
+     * habitación por habitación a buscarlo en el formulario de edición.
+     */
+    public function qrSheet(): View
+    {
+        $rooms = Room::with('category')->get()
+            ->sortBy(fn (Room $room) => sprintf('%03d-%s', $room->category->display_order, $room->name))
+            ->values();
+
+        return view('admin.rooms.qr-sheet', ['rooms' => $rooms]);
+    }
+
     public function create(): View
     {
         return $this->form(new Room());
