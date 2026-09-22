@@ -25,6 +25,7 @@ class FurnitureTest extends TestCase
             '2026_08_18_120003_create_rooms_table.php',
             '2026_08_18_120018_create_audit_logs_table.php',
             '2026_09_15_230000_create_room_furniture_tables.php',
+            '2026_09_16_050000_add_videos_to_rooms.php',
         ] as $migration) {
             (require database_path('migrations/'.$migration))->up();
         }
