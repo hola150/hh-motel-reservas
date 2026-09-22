@@ -94,6 +94,10 @@
             <span class="hh-subnav-group">
                 <a href="{{ route('admin.staff.index') }}" class="{{ request()->routeIs('admin.staff.*') ? 'hh-active' : '' }}">Personal</a>
             </span>
+            <span class="hh-subnav-sep"></span>
+            <span class="hh-subnav-group">
+                <a href="{{ route('admin.ghl.index') }}" class="{{ request()->routeIs('admin.ghl.*') ? 'hh-active' : '' }}">Integración GHL</a>
+            </span>
         </div>
     @endif
 </div>

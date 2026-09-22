@@ -11,6 +11,7 @@ use App\Models\Coupon;
 use App\Models\CouponRedemption;
 use App\Models\Customer;
 use App\Models\Room;
+use App\Services\Integrations\GhlBookingSync;
 use App\Services\Pricing\CouponValidator;
 use App\Services\Pricing\PriceCalculator;
 use App\Services\Pricing\PromotionResolver;
@@ -27,6 +28,7 @@ class BookingService
         private AvailabilityChecker $availabilityChecker,
         private BookingCodeGenerator $codeGenerator,
         private PaymentService $paymentService,
+        private GhlBookingSync $ghlSync,
     ) {
     }
 
@@ -96,7 +98,7 @@ class BookingService
         $priceFinal = max(0, $priceOriginal - $discountAmount);
 
         try {
-            return DB::transaction(function () use ($room, $customer, $startsAt, $endsAt, $durationMinutes, $data, $pricing, $coupon, $discountAmount, $priceOriginal, $priceFinal) {
+            $booking = DB::transaction(function () use ($room, $customer, $startsAt, $endsAt, $durationMinutes, $data, $pricing, $coupon, $discountAmount, $priceOriginal, $priceFinal) {
                 $booking = Booking::create([
                     'code' => $this->codeGenerator->generate($startsAt),
                     'customer_id' => $customer->id,
@@ -141,6 +143,13 @@ class BookingService
 
                 return $booking;
             });
+
+            // Fuera de la transacción a propósito: si GHL falla o está lento,
+            // la reserva ya quedó confirmada igual -- nunca debe poder
+            // tumbarla ni demorarla. GhlBookingSync nunca lanza excepción.
+            $this->ghlSync->sync($booking);
+
+            return $booking;
         } catch (QueryException $e) {
             // SQLSTATE 23P01 = exclusion_violation (choque con bookings_no_overlap)
             if ($e->getCode() === '23P01' || str_contains($e->getMessage(), 'bookings_no_overlap')) {

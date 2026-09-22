@@ -193,5 +193,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::post('/turnos', [ShiftController::class, 'store'])->name('shifts.store');
     Route::put('/turnos/{shift}', [ShiftController::class, 'update'])->name('shifts.update');
     Route::delete('/turnos/{shift}', [ShiftController::class, 'destroy'])->name('shifts.destroy');
+
+    Route::get('/integraciones/ghl', [\App\Http\Controllers\Admin\GhlTestController::class, 'index'])->name('ghl.index');
+    Route::post('/integraciones/ghl/probar', [\App\Http\Controllers\Admin\GhlTestController::class, 'test'])->name('ghl.test');
     }); // fin role:administrador
 });

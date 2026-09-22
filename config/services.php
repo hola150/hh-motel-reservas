@@ -39,6 +39,15 @@ return [
     // de pago" (ver reservations/show.blade.php) -- sin esto configurado, ese
     // mensaje NO incluye datos de transferencia (para no mandarle a un
     // cliente una cuenta inventada o de otro negocio).
+    // Cuenta/subcuenta de GoHighLevel de HH Motel -- Private Integration
+    // Token (no OAuth), generado en Configuración → Integraciones privadas
+    // de esa subcuenta puntual, con permisos de contactos y tags.
+    'ghl' => [
+        'private_token' => env('GHL_PRIVATE_TOKEN'),
+        'location_id' => env('GHL_LOCATION_ID'),
+        'custom_field_pago_id' => env('GHL_CUSTOM_FIELD_PAGO_ID'),
+    ],
+
     'hh_payment' => [
         'bank_titular' => env('HH_BANK_TITULAR'),
         'bank_rut' => env('HH_BANK_RUT'),
