@@ -426,7 +426,7 @@
 
         <div class="sidebar">
             <div class="sidebar-title"><h2>Por llegar</h2><span class="count">{{ $grouped['proximas']->count() }}</span></div>
-            <p class="sidebar-hint">Habitaciones libres pero con una reserva tan próxima (o que ya debería haber llegado) que ya no conviene ofrecerlas a un walk-in. Marca el check-in apenas llegue el cliente.</p>
+            <p class="sidebar-hint">Habitaciones actualmente libres, pero con una reserva próxima. No las asignes a clientes sin reserva. Marca el check-in cuando llegue el cliente reservado.</p>
             @if ($grouped['proximas']->isEmpty())
                 <p class="sidebar-empty">Ninguna por ahora.</p>
             @else

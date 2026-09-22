@@ -128,7 +128,7 @@ class ReservationController extends Controller
             'document_type' => ['required', 'in:rut,pasaporte'],
             'document_number' => ['required', 'string', 'max:30', function ($attribute, $value, $fail) use ($request) {
                 if ($request->input('document_type') === 'rut' && $value && ! \App\Support\Rut::isValid($value)) {
-                    $fail('El RUT no es válido — revisá el dígito verificador.');
+                    $fail('El RUT no es válido — revisa el dígito verificador.');
                 }
             }],
             'nationality' => ['nullable', 'string', 'max:60'],

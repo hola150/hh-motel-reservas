@@ -249,7 +249,7 @@ class RoomBoardController extends Controller
             'cleaned_by' => ['required', 'string', Rule::in($names)],
         ], [
             'cleaned_by.required' => 'Falta indicar quién hizo el aseo.',
-            'cleaned_by.in' => 'Elegí una persona de aseo válida.',
+            'cleaned_by.in' => 'Elige una persona de aseo válida.',
         ]);
 
         $old = $room->only(['operational_status', 'aseo_reported_by', 'aseo_reported_at']);

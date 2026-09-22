@@ -284,6 +284,9 @@
 
                 <label>Personas</label>
                 <input type="number" name="guests_count" min="1" max="10" value="{{ old('guests_count', 2) }}" required>
+
+                <label>Abono <span class="hint" style="margin:0;">— si el cliente paga solo una parte ahora, opcional</span></label>
+                <input type="number" name="deposit_amount" id="deposit-amount" min="0" step="1" value="{{ old('deposit_amount') }}" placeholder="Ej. 10000">
             </div>
 
             <div class="panel">

@@ -36,7 +36,7 @@ class MucamaAuthController extends Controller
             'pin' => ['required', 'digits:4'],
             'next' => ['nullable', 'string'],
         ], [
-            'staff_id.required' => 'Elegí tu nombre.',
+            'staff_id.required' => 'Elige tu nombre.',
             'pin.digits' => 'El PIN tiene 4 dígitos.',
         ]);
 

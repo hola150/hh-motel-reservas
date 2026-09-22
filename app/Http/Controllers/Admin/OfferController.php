@@ -87,7 +87,7 @@ class OfferController extends Controller
         }
 
         if (empty($validated['room_ids']) && empty($validated['category_ids'])) {
-            return back()->withInput()->withErrors(['room_ids' => 'Elegí al menos una habitación o una categoría para la oferta.']);
+            return back()->withInput()->withErrors(['room_ids' => 'Elige al menos una habitación o una categoría para la oferta.']);
         }
 
         $old = $offer->exists ? $offer->toArray() : null;

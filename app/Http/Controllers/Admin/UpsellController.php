@@ -74,7 +74,7 @@ class UpsellController extends Controller
         $errors = [];
         if ($validated['type'] === 'category_upgrade') {
             if (empty($validated['from_room_category_id']) || empty($validated['to_room_category_id'])) {
-                $errors['from_room_category_id'] = 'Elegí la categoría de origen y la de destino.';
+                $errors['from_room_category_id'] = 'Elige la categoría de origen y la de destino.';
             } elseif ($validated['from_room_category_id'] === $validated['to_room_category_id']) {
                 $errors['to_room_category_id'] = 'La categoría destino tiene que ser distinta a la de origen.';
             }
@@ -91,7 +91,7 @@ class UpsellController extends Controller
             }
         }
         if ($validated['type'] === 'combo' && empty($validated['combo_id'])) {
-            $errors['combo_id'] = 'Elegí el combo.';
+            $errors['combo_id'] = 'Elige el combo.';
         }
         if ($errors) {
             return back()->withInput()->withErrors($errors);
