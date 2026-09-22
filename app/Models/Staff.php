@@ -28,4 +28,14 @@ class Staff extends Model
     {
         return $this->belongsTo(Room::class, 'last_qr_room_id');
     }
+
+    public function shiftLogs(): HasMany
+    {
+        return $this->hasMany(StaffShiftLog::class);
+    }
+
+    public function openShiftLog(): ?StaffShiftLog
+    {
+        return $this->shiftLogs()->whereNull('ended_at')->latest('started_at')->first();
+    }
 }

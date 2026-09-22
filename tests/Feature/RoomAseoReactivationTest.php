@@ -43,6 +43,7 @@ class RoomAseoReactivationTest extends TestCase
             '2026_09_16_020000_add_legal_hours_to_staff.php',
             '2026_09_22_010022_add_pin_to_staff_table.php',
             '2026_09_22_010843_add_last_qr_scan_to_staff_table.php',
+            '2026_09_22_012410_create_staff_shift_logs_table.php',
         ] as $migration) {
             (require database_path('migrations/'.$migration))->up();
         }
@@ -212,5 +213,29 @@ class RoomAseoReactivationTest extends TestCase
         $fresh = $booking->fresh();
         $this->assertSame('Ana Mucama', $fresh->room_checked_by);
         $this->assertNotNull($fresh->room_checked_at);
+    }
+
+    /**
+     * Login/logout funcionan como marca real de entrada/salida de turno
+     * (StaffShiftLog) -- distinto del horario planificado (Shift). Un
+     * segundo login sin haber cerrado sesión antes no abre un turno nuevo.
+     */
+    public function test_login_opens_a_shift_log_and_logout_closes_it(): void
+    {
+        $mucama = Staff::create(['name' => 'Ana Mucama', 'role' => 'Mucama', 'is_active' => true, 'pin' => '1234']);
+
+        $this->post('/qr/mucamas/entrar', ['staff_id' => $mucama->id, 'pin' => '1234']);
+        $this->assertNotNull($mucama->openShiftLog());
+
+        // Un segundo login (por ejemplo, la sesión expiró en el celular pero
+        // no cerró sesión a propósito) no abre un turno duplicado.
+        $this->post('/qr/mucamas/entrar', ['staff_id' => $mucama->id, 'pin' => '1234']);
+        $this->assertSame(1, \App\Models\StaffShiftLog::where('staff_id', $mucama->id)->count());
+
+        $this->withSession(['mucama_staff_id' => $mucama->id])->post('/qr/mucamas/salir');
+
+        $this->assertNull($mucama->openShiftLog());
+        $log = \App\Models\StaffShiftLog::where('staff_id', $mucama->id)->firstOrFail();
+        $this->assertNotNull($log->ended_at);
     }
 }

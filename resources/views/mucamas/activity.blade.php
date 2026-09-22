@@ -23,7 +23,15 @@
         .status-tag.reported { background:#0f2b22; color:#6ee7b7; }
         .status-tag.done { background:#1a2a1a; color:#7fbf8f; }
         .status-tag.none { background:#262626; color:#888; }
+        .shift-tag { display:inline-block; margin-top:4px; font-size:11px; }
+        .shift-tag.on { color:#6ee7b7; }
+        .shift-tag.off { color:#777; }
         .empty { color:#777; padding:30px; text-align:center; }
+        h2.section { font-size:14px; margin:30px 0 12px; color:#999; text-transform:uppercase; letter-spacing:.04em; }
+        table.log-table { width:100%; border-collapse:collapse; font-size:13px; }
+        table.log-table th { text-align:left; color:#888; font-weight:500; font-size:11px; text-transform:uppercase; padding:0 10px 8px 0; }
+        table.log-table td { padding:8px 10px 8px 0; border-top:1px solid #292929; }
+        table.log-table td.open { color:#6ee7b7; font-weight:700; }
     </style>
 </head>
 <body>
@@ -36,8 +44,13 @@
         <div class="mucama-row">
             <div class="who">
                 <strong>{{ $mucama->name }}</strong>
+                @if ($mucama->shiftLogs->isNotEmpty())
+                    <span class="shift-tag on">🟢 En turno desde {{ $mucama->shiftLogs->first()->started_at->timezone('America/Santiago')->format('H:i') }}</span>
+                @else
+                    <span class="shift-tag off">⚪ Fuera de turno</span>
+                @endif
                 @if (!$mucama->pin)
-                    <small style="color:#e88a9a;">Sin PIN asignado -- no puede entrar al panel</small>
+                    <small style="display:block; color:#e88a9a;">Sin PIN asignado -- no puede entrar al panel</small>
                 @endif
             </div>
             <div class="where">
@@ -60,6 +73,25 @@
     @empty
         <p class="empty">No hay mucamas activas cargadas en Personal.</p>
     @endforelse
+
+    <h2 class="section">Registro de turnos de hoy</h2>
+    @if ($todayLogs->isEmpty())
+        <p class="empty">Todavía no hay entradas registradas hoy.</p>
+    @else
+        <table class="log-table">
+            <thead><tr><th>Mucama</th><th>Entrada</th><th>Salida</th><th>Duración</th></tr></thead>
+            <tbody>
+                @foreach ($todayLogs as $log)
+                    <tr>
+                        <td>{{ $log->staff->name }}</td>
+                        <td>{{ $log->started_at->timezone('America/Santiago')->format('H:i') }}</td>
+                        <td class="{{ $log->ended_at ? '' : 'open' }}">{{ $log->ended_at ? $log->ended_at->timezone('America/Santiago')->format('H:i') : 'En turno' }}</td>
+                        <td>{{ intdiv($log->durationMinutes(), 60) }}h {{ str_pad($log->durationMinutes() % 60, 2, '0', STR_PAD_LEFT) }}min</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
 </div>
 </body>
 </html>

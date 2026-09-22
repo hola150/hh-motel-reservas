@@ -111,7 +111,7 @@
             <p class="section-hint">Tocá una para confirmar que quedó en condiciones antes de que llegue el huésped.</p>
             @forelse ($upcoming as $entry)
                 @php $checked = $entry['status']['next_booking']->room_checked_at; @endphp
-                <a class="row" href="{{ route('rooms.qr.show', $entry['room']) }}" style="text-decoration:none; color:inherit; justify-content:space-between;">
+                <a class="row" href="{{ route('rooms.qr.show', $entry['room']) }}" style="text-decoration:none;">
                     <span class="name">{{ $entry['room']->name }}</span>
                     <span style="text-align:right;">
                         <span class="meta" style="display:block;">{{ $entry['status']['next_booking']->starts_at->timezone('America/Santiago')->format('H:i') }}</span>
