@@ -17,7 +17,8 @@
            de esta misma página) -- el !important gana la herencia para
            cualquier texto que no fije su propio color, así que esta tarjeta
            oscura necesita el suyo explícito en vez de heredar del body. */
-        .mucama-row { display:flex; align-items:center; justify-content:space-between; gap:14px; background:#1c1c1c; border:1px solid #333; border-radius:10px; padding:16px 18px; margin-bottom:10px; color:#eee; }
+        .mucama-card { background:#1c1c1c; border:1px solid #333; border-radius:10px; padding:16px 18px; margin-bottom:10px; color:#eee; }
+        .mucama-row { display:flex; align-items:center; justify-content:space-between; gap:14px; }
         .mucama-row .who strong { display:block; font-size:15px; }
         .mucama-row .who small { color:#999; font-size:12px; }
         .mucama-row .where { text-align:right; }
@@ -51,39 +52,41 @@
     <p class="sub">Última habitación que cada una escaneó por QR y cuándo · se avisa solo, sin recargar · <a href="{{ route('mucamas.activity') }}" style="color:#ff7918;">actualizar ahora</a></p>
 
     @forelse ($mucamas as $mucama)
-        <div class="mucama-row">
-            <div class="who">
-                <strong>{{ $mucama->name }}</strong>
-                @if ($mucama->shiftLogs->isNotEmpty())
-                    <span class="shift-tag on">🟢 En turno desde {{ $mucama->shiftLogs->first()->started_at->timezone('America/Santiago')->format('H:i') }}</span>
-                @else
-                    <span class="shift-tag off">⚪ Fuera de turno</span>
-                @endif
-                @if (!$mucama->pin)
-                    <small style="display:block; color:#e88a9a;">Sin PIN asignado -- no puede entrar al panel</small>
-                @endif
-            </div>
-            <div class="where">
-                @if ($mucama->lastQrRoom)
-                    <div class="room">{{ $mucama->lastQrRoom->name }} <span style="color:#999; font-weight:500;">· {{ $mucama->lastQrRoom->category->name }}</span></div>
-                    <div class="ago">hace {{ $mucama->last_qr_seen_at->diffForHumans(null, true) }}</div>
-                    @if ($mucama->lastQrRoom->operational_status === 'aseo' && $mucama->lastQrRoom->aseo_reported_at)
-                        <span class="status-tag reported">Reportó, falta confirmar</span>
-                    @elseif ($mucama->lastQrRoom->operational_status === 'aseo')
-                        <span class="status-tag working">Trabajando en esto</span>
+        <div class="mucama-card">
+            <div class="mucama-row">
+                <div class="who">
+                    <strong>{{ $mucama->name }}</strong>
+                    @if ($mucama->shiftLogs->isNotEmpty())
+                        <span class="shift-tag on">🟢 En turno desde {{ $mucama->shiftLogs->first()->started_at->timezone('America/Santiago')->format('H:i') }}</span>
                     @else
-                        <span class="status-tag done">Ya liberada</span>
+                        <span class="shift-tag off">⚪ Fuera de turno</span>
                     @endif
-                @else
-                    <div class="ago">Todavía no escaneó ninguna habitación</div>
-                    <span class="status-tag none">Sin actividad</span>
-                @endif
+                    @if (!$mucama->pin)
+                        <small style="display:block; color:#e88a9a;">Sin PIN asignado -- no puede entrar al panel</small>
+                    @endif
+                </div>
+                <div class="where">
+                    @if ($mucama->lastQrRoom)
+                        <div class="room">{{ $mucama->lastQrRoom->name }} <span style="color:#999; font-weight:500;">· {{ $mucama->lastQrRoom->category->name }}</span></div>
+                        <div class="ago">hace {{ $mucama->last_qr_seen_at->diffForHumans(null, true) }}</div>
+                        @if ($mucama->lastQrRoom->operational_status === 'aseo' && $mucama->lastQrRoom->aseo_reported_at)
+                            <span class="status-tag reported">Reportó, falta confirmar</span>
+                        @elseif ($mucama->lastQrRoom->operational_status === 'aseo')
+                            <span class="status-tag working">Trabajando en esto</span>
+                        @else
+                            <span class="status-tag done">Ya liberada</span>
+                        @endif
+                    @else
+                        <div class="ago">Todavía no escaneó ninguna habitación</div>
+                        <span class="status-tag none">Sin actividad</span>
+                    @endif
+                </div>
             </div>
+            @php $route = $routesByStaff->get($mucama->id); @endphp
+            @if ($route && $route->count() > 1)
+                <div class="route-trail">Ruta de hoy: {{ $route->map(fn ($stop) => $stop['room'].' ('.$stop['at'].')')->implode(' → ') }}</div>
+            @endif
         </div>
-        @php $route = $routesByStaff->get($mucama->id); @endphp
-        @if ($route && $route->count() > 1)
-            <div class="route-trail" style="margin:-4px 0 10px 4px;">Ruta de hoy: {{ $route->map(fn ($stop) => $stop['room'].' ('.$stop['at'].')')->implode(' → ') }}</div>
-        @endif
     @empty
         <p class="empty">No hay mucamas activas cargadas en Personal.</p>
     @endforelse
