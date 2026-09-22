@@ -196,8 +196,14 @@
         a.checkout-btn.pending-balance { background:#2a2010; border-color:#6b5a1e; color:#e8a23f; }
         a.checkout-btn.pending-balance:hover { border-color:#e8a23f; color:#ffcf7a; }
         .bookings-btn { display:block; width:100%; box-sizing:border-box; text-align:center; margin-top:8px; text-decoration:none; padding:8px; border-radius:7px; font-size:12.5px; font-weight:600; background:none; font-family:inherit; cursor:pointer; }
-        .bookings-btn.has-bookings { background:#2a2410; border:1px solid #8a6f1e; color:#f0c95f; font-weight:800; }
-        .bookings-btn.has-bookings:hover { border-color:#f0c95f; background:#352c12; }
+        /* hh-theme.css (inyectado por partials.navbar, que en el documento
+           queda DESPUÉS de este <style>) trae su propia
+           "a.bookings-btn.has-bookings" -- misma o mayor especificidad que
+           la de acá, así que gana igual sin importar qué tan abajo esté
+           este bloque. Hace falta una especificidad mayor de verdad
+           (calificado por .card), no solo igualarla. */
+        .card a.bookings-btn.has-bookings { background:#2a2410; border:1px solid #8a6f1e; color:#f0c95f; font-weight:800; }
+        .card a.bookings-btn.has-bookings:hover { border-color:#f0c95f; background:#352c12; }
         .bookings-btn.empty { background:transparent; border:1px dashed #333; color:#666; font-weight:500; }
         .bookings-btn.empty:hover { border-color:#555; color:#999; }
         .copy-link-btn { display:block; width:100%; box-sizing:border-box; text-align:center; margin-top:8px; padding:8px; border-radius:7px; font-size:12.5px; font-weight:600; font-family:inherit; cursor:pointer; background:#1c2f3a; border:1px solid #3a5a72; color:#7fbcdc; }
