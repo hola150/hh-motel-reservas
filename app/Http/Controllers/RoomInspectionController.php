@@ -24,11 +24,17 @@ class RoomInspectionController extends Controller
     {
         $itemKeys = array_keys(RoomInspection::ITEMS);
 
+        // "checklist.*" no alcanza -- también matchea "checklist.furniture"
+        // (que es un array de ítems, no "ok"/"falla") y esa fila siempre
+        // fallaba la regla in:ok,falla. Los ítems fijos y el mobiliario se
+        // validan por separado.
         $validated = $request->validate([
             'inspected_by' => ['required', 'string', 'max:100'],
             'shift' => ['required', 'in:Mañana,Tarde,Noche,Madrugada'],
             'checklist' => ['required', 'array'],
-            'checklist.*' => ['required', 'in:ok,falla'],
+            ...collect($itemKeys)->mapWithKeys(fn (string $key) => ["checklist.{$key}" => ['required', 'in:ok,falla']])->all(),
+            'checklist.furniture' => ['nullable', 'array'],
+            'checklist.furniture.*' => ['required', 'in:ok,falla'],
             'notes' => ['nullable', 'string', 'max:500'],
             'defects' => ['nullable', 'string', 'max:1000'],
             'photos' => ['nullable', 'array', 'max:6'],
