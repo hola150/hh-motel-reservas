@@ -42,7 +42,13 @@
     <div class="wrap">
         <div class="brand">HH MOTEL</div>
         <h1>Panel de mucamas</h1>
-        <p class="sub">Se actualiza solo cada 60s</p>
+        <p class="sub">
+            Hola, {{ $mucama->name }} · se actualiza solo cada 60s
+            <form method="POST" action="{{ route('mucamas.logout') }}" style="display:inline;">
+                @csrf
+                <button type="submit" style="background:none; border:none; color:#ff7918; font-size:inherit; cursor:pointer; text-decoration:underline; padding:0; font-family:inherit;">cerrar sesión</button>
+            </form>
+        </p>
 
         <section class="pending">
             <h2>⚠ Pendientes de aseo <span class="count">{{ $pendingAseo->count() }}</span></h2>

@@ -70,24 +70,26 @@
                         ✓ Reportada por <strong>{{ $room->aseo_reported_by }}</strong> a las {{ $room->aseo_reported_at->timezone('America/Santiago')->format('H:i') }}.<br>
                         Recepción todavía tiene que confirmarla para volver a quedar disponible.
                     </div>
-                @elseif ($cleaningStaff->isEmpty())
-                    <div class="banner error">No hay mucamas activas cargadas en el sistema -- avisale a recepción antes de poder reportar.</div>
-                @else
+                @elseif ($mucama)
                     <form method="POST" action="{{ route('rooms.qr.report_aseo', $room) }}">
                         @csrf
-                        <label for="cleaned_by">¿Quién hizo el aseo?</label>
-                        <select id="cleaned_by" name="cleaned_by" required>
-                            <option value="" selected disabled>Elegí tu nombre</option>
-                            @foreach ($cleaningStaff as $name)
-                                <option value="{{ $name }}">{{ $name }}</option>
-                            @endforeach
-                        </select>
+                        <p class="info" style="margin-top:0;">Conectada como <strong>{{ $mucama->name }}</strong></p>
                         <button class="submit" type="submit">Reportar aseo listo →</button>
                     </form>
                     <p class="info">Recepción confirma después de este aviso -- la habitación no vuelve a disponible sola.</p>
+                @else
+                    <p class="info">Iniciá sesión con tu PIN para poder reportar el aseo de esta habitación.</p>
+                    <a class="submit" style="display:block; text-align:center; text-decoration:none;" href="{{ route('mucamas.login', ['next' => route('rooms.qr.show', $room)]) }}">Iniciar sesión →</a>
                 @endif
             @else
                 <p class="info">Esta habitación no está esperando aseo ahora mismo.</p>
+            @endif
+
+            @if ($mucama)
+                <form method="POST" action="{{ route('mucamas.logout') }}" style="text-align:center; margin-top:14px;">
+                    @csrf
+                    <button type="submit" style="background:none; border:none; color:#62656c; font-size:12.5px; cursor:pointer; text-decoration:underline;">Cerrar sesión ({{ $mucama->name }})</button>
+                </form>
             @endif
 
             @auth

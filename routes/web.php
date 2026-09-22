@@ -52,11 +52,16 @@ Route::get('/reservas/{code}/pase', [BookingPassController::class, 'preview'])->
 Route::get('/reservas/{code}/pase.pdf', [BookingPassController::class, 'download'])->name('bookings.pass.pdf');
 
 // QR pegado en la puerta de cada habitación + panel general de mucamas --
-// sin login, las mucamas son solo un roster (Staff) sin cuenta de acceso.
+// login liviano por PIN (ver MucamaAuthController), no el guard de auth()
+// del panel interno (Staff no es un usuario del sistema).
+Route::get('/qr/mucamas/entrar', [\App\Http\Controllers\MucamaAuthController::class, 'showLogin'])->name('mucamas.login');
+Route::post('/qr/mucamas/entrar', [\App\Http\Controllers\MucamaAuthController::class, 'login'])->middleware('throttle:15,1')->name('mucamas.login.store');
+Route::post('/qr/mucamas/salir', [\App\Http\Controllers\MucamaAuthController::class, 'logout'])->name('mucamas.logout');
+
 Route::get('/qr/habitacion/{room}', [\App\Http\Controllers\RoomQrController::class, 'show'])->name('rooms.qr.show');
 Route::get('/qr/habitacion/{room}/imagen.png', [\App\Http\Controllers\RoomQrController::class, 'image'])->name('rooms.qr.image');
-Route::post('/qr/habitacion/{room}/aseo', [\App\Http\Controllers\RoomQrController::class, 'reportAseo'])->middleware('throttle:20,1')->name('rooms.qr.report_aseo');
-Route::get('/qr/mucamas', [\App\Http\Controllers\RoomQrController::class, 'mucamaPanel'])->name('rooms.qr.mucama_panel');
+Route::post('/qr/habitacion/{room}/aseo', [\App\Http\Controllers\RoomQrController::class, 'reportAseo'])->middleware(['throttle:20,1', 'mucama'])->name('rooms.qr.report_aseo');
+Route::get('/qr/mucamas', [\App\Http\Controllers\RoomQrController::class, 'mucamaPanel'])->middleware('mucama')->name('rooms.qr.mucama_panel');
 Route::get('/qr/mucamas/imagen.png', [\App\Http\Controllers\RoomQrController::class, 'mucamaPanelImage'])->name('rooms.qr.mucama_panel_image');
 
 Route::get('/login', [LoginController::class, 'create'])->middleware('guest')->name('login');

@@ -34,6 +34,7 @@ class RoomAseoReactivationTest extends TestCase
             '2026_09_22_004138_add_aseo_report_to_rooms_table.php',
             '2026_09_16_010000_create_staff_and_shifts_tables.php',
             '2026_09_16_020000_add_legal_hours_to_staff.php',
+            '2026_09_22_010022_add_pin_to_staff_table.php',
         ] as $migration) {
             (require database_path('migrations/'.$migration))->up();
         }
@@ -80,18 +81,19 @@ class RoomAseoReactivationTest extends TestCase
     }
 
     /**
-     * El QR de la puerta lo escanea la mucama SIN login -- confirma que la
-     * ruta pública realmente no exige auth, que deja la habitación en
-     * 'aseo' (no la reactiva sola) y que recepción ve ese reporte como
-     * contexto al confirmar.
+     * El QR de la puerta lo escanea la mucama, que ahora necesita haber
+     * iniciado sesión con su PIN (ver EnsureMucamaSession) -- ya no elige su
+     * nombre de una lista, así que no puede reportar "a nombre de" otra.
+     * Confirma también que el reporte deja la habitación en 'aseo' (no la
+     * reactiva sola) y que recepción ve ese reporte como contexto al
+     * confirmar.
      */
-    public function test_maid_can_report_aseo_via_the_public_qr_route_without_login(): void
+    public function test_logged_in_maid_can_report_aseo_via_the_qr_route(): void
     {
-        Staff::create(['name' => 'Ana Mucama', 'role' => 'Mucama', 'is_active' => true]);
+        $mucama = Staff::create(['name' => 'Ana Mucama', 'role' => 'Mucama', 'is_active' => true, 'pin' => '1234']);
 
-        $response = $this->post("/qr/habitacion/{$this->room->id}/aseo", [
-            'cleaned_by' => 'Ana Mucama',
-        ]);
+        $response = $this->withSession(['mucama_staff_id' => $mucama->id])
+            ->post("/qr/habitacion/{$this->room->id}/aseo");
 
         $response->assertRedirect();
         $fresh = $this->room->fresh();
@@ -110,16 +112,45 @@ class RoomAseoReactivationTest extends TestCase
         $this->assertNull($confirmed->aseo_reported_at);
     }
 
+    public function test_reporting_aseo_without_a_maid_session_redirects_to_login(): void
+    {
+        Staff::create(['name' => 'Ana Mucama', 'role' => 'Mucama', 'is_active' => true, 'pin' => '1234']);
+
+        $response = $this->post("/qr/habitacion/{$this->room->id}/aseo");
+
+        $this->assertStringContainsString('/qr/mucamas/entrar', $response->headers->get('Location'));
+        $this->assertNull($this->room->fresh()->aseo_reported_at);
+    }
+
     public function test_reporting_aseo_is_rejected_once_the_room_is_no_longer_awaiting_it(): void
     {
-        Staff::create(['name' => 'Ana Mucama', 'role' => 'Mucama', 'is_active' => true]);
+        $mucama = Staff::create(['name' => 'Ana Mucama', 'role' => 'Mucama', 'is_active' => true, 'pin' => '1234']);
         $this->room->update(['operational_status' => 'activa']);
 
-        $response = $this->post("/qr/habitacion/{$this->room->id}/aseo", [
-            'cleaned_by' => 'Ana Mucama',
-        ]);
+        $response = $this->withSession(['mucama_staff_id' => $mucama->id])
+            ->post("/qr/habitacion/{$this->room->id}/aseo");
 
-        $response->assertSessionHasErrors('cleaned_by');
+        $response->assertSessionHasErrors('pin');
         $this->assertNull($this->room->fresh()->aseo_reported_at);
+    }
+
+    public function test_maid_login_requires_the_correct_pin(): void
+    {
+        $mucama = Staff::create(['name' => 'Ana Mucama', 'role' => 'Mucama', 'is_active' => true, 'pin' => '1234']);
+
+        $response = $this->post('/qr/mucamas/entrar', ['staff_id' => $mucama->id, 'pin' => '9999']);
+
+        $response->assertSessionHasErrors('pin');
+        $this->assertGuest();
+    }
+
+    public function test_maid_login_succeeds_with_the_correct_pin(): void
+    {
+        $mucama = Staff::create(['name' => 'Ana Mucama', 'role' => 'Mucama', 'is_active' => true, 'pin' => '1234']);
+
+        $response = $this->post('/qr/mucamas/entrar', ['staff_id' => $mucama->id, 'pin' => '1234']);
+
+        $response->assertRedirect(route('rooms.qr.mucama_panel'));
+        $response->assertSessionHas('mucama_staff_id', $mucama->id);
     }
 }

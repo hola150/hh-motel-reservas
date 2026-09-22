@@ -25,6 +25,7 @@ class StaffController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:100'],
             'role' => ['required', 'string', 'max:50'],
+            'pin' => ['nullable', 'digits:4'],
             'legal_hours_per_week' => ['nullable', 'integer', 'min:0', 'max:100'],
         ]);
 
@@ -39,14 +40,21 @@ class StaffController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:100'],
             'role' => ['required', 'string', 'max:50'],
+            'pin' => ['nullable', 'digits:4'],
             'legal_hours_per_week' => ['nullable', 'integer', 'min:0', 'max:100'],
             'is_active' => ['sometimes', 'boolean'],
         ]);
         $validated['is_active'] = $request->boolean('is_active');
+        // Campo en blanco = no tocar el PIN que ya tenía -- si querían
+        // sacárselo de verdad, "resetear" es la acción explícita, no dejar
+        // el campo vacío sin querer al editar otra cosa.
+        if (! $validated['pin']) {
+            unset($validated['pin']);
+        }
 
         $old = $staff->toArray();
         $staff->update($validated);
-        AuditLog::record(auth()->id(), 'personal.editar', 'Staff', $staff->id, $old, $staff->toArray());
+        AuditLog::record(auth()->id(), 'personal.editar', 'Staff', $staff->id, $old, $staff->fresh()->toArray());
 
         return redirect()->route('admin.staff.index')->with('status', 'Datos actualizados.');
     }

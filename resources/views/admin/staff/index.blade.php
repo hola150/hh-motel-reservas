@@ -73,7 +73,7 @@
     </div>
 
     <h1 style="margin-top:36px;">Personal para turnos</h1>
-    <p class="sub">Anfitriones, mucamas y cualquier otro rol -- se usa para armar los turnos y calcular horas extra. No es una cuenta de acceso al sistema.</p>
+    <p class="sub">Anfitriones, mucamas y cualquier otro rol -- se usa para armar los turnos y calcular horas extra. No es una cuenta de acceso al sistema. Las mucamas sí tienen un PIN de 4 dígitos para entrar al <a href="{{ route('rooms.qr.mucama_panel') }}" target="_blank" rel="noopener">panel/QR de mucamas</a> como ellas mismas.</p>
 
     <div class="card">
         <h2>Agregar persona</h2>
@@ -94,6 +94,10 @@
                     </datalist>
                 </div>
                 <div>
+                    <label>PIN (4 dígitos, mucamas)</label>
+                    <input type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" name="pin" placeholder="Ej. 1234">
+                </div>
+                <div>
                     <label>Horas legales por semana</label>
                     <input type="number" name="legal_hours_per_week" min="0" max="100" placeholder="Ej. 45">
                 </div>
@@ -104,12 +108,13 @@
 
     <div class="card">
         <table>
-            <thead><tr><th>Nombre</th><th>Rol</th><th>Horas legales/semana</th><th>Estado</th><th></th></tr></thead>
+            <thead><tr><th>Nombre</th><th>Rol</th><th>PIN</th><th>Horas legales/semana</th><th>Estado</th><th></th></tr></thead>
             <tbody>
                 @forelse ($staff as $person)
                     <tr>
                         <td>{{ $person->name }}</td>
                         <td>{{ $person->role }}</td>
+                        <td>{{ $person->pin ? '✓ Asignado' : '— Sin PIN' }}</td>
                         <td>{{ $person->legal_hours_per_week ?? '—' }}</td>
                         <td><span class="pill">{{ $person->is_active ? 'ACTIVO' : 'INACTIVO' }}</span></td>
                         <td>
@@ -119,6 +124,7 @@
                                     @csrf @method('PUT')
                                     <input name="name" value="{{ $person->name }}" maxlength="100" required>
                                     <input name="role" value="{{ $person->role }}" maxlength="50" required>
+                                    <input type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" name="pin" placeholder="{{ $person->pin ? 'Nuevo PIN (dejar vacío = no cambiar)' : 'PIN (4 dígitos)' }}">
                                     <input type="number" name="legal_hours_per_week" value="{{ $person->legal_hours_per_week }}" min="0" max="100" placeholder="Horas legales/semana">
                                     <select name="is_active">
                                         <option value="1" @selected($person->is_active)>Activo</option>
@@ -130,7 +136,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" style="color:#666;">Todavía no hay nadie cargado.</td></tr>
+                    <tr><td colspan="6" style="color:#666;">Todavía no hay nadie cargado.</td></tr>
                 @endforelse
             </tbody>
         </table>
