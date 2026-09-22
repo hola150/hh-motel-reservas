@@ -11,15 +11,18 @@ if [ "$EMPTY_DB" = "0" ]; then
     php artisan db:seed --force
 fi
 
-# DIAGNÓSTICO TEMPORAL -- listar todas las reservas antes de decidir si se
-# limpian como datos de prueba. Solo lectura. Se saca en el próximo commit.
+# LIMPIEZA TEMPORAL DE DATOS DE PRUEBA -- confirmado explícitamente por el
+# usuario tras revisar el listado completo (15 reservas, 6 clientes, todas
+# de prueba, incluida "Alain Marchant"). Payments primero (restrictOnDelete
+# bloquea borrar la reserva si no). Booking_addons/guests/coupon_redemptions/
+# integration_outbox/tracking_data se van solos por cascadeOnDelete. Se saca
+# del arranque en el próximo commit -- corre una sola vez.
 php artisan tinker --execute="
-echo 'BOOKDIAG total_reservas='.App\Models\Booking::count().PHP_EOL;
-echo 'BOOKDIAG total_clientes='.App\Models\Customer::count().PHP_EOL;
-echo 'BOOKDIAG total_pagos='.App\Models\Payment::count().PHP_EOL;
-foreach (App\Models\Booking::with('customer')->orderBy('created_at')->get() as \$b) {
-    echo 'BOOKDIAG '.\$b->code.' | '.\$b->created_at->toDateTimeString().' | cliente='.(\$b->customer->name ?? '?').' '.(\$b->customer->phone_e164 ?? '?').' | estado='.\$b->booking_status.' | pago='.\$b->payment_status.PHP_EOL;
-}
-" 2>&1 | grep 'BOOKDIAG'
+echo 'CLEANUP antes: reservas='.App\Models\Booking::count().' clientes='.App\Models\Customer::count().' pagos='.App\Models\Payment::count().PHP_EOL;
+App\Models\Payment::query()->delete();
+App\Models\Booking::query()->delete();
+App\Models\Customer::query()->delete();
+echo 'CLEANUP despues: reservas='.App\Models\Booking::count().' clientes='.App\Models\Customer::count().' pagos='.App\Models\Payment::count().PHP_EOL;
+" 2>&1 | grep 'CLEANUP'
 
 exec php artisan serve --host=0.0.0.0 --port="${PORT:-10000}"
