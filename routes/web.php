@@ -44,6 +44,11 @@ Route::get('/catalogo/reservar', [PublicBookingController::class, 'create'])->na
 Route::get('/catalogo/reservar/disponibilidad', [PublicBookingController::class, 'checkAvailability'])->middleware('throttle:30,1')->name('catalog.reserve.availability');
 Route::post('/catalogo/reservar', [PublicBookingController::class, 'store'])->middleware('throttle:8,1')->name('catalog.reserve.store');
 Route::get('/catalogo/reservado/{code}', [PublicBookingController::class, 'booked'])->name('catalog.booked');
+// El pase PDF se manda directo al cliente por WhatsApp (ver el botón de
+// "instrucciones de pago" en reservations/show) -- tiene que poder abrirlo
+// sin loguearse, el código de reserva ya funciona como el token de acceso.
+Route::get('/reservas/{code}/pase', [BookingPassController::class, 'preview'])->name('bookings.pass.preview');
+Route::get('/reservas/{code}/pase.pdf', [BookingPassController::class, 'download'])->name('bookings.pass.pdf');
 
 Route::get('/login', [LoginController::class, 'create'])->middleware('guest')->name('login');
 Route::post('/login', [LoginController::class, 'store'])->middleware(['guest', 'throttle:8,1'])->name('login.store');
@@ -58,8 +63,6 @@ Route::get('/buscar', [ReservationSearchController::class, 'index'])->name('rese
 Route::get('/calendario', [CalendarController::class, 'index'])->name('calendar.index');
 Route::post('/reservar', [ReservationController::class, 'store'])->name('reservations.store');
 Route::get('/reservas/{code}', [ReservationController::class, 'show'])->name('reservations.show');
-Route::get('/reservas/{code}/pase', [BookingPassController::class, 'preview'])->name('bookings.pass.preview');
-Route::get('/reservas/{code}/pase.pdf', [BookingPassController::class, 'download'])->name('bookings.pass.pdf');
 Route::get('/reservas/{code}/editar', [ReservationController::class, 'edit'])->name('reservations.edit');
 Route::put('/reservas/{code}', [ReservationController::class, 'update'])->name('reservations.update');
 

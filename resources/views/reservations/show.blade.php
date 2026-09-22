@@ -41,6 +41,10 @@
         a.pay-btn { display:block; text-align:center; background:#ff7918; color:#fff; padding:13px; border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; }
         a.pay-btn-inline { margin-top:14px; }
         a.whatsapp-btn { display:inline-block; background:#25d366; border:1px solid #25d366; color:#0b2816; padding:8px 14px; border-radius:7px; font-size:12.5px; font-weight:700; text-decoration:none; }
+        .payment-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; margin:-4px 0 16px; }
+        button.copy-btn { background:#2a2a2a; border:1px solid #444; color:#eee; padding:8px 14px; border-radius:7px; font-size:12.5px; font-weight:700; cursor:pointer; font-family:inherit; }
+        button.copy-btn:hover { border-color:#ff7918; color:#ff7918; }
+        .visually-hidden { position:absolute; left:-9999px; top:-9999px; }
         table.payments { width:100%; border-collapse: collapse; font-size: 13px; }
         table.payments th { text-align:left; color:#888; font-weight:500; font-size:11px; text-transform:uppercase; padding-bottom:6px; }
         table.payments td { padding: 6px 0; border-top: 1px solid #292929; }
@@ -108,18 +112,19 @@
 
     @php
         $hhPayment = config('services.hh_payment');
-        $paymentLines = [];
         // Sin esto configurado (HH_BANK_* / HH_MERCADOPAGO_LINK en .env), el
         // mensaje simplemente no incluye ninguna instrucción de pago -- mejor
         // que mandarle al cliente una cuenta inventada o equivocada.
+        $bankLines = [];
         if ($hhPayment['bank_titular'] && $hhPayment['bank_account_number']) {
-            $paymentLines[] = "Datos para transferencia:";
-            $paymentLines[] = "Titular: {$hhPayment['bank_titular']}";
-            if ($hhPayment['bank_rut']) $paymentLines[] = "RUT: {$hhPayment['bank_rut']}";
-            if ($hhPayment['bank_name']) $paymentLines[] = "Banco: {$hhPayment['bank_name']}";
-            $paymentLines[] = trim(($hhPayment['bank_account_type'] ?: 'Cuenta').": {$hhPayment['bank_account_number']}");
-            if ($hhPayment['bank_email']) $paymentLines[] = "Correo: {$hhPayment['bank_email']}";
+            $bankLines[] = "Datos para transferencia:";
+            $bankLines[] = "Titular: {$hhPayment['bank_titular']}";
+            if ($hhPayment['bank_rut']) $bankLines[] = "RUT: {$hhPayment['bank_rut']}";
+            if ($hhPayment['bank_name']) $bankLines[] = "Banco: {$hhPayment['bank_name']}";
+            $bankLines[] = trim(($hhPayment['bank_account_type'] ?: 'Cuenta').": {$hhPayment['bank_account_number']}");
+            if ($hhPayment['bank_email']) $bankLines[] = "Correo: {$hhPayment['bank_email']}";
         }
+        $paymentLines = $bankLines;
         if ($hhPayment['mercadopago_link']) {
             $paymentLines[] = ($paymentLines ? "\nTambién podés pagar con Mercado Pago:\n" : "Pagá con Mercado Pago:\n").$hhPayment['mercadopago_link'];
         }
@@ -135,7 +140,17 @@
         $whatsappPaymentUrl = 'https://wa.me/'.preg_replace('/[^0-9]/', '', $booking->customer->phone_e164).'?text='.rawurlencode($whatsappMessage);
     @endphp
     @if ($booking->balanceDue() > 0)
-        <div style="text-align:right; margin:-4px 0 16px;"><a class="whatsapp-btn" href="{{ $whatsappPaymentUrl }}" target="_blank" rel="noopener">Enviar instrucciones por WhatsApp</a></div>
+        <textarea id="whatsapp-message-text" class="visually-hidden" readonly>{{ $whatsappMessage }}</textarea>
+        @if ($bankLines)
+            <textarea id="bank-details-text" class="visually-hidden" readonly>{{ implode("\n", $bankLines) }}</textarea>
+        @endif
+        <div class="payment-actions">
+            @if ($bankLines)
+                <button type="button" class="copy-btn" onclick="hhCopyText('bank-details-text', this)">Copiar datos de cuenta</button>
+            @endif
+            <button type="button" class="copy-btn" onclick="hhCopyText('whatsapp-message-text', this)">Copiar texto</button>
+            <a class="whatsapp-btn" href="{{ $whatsappPaymentUrl }}" target="_blank" rel="noopener">Enviar instrucciones por WhatsApp</a>
+        </div>
     @endif
 
     @if (session('status'))
@@ -342,5 +357,27 @@
     <a class="board-btn" href="{{ route('rooms.board') }}">← Volver al tablero</a>
     <a class="back" href="{{ route('reservations.create') }}">+ Nueva reserva</a>
     </div>
+    <script>
+        // navigator.clipboard falla callado en varios navegadores/contextos
+        // sin HTTPS -- con execCommand('copy') como respaldo, y mostrando el
+        // resultado real (no el optimista), igual que en catalog/room.
+        function hhCopyText(elementId, btn) {
+            const el = document.getElementById(elementId);
+            const original = btn.textContent;
+            const show = (ok) => {
+                btn.textContent = ok ? '¡Copiado!' : 'No se pudo copiar';
+                setTimeout(() => { btn.textContent = original; }, 2000);
+            };
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(el.value).then(() => show(true)).catch(() => {
+                    el.select();
+                    try { show(document.execCommand('copy')); } catch (e) { show(false); }
+                });
+            } else {
+                el.select();
+                try { show(document.execCommand('copy')); } catch (e) { show(false); }
+            }
+        }
+    </script>
 </body>
 </html>
