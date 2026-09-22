@@ -29,6 +29,13 @@
         .row .right { text-align:right; font-size:12.5px; }
         .pending h2 { color:#956009; }
         .pending .row { border-left:4px solid #e8a23f; }
+        .section-hint { color:#8a8d93; font-size:11.5px; margin:-6px 0 10px; }
+        .priority-tag { font-size:12px; font-weight:700; text-align:right; white-space:nowrap; }
+        .pending-row.none .priority-tag { color:#8a8d93; font-weight:500; }
+        .pending-row.soon { border-left-color:#e8a23f; }
+        .pending-row.soon .priority-tag { color:#e8a23f; }
+        .pending-row.urgent { border-left-color:#e05252; background:#3a2020; }
+        .pending-row.urgent .priority-tag { color:#ff8a8a; }
         .reported h2 { color:#0e9f6e; }
         .reported .row { border-left:4px solid #34d399; }
         .occupied h2 { color:#b64c0a; }
@@ -52,8 +59,26 @@
 
         <section class="pending">
             <h2>⚠ Pendientes de aseo <span class="count">{{ $pendingAseo->count() }}</span></h2>
+            <p class="section-hint">Ordenadas por prioridad -- primero las que tienen una reserva más próxima encima.</p>
             @forelse ($pendingAseo as $entry)
-                <div class="row"><span class="name">{{ $entry['room']->name }}</span><span class="meta">{{ $entry['room']->category->name }}</span></div>
+                @php
+                    $next = $entry['status']['next_booking'];
+                    $mins = $entry['status']['minutes_until_next'];
+                @endphp
+                <div class="row pending-row {{ $next ? ($mins <= 60 ? 'urgent' : ($mins <= 180 ? 'soon' : '')) : 'none' }}">
+                    <span class="name">{{ $entry['room']->name }}<br><span class="meta">{{ $entry['room']->category->name }}</span></span>
+                    <span class="priority-tag">
+                        @if (!$next)
+                            Sin reserva próxima
+                        @elseif ($mins <= 0)
+                            ⚠ Ya debería estar lista
+                        @elseif ($mins <= 60)
+                            ⚠ Entra en {{ $mins }} min
+                        @else
+                            Entra a las {{ $next->starts_at->timezone('America/Santiago')->format('H:i') }}
+                        @endif
+                    </span>
+                </div>
             @empty
                 <p class="empty">Nada pendiente ahora mismo.</p>
             @endforelse

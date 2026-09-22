@@ -28,6 +28,13 @@ class RoomQrController extends Controller
         $mucamaId = $request->session()->get('mucama_staff_id');
         $mucama = $mucamaId ? Staff::where('role', 'Mucama')->where('is_active', true)->find($mucamaId) : null;
 
+        // "Dónde anda cada mucama ahora" para recepción -- se actualiza con
+        // cada visita a un QR de habitación, no solo al reportar aseo listo,
+        // así se ve también cuando recién llegó a mirar una pieza.
+        if ($mucama) {
+            $mucama->update(['last_qr_room_id' => $room->id, 'last_qr_seen_at' => now()]);
+        }
+
         return view('rooms.qr-show', ['room' => $room, 'mucama' => $mucama]);
     }
 
@@ -87,7 +94,13 @@ class RoomQrController extends Controller
     {
         $entries = collect($board->board());
 
-        $pendingAseo = $entries->filter(fn (array $e) => $e['room']->operational_status === 'aseo' && ! $e['room']->aseo_reported_at)->values();
+        // Prioridad: la que tiene una reserva agendada más próxima primero
+        // (por más urgente que sea limpiarla), las que no tienen nada
+        // encima todavía agendado van al final -- next_booking se calcula
+        // igual aunque la pieza esté en 'aseo', no hace falta nada nuevo acá.
+        $pendingAseo = $entries->filter(fn (array $e) => $e['room']->operational_status === 'aseo' && ! $e['room']->aseo_reported_at)
+            ->sortBy(fn (array $e) => $e['status']['next_booking']?->starts_at?->timestamp ?? PHP_INT_MAX)
+            ->values();
         $reportedAseo = $entries->filter(fn (array $e) => $e['room']->operational_status === 'aseo' && $e['room']->aseo_reported_at)->values();
         $occupied = $entries->filter(fn (array $e) => $e['room']->operational_status === 'activa' && $e['status']['occupancy'] === 'ocupada')->values();
         $upcoming = $entries->filter(fn (array $e) => $e['room']->operational_status === 'activa' && $e['status']['occupancy'] === 'libre' && $e['status']['next_booking'])

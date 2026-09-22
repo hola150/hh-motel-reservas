@@ -272,7 +272,7 @@
             <a class="compact-toggle sales-btn" href="{{ route('sales.daily') }}">Ventas del día →</a>
             <a class="compact-toggle" href="{{ route('calendar.index') }}">Calendario</a>
             <a class="compact-toggle" href="{{ route('catalog.index') }}" target="_blank" rel="noopener">Ver catálogo ↗</a>
-            <a class="compact-toggle" href="{{ route('rooms.qr.mucama_panel') }}" target="_blank" rel="noopener">Panel de mucamas ↗</a>
+            <a class="compact-toggle" href="{{ route('mucamas.activity') }}">Dónde están las mucamas →</a>
             <button type="button" class="compact-toggle" id="catalog-link-btn" data-room-link="{{ route('catalog.index') }}" onclick="hhCopyRoomLink(this)">Copiar link del catálogo</button>
             <button type="button" class="compact-toggle" id="compact-toggle-btn" onclick="hhToggleCompact()">⊟ Vista compacta</button>
         </div>

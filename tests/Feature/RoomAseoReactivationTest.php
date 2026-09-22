@@ -35,6 +35,7 @@ class RoomAseoReactivationTest extends TestCase
             '2026_09_16_010000_create_staff_and_shifts_tables.php',
             '2026_09_16_020000_add_legal_hours_to_staff.php',
             '2026_09_22_010022_add_pin_to_staff_table.php',
+            '2026_09_22_010843_add_last_qr_scan_to_staff_table.php',
         ] as $migration) {
             (require database_path('migrations/'.$migration))->up();
         }
@@ -152,5 +153,23 @@ class RoomAseoReactivationTest extends TestCase
 
         $response->assertRedirect(route('rooms.qr.mucama_panel'));
         $response->assertSessionHas('mucama_staff_id', $mucama->id);
+    }
+
+    /**
+     * Recepción quiere saber "dónde anda cada mucama ahora" -- se registra
+     * con cada visita al QR de una habitación (no solo al reportar aseo),
+     * para que se note incluso cuando recién está mirando la pieza.
+     */
+    public function test_visiting_a_room_qr_while_logged_in_updates_maid_presence(): void
+    {
+        $mucama = Staff::create(['name' => 'Ana Mucama', 'role' => 'Mucama', 'is_active' => true, 'pin' => '1234']);
+
+        $this->withSession(['mucama_staff_id' => $mucama->id])
+            ->get("/qr/habitacion/{$this->room->id}")
+            ->assertOk();
+
+        $fresh = $mucama->fresh();
+        $this->assertSame($this->room->id, $fresh->last_qr_room_id);
+        $this->assertNotNull($fresh->last_qr_seen_at);
     }
 }
