@@ -19,6 +19,8 @@
         button { width:100%; margin-top:24px; background:#ff7918; color:#fff; border:none; padding:14px; border-radius:8px; font-size:15px; font-weight:600; }
         .errors { background:#3a1c1c; border:1px solid #7a2d2d; color:#f3b8b8; padding:12px 14px; border-radius:8px; margin-bottom: 18px; font-size:14px; }
         a.back { display:block; text-align:center; margin-top: 16px; color:#999; font-size: 13px; text-decoration:none; }
+        a.skip-btn { display:block; text-align:center; margin-top: 16px; background:#2a2a2a; border:1px solid #555; color:#eee; padding:13px; border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; }
+        a.skip-btn:hover { border-color:#ff7918; color:#ff7918; }
     </style>
 </head>
 <body>
@@ -83,7 +85,7 @@
     </div>
 
     @if ($after === 'board')
-        <a class="back" href="{{ route('rooms.board') }}">Saltar por ahora — volver al tablero</a>
+        <a class="skip-btn" href="{{ route('rooms.board') }}">Saltar por ahora — volver al tablero</a>
     @else
         <a class="back" href="{{ route('reservations.show', $booking->code) }}">← Volver a la reserva</a>
     @endif
