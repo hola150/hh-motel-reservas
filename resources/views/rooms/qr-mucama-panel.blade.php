@@ -43,6 +43,10 @@
         .upcoming h2 { color:#7fbcdc; }
         .upcoming .row { border-left:4px solid #5b9dd9; }
         .empty { color:#8a8d93; font-size:13px; padding:6px 2px; }
+        .section-hint { color:#8a8d93; font-size:11.5px; margin:-6px 0 10px; }
+        .ptag { display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; white-space:nowrap; margin-top:3px; }
+        .ptag.sent { background:#123a28; color:#6ee7b7; }
+        .ptag.unsent { background:#3a1c10; color:#ffb078; }
     </style>
 </head>
 <body>
@@ -104,8 +108,16 @@
 
         <section class="upcoming">
             <h2>◷ Próximas a llegar <span class="count">{{ $upcoming->count() }}</span></h2>
+            <p class="section-hint">Tocá una para confirmar que quedó en condiciones antes de que llegue el huésped.</p>
             @forelse ($upcoming as $entry)
-                <div class="row"><span class="name">{{ $entry['room']->name }}</span><span class="meta">{{ $entry['status']['next_booking']->starts_at->timezone('America/Santiago')->format('H:i') }}</span></div>
+                @php $checked = $entry['status']['next_booking']->room_checked_at; @endphp
+                <a class="row" href="{{ route('rooms.qr.show', $entry['room']) }}" style="text-decoration:none; color:inherit; justify-content:space-between;">
+                    <span class="name">{{ $entry['room']->name }}</span>
+                    <span style="text-align:right;">
+                        <span class="meta" style="display:block;">{{ $entry['status']['next_booking']->starts_at->timezone('America/Santiago')->format('H:i') }}</span>
+                        <span class="ptag {{ $checked ? 'sent' : 'unsent' }}">{{ $checked ? '✓ Confirmada' : 'Falta confirmar' }}</span>
+                    </span>
+                </a>
             @empty
                 <p class="empty">Nada agendado por ahora.</p>
             @endforelse

@@ -23,7 +23,7 @@ use Illuminate\View\View;
  */
 class RoomQrController extends Controller
 {
-    public function show(Request $request, Room $room): View
+    public function show(Request $request, Room $room, RoomBoardService $board): View
     {
         $mucamaId = $request->session()->get('mucama_staff_id');
         $mucama = $mucamaId ? Staff::where('role', 'Mucama')->where('is_active', true)->find($mucamaId) : null;
@@ -35,7 +35,33 @@ class RoomQrController extends Controller
             $mucama->update(['last_qr_room_id' => $room->id, 'last_qr_seen_at' => now()]);
         }
 
-        return view('rooms.qr-show', ['room' => $room, 'mucama' => $mucama]);
+        return view('rooms.qr-show', [
+            'room' => $room,
+            'mucama' => $mucama,
+            'nextBooking' => $board->statusFor($room)['next_booking'],
+        ]);
+    }
+
+    /**
+     * Confirma que la habitación quedó revisada/en condiciones ANTES de que
+     * llegue el próximo huésped -- distinto de "aseo listo" (que es sobre la
+     * limpieza en sí): esto es un último vistazo justo antes de la llegada.
+     */
+    public function confirmRoomReady(Request $request, Room $room, RoomBoardService $board): RedirectResponse
+    {
+        $next = $board->statusFor($room)['next_booking'];
+
+        if (! $next) {
+            return back()->withErrors(['pin' => 'Esta habitación ya no tiene una próxima reserva para confirmar.']);
+        }
+
+        /** @var Staff $mucama */
+        $mucama = $request->attributes->get('mucama');
+
+        $next->update(['room_checked_at' => now(), 'room_checked_by' => $mucama->name]);
+        AuditLog::record(null, 'habitacion.revision_previa', 'Booking', $next->id, null, $next->only(['room_checked_at', 'room_checked_by']));
+
+        return redirect()->route('rooms.qr.show', $room)->with('status', '¡Gracias, '.$mucama->name.'! Quedó confirmada para la próxima reserva.');
     }
 
     /**

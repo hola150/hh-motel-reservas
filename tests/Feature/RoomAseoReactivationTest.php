@@ -28,10 +28,17 @@ class RoomAseoReactivationTest extends TestCase
             '2026_08_18_120001_add_role_to_users_table.php',
             '2026_08_18_120002_create_room_categories_table.php',
             '2026_08_18_120003_create_rooms_table.php',
+            '2026_08_18_120004_create_rate_rules_table.php',
+            '2026_08_18_120006_create_rate_rule_prices_table.php',
+            '2026_08_18_120008_create_coupons_table.php',
+            '2026_08_18_120010_create_customers_table.php',
+            '2026_08_18_120011_create_bookings_table.php',
             '2026_08_18_120018_create_audit_logs_table.php',
+            '2026_08_19_180001_add_checkin_checkout_to_bookings_table.php',
             '2026_08_26_120001_add_aseo_override_to_rooms_table.php',
             '2026_08_26_140001_add_aseo_started_to_rooms_table.php',
             '2026_09_22_004138_add_aseo_report_to_rooms_table.php',
+            '2026_09_22_012032_add_room_check_to_bookings_table.php',
             '2026_09_16_010000_create_staff_and_shifts_tables.php',
             '2026_09_16_020000_add_legal_hours_to_staff.php',
             '2026_09_22_010022_add_pin_to_staff_table.php',
@@ -171,5 +178,39 @@ class RoomAseoReactivationTest extends TestCase
         $fresh = $mucama->fresh();
         $this->assertSame($this->room->id, $fresh->last_qr_room_id);
         $this->assertNotNull($fresh->last_qr_seen_at);
+    }
+
+    /**
+     * Además de "aseo listo" (la limpieza en sí), una mucama logueada puede
+     * confirmar que la pieza quedó en condiciones justo antes de que llegue
+     * la próxima reserva -- un último vistazo, no lo mismo que el aseo.
+     */
+    public function test_logged_in_maid_can_confirm_room_ready_for_next_booking(): void
+    {
+        $activeRoom = Room::create(['room_category_id' => $this->room->room_category_id, 'name' => 'GO 102', 'operational_status' => 'activa']);
+        $customer = \App\Models\Customer::create(['name' => 'Cliente Prueba', 'phone_e164' => '+56911112222']);
+        $booking = \App\Models\Booking::create([
+            'code' => 'HH-TEST-0002',
+            'customer_id' => $customer->id,
+            'room_id' => $activeRoom->id,
+            'starts_at' => now()->addHour(),
+            'ends_at' => now()->addHours(2),
+            'duration_minutes' => 60,
+            'guests_count' => 2,
+            'booking_status' => 'CONFIRMADA',
+            'payment_status' => 'NO_PAGADA',
+            'price_original' => 20000,
+            'price_final' => 20000,
+        ]);
+
+        $mucama = Staff::create(['name' => 'Ana Mucama', 'role' => 'Mucama', 'is_active' => true, 'pin' => '1234']);
+
+        $response = $this->withSession(['mucama_staff_id' => $mucama->id])
+            ->post("/qr/habitacion/{$activeRoom->id}/confirmar");
+
+        $response->assertRedirect();
+        $fresh = $booking->fresh();
+        $this->assertSame('Ana Mucama', $fresh->room_checked_by);
+        $this->assertNotNull($fresh->room_checked_at);
     }
 }

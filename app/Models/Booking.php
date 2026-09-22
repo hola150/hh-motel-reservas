@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'coupon_id', 'coupon_code_snapshot', 'discount_amount', 'price_final', 'deposit_amount',
     'notes', 'expires_at', 'consumption_offered_at', 'consumption_offered_by',
     'checked_in_at', 'checked_out_at', 'payment_instructions_sent_at',
+    'room_checked_at', 'room_checked_by',
 ])]
 class Booking extends Model
 {
@@ -30,6 +31,7 @@ class Booking extends Model
             'checked_in_at' => 'datetime',
             'checked_out_at' => 'datetime',
             'payment_instructions_sent_at' => 'datetime',
+            'room_checked_at' => 'datetime',
         ];
     }
 
