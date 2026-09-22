@@ -21,11 +21,15 @@ return new class extends Migration
         });
 
         // Las ofertas no tienen código — se permite null (el índice único deja
-        // pasar varios null en Postgres).
-        DB::statement('ALTER TABLE coupons ALTER COLUMN code DROP NOT NULL');
+        // pasar varios null en Postgres). Sintaxis ALTER COLUMN/CONSTRAINT de
+        // Postgres -- en SQLite (tests) code ya nace nullable y discount_type
+        // ya incluye 'precio_fijo' desde create_coupons_table.
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE coupons ALTER COLUMN code DROP NOT NULL');
 
-        DB::statement('ALTER TABLE coupons DROP CONSTRAINT IF EXISTS coupons_discount_type_check');
-        DB::statement("ALTER TABLE coupons ADD CONSTRAINT coupons_discount_type_check CHECK (discount_type IN ('percentage', 'fixed', 'precio_fijo'))");
+            DB::statement('ALTER TABLE coupons DROP CONSTRAINT IF EXISTS coupons_discount_type_check');
+            DB::statement("ALTER TABLE coupons ADD CONSTRAINT coupons_discount_type_check CHECK (discount_type IN ('percentage', 'fixed', 'precio_fijo'))");
+        }
     }
 
     public function down(): void

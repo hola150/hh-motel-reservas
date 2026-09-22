@@ -10,9 +10,15 @@ return new class extends Migration
     {
         Schema::create('coupons', function (Blueprint $table) {
             $table->id();
-            $table->string('code')->unique(); // MORNING ESCAPE, EXPERTOS EN VIDA...
+            // Nullable desde el arranque -- las ofertas (auto_apply, ver
+            // 2026_09_10_130000_add_auto_apply_offers_to_coupons) no tienen
+            // código, y en SQLite (tests) esa migración no puede aflojar un
+            // NOT NULL después vía ALTER COLUMN como en Postgres.
+            $table->string('code')->nullable()->unique(); // MORNING ESCAPE, EXPERTOS EN VIDA...
             $table->string('internal_name');
-            $table->enum('discount_type', ['percentage', 'fixed']);
+            // 'precio_fijo' se agregó después (ver esa misma migración) --
+            // incluido acá desde el arranque por la misma razón de arriba.
+            $table->enum('discount_type', ['percentage', 'fixed', 'precio_fijo']);
             $table->unsignedInteger('discount_value'); // % (0-100) o CLP según discount_type
             $table->unsignedInteger('min_amount')->nullable();
             $table->unsignedInteger('max_discount_amount')->nullable();

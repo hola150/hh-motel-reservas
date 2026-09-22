@@ -10,8 +10,12 @@ return new class extends Migration
     public function up(): void
     {
         // Necesaria para poder combinar igualdad (room_id) con superposición de
-        // rangos (tstzrange) en una misma restricción EXCLUDE.
-        DB::statement('CREATE EXTENSION IF NOT EXISTS btree_gist');
+        // rangos (tstzrange) en una misma restricción EXCLUDE -- específico de
+        // Postgres. En SQLite (solo se usa para tests que no dependen de esta
+        // garantía a nivel de motor) se salta directo a crear la tabla.
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            DB::statement('CREATE EXTENSION IF NOT EXISTS btree_gist');
+        }
 
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
@@ -57,16 +61,19 @@ return new class extends Migration
         });
 
         // Ninguna habitación puede tener dos reservas activas con horarios superpuestos.
-        // Es una garantía del motor de base de datos, no del código de la aplicación.
-        DB::statement("
-            ALTER TABLE bookings
-            ADD CONSTRAINT bookings_no_overlap
-            EXCLUDE USING gist (
-                room_id WITH =,
-                tstzrange(starts_at, ends_at) WITH &&
-            )
-            WHERE (booking_status NOT IN ('CANCELADA', 'EXPIRADA', 'NO_SHOW'))
-        ");
+        // Es una garantía del motor de base de datos, no del código de la aplicación
+        // -- sintaxis EXCLUDE de Postgres, no existe en SQLite.
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            DB::statement("
+                ALTER TABLE bookings
+                ADD CONSTRAINT bookings_no_overlap
+                EXCLUDE USING gist (
+                    room_id WITH =,
+                    tstzrange(starts_at, ends_at) WITH &&
+                )
+                WHERE (booking_status NOT IN ('CANCELADA', 'EXPIRADA', 'NO_SHOW'))
+            ");
+        }
     }
 
     public function down(): void
