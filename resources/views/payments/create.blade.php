@@ -85,7 +85,8 @@
     </div>
 
     @if ($after === 'board')
-        <a class="skip-btn" href="{{ route('rooms.board') }}">Saltar por ahora — volver al tablero</a>
+        <a class="skip-btn" href="{{ route('reservations.show', $booking->code) }}">Saltar por ahora →</a>
+        <a class="back" href="{{ route('rooms.board') }}">← Volver al tablero</a>
     @else
         <a class="back" href="{{ route('reservations.show', $booking->code) }}">← Volver a la reserva</a>
     @endif
