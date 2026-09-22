@@ -41,6 +41,51 @@
         {{ $customer->age() !== null ? ' · '.$customer->age().' años' : '' }}
     </p>
 
+    <details style="margin-bottom:18px;">
+        <summary class="link" style="cursor:pointer;">Editar datos del cliente</summary>
+        <div class="card" style="margin-top:10px;">
+            <form method="POST" action="{{ route('admin.customers.update', $customer) }}">
+                @csrf @method('PUT')
+                <div class="row2">
+                    <div>
+                        <label>Nombre</label>
+                        <input name="name" value="{{ $customer->name }}" maxlength="150" required>
+                    </div>
+                    <div>
+                        <label>Correo</label>
+                        <input type="email" name="email" value="{{ $customer->email }}" maxlength="255" placeholder="cliente@correo.cl">
+                    </div>
+                    <div>
+                        <label>Tipo de documento</label>
+                        <select name="document_type">
+                            <option value="">— Sin definir</option>
+                            <option value="rut" @selected($customer->document_type === 'rut')>RUT</option>
+                            <option value="pasaporte" @selected($customer->document_type === 'pasaporte')>Pasaporte</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>RUT</label>
+                        <input name="rut" value="{{ $customer->rut }}" maxlength="20">
+                    </div>
+                    <div>
+                        <label>N° de pasaporte</label>
+                        <input name="passport_number" value="{{ $customer->passport_number }}" maxlength="30">
+                    </div>
+                    <div>
+                        <label>Nacionalidad</label>
+                        <input name="nationality" value="{{ $customer->nationality }}" maxlength="60">
+                    </div>
+                    <div>
+                        <label>Fecha de nacimiento</label>
+                        <input type="date" name="birth_date" value="{{ $customer->birth_date?->toDateString() }}">
+                    </div>
+                </div>
+                <p class="sub" style="margin:10px 0 0;">El teléfono no se edita acá — es la identidad del cliente. Al guardar, se sincroniza el correo/nombre con GHL de inmediato.</p>
+                <div class="actions" style="margin-top:12px;"><button class="btn" type="submit">Guardar cambios</button></div>
+            </form>
+        </div>
+    </details>
+
     @if ($monthlyVisits >= 3)
         <div style="background:#211d10; border:1px solid #7a6a1e; color:#f0d98a; border-radius:10px; padding:12px 16px; margin-bottom:14px; font-weight:600; font-size:14px;">
             ⭐ Recurrente del mes — {{ $monthlyVisits }} reservas en {{ ucfirst(now()->locale('es')->isoFormat('MMMM')) }}

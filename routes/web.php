@@ -194,6 +194,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
     Route::get('/clientes', [AdminCustomerController::class, 'index'])->name('customers.index');
     Route::get('/clientes/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
+    Route::put('/clientes/{customer}', [AdminCustomerController::class, 'update'])->name('customers.update');
 
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
     Route::get('/analytics/exportar', [AnalyticsController::class, 'export'])->name('analytics.export');
