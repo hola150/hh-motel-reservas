@@ -112,4 +112,17 @@
             <a class="link" href="{{ route('admin.rooms.index') }}">Cancelar</a>
         </div>
     </form>
+
+    @if ($room->exists)
+        <div class="card" style="margin-top:20px; text-align:center;">
+            <h2 style="font-size:14px; margin:0 0 4px;">QR para la puerta</h2>
+            <p class="sub" style="margin:0 0 12px;">Las mucamas lo escanean para reportar "aseo listo", sin necesitar login.</p>
+            <img src="{{ route('rooms.qr.image', $room) }}" alt="QR de {{ $room->name }}" width="220" height="220" style="border-radius:10px; background:#fff; padding:8px;">
+            <div style="margin-top:10px;">
+                <a class="link" href="{{ route('rooms.qr.image', $room) }}" target="_blank" rel="noopener">Abrir imagen →</a>
+                &nbsp;·&nbsp;
+                <a class="link" href="{{ route('rooms.qr.show', $room) }}" target="_blank" rel="noopener">Ver página →</a>
+            </div>
+        </div>
+    @endif
 @endsection

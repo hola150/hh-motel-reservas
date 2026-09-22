@@ -252,8 +252,16 @@ class RoomBoardController extends Controller
             'cleaned_by.in' => 'Elegí una persona de aseo válida.',
         ]);
 
-        $old = $room->only(['operational_status']);
-        $room->update(['operational_status' => 'activa', 'aseo_override_at' => now()]);
+        $old = $room->only(['operational_status', 'aseo_reported_by', 'aseo_reported_at']);
+        $room->update([
+            'operational_status' => 'activa',
+            'aseo_override_at' => now(),
+            // Se limpia el reporte de la mucama -- ya cumplió su propósito
+            // (avisar) y la próxima vez que la pieza vaya a aseo no puede
+            // arrastrar este reporte viejo como si fuera del nuevo ciclo.
+            'aseo_reported_by' => null,
+            'aseo_reported_at' => null,
+        ]);
 
         // "Quién hizo el aseo" queda en el propio registro de auditoría de
         // este evento -- no hace falta una tabla aparte para la huella.

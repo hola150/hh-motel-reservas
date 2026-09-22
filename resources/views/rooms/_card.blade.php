@@ -25,14 +25,18 @@
     @endif
 
     @if ($room->operational_status === 'aseo')
-        <div class="eta">Esperando aseo — no vuelve a disponibles hasta que recepción la marque</div>
+        @if ($room->aseo_reported_at)
+            <div class="eta" style="color:#34d399;">✓ {{ $room->aseo_reported_by }} reportó aseo listo a las {{ $room->aseo_reported_at->timezone('America/Santiago')->format('H:i') }} — falta tu confirmación</div>
+        @else
+            <div class="eta">Esperando aseo — no vuelve a disponibles hasta que recepción la marque</div>
+        @endif
         @if (($cleaningStaff ?? collect())->isNotEmpty())
             <form method="POST" action="{{ route('rooms.aseo_ready', $room) }}" class="aseo-ready-form">
                 @csrf
                 <select name="cleaned_by" class="aseo-cleaner-input" required>
-                    <option value="" selected disabled>¿Quién hizo el aseo?</option>
+                    <option value="" @selected(!$room->aseo_reported_by) disabled>¿Quién hizo el aseo?</option>
                     @foreach ($cleaningStaff as $name)
-                        <option value="{{ $name }}">{{ $name }}</option>
+                        <option value="{{ $name }}" @selected($room->aseo_reported_by === $name)>{{ $name }}</option>
                     @endforeach
                 </select>
                 <button type="submit" class="aseo-ready-btn">Marcar aseo listo — reactivar</button>

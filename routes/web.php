@@ -51,6 +51,14 @@ Route::get('/catalogo/reservado/{code}', [PublicBookingController::class, 'booke
 Route::get('/reservas/{code}/pase', [BookingPassController::class, 'preview'])->name('bookings.pass.preview');
 Route::get('/reservas/{code}/pase.pdf', [BookingPassController::class, 'download'])->name('bookings.pass.pdf');
 
+// QR pegado en la puerta de cada habitación + panel general de mucamas --
+// sin login, las mucamas son solo un roster (Staff) sin cuenta de acceso.
+Route::get('/qr/habitacion/{room}', [\App\Http\Controllers\RoomQrController::class, 'show'])->name('rooms.qr.show');
+Route::get('/qr/habitacion/{room}/imagen.png', [\App\Http\Controllers\RoomQrController::class, 'image'])->name('rooms.qr.image');
+Route::post('/qr/habitacion/{room}/aseo', [\App\Http\Controllers\RoomQrController::class, 'reportAseo'])->middleware('throttle:20,1')->name('rooms.qr.report_aseo');
+Route::get('/qr/mucamas', [\App\Http\Controllers\RoomQrController::class, 'mucamaPanel'])->name('rooms.qr.mucama_panel');
+Route::get('/qr/mucamas/imagen.png', [\App\Http\Controllers\RoomQrController::class, 'mucamaPanelImage'])->name('rooms.qr.mucama_panel_image');
+
 Route::get('/login', [LoginController::class, 'create'])->middleware('guest')->name('login');
 Route::post('/login', [LoginController::class, 'store'])->middleware(['guest', 'throttle:8,1'])->name('login.store');
 Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
