@@ -12,7 +12,12 @@
         .page-inner { max-width: 760px; margin: 0; padding: 24px 24px 60px; }
         h1 { font-size: 18px; letter-spacing: .04em; margin-bottom: 2px; }
         .sub { color:#999; font-size: 13px; margin:0 0 22px; }
-        .mucama-row { display:flex; align-items:center; justify-content:space-between; gap:14px; background:#1c1c1c; border:1px solid #333; border-radius:10px; padding:16px 18px; margin-bottom:10px; }
+        /* hh-theme.css (inyectado por partials.navbar) fuerza "body { color:
+           var(--hh-ink) !important }" (oscuro, pensado para el fondo claro
+           de esta misma página) -- el !important gana la herencia para
+           cualquier texto que no fije su propio color, así que esta tarjeta
+           oscura necesita el suyo explícito en vez de heredar del body. */
+        .mucama-row { display:flex; align-items:center; justify-content:space-between; gap:14px; background:#1c1c1c; border:1px solid #333; border-radius:10px; padding:16px 18px; margin-bottom:10px; color:#eee; }
         .mucama-row .who strong { display:block; font-size:15px; }
         .mucama-row .who small { color:#999; font-size:12px; }
         .mucama-row .where { text-align:right; }
