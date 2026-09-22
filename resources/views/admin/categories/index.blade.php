@@ -36,7 +36,7 @@
             </div>
         </div>
         <div class="toggle-group">
-            <div class="toggle-group-label">Disponibilidad por piso y ala <span style="text-transform:none; letter-spacing:normal;">— priorizá el Ala Norte y andá abriendo el Ala Sur piso por piso según la capacidad que necesites. El piso 1 (GO 101-103) no tiene ala.</span></div>
+            <div class="toggle-group-label">Disponibilidad por piso y ala <span style="text-transform:none; letter-spacing:normal;">— prioriza el Ala Norte y anda abriendo el Ala Sur piso por piso según la capacidad que necesites. El piso 1 (GO 101-103) no tiene ala.</span></div>
             <div class="wing-toggle-row">
                 @foreach ([
                     'piso_1_enabled' => ['Piso 1', $settings->piso_1_enabled],

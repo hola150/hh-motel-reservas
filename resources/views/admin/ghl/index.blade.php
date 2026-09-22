@@ -2,7 +2,7 @@
 @section('title', 'Integración GHL')
 @section('content')
     <h1>Integración con GoHighLevel</h1>
-    <p class="sub">Cada reserva nueva crea/actualiza el contacto en GHL y le pone un tag "Reservó:{fecha}" -- reemplaza el de la reserva anterior, no se acumulan. Probá acá con un número tuyo antes de confiar en que la sincronización automática funciona.</p>
+    <p class="sub">Cada reserva nueva crea/actualiza el contacto en GHL y le pone un tag "Reservó:{fecha}" -- reemplaza el de la reserva anterior, no se acumulan. Prueba acá con un número tuyo antes de confiar en que la sincronización automática funciona.</p>
 
     <div class="card">
         @if ($configured)
@@ -42,7 +42,7 @@
             @if ($error)
                 <p style="margin:10px 0 0; color:#f3b8b8;">✗ Error: {{ $error }}</p>
             @else
-                <p style="margin:10px 0 0; color:#6ee7b7;">✓ Listo -- revisá el contacto en GHL para confirmar que se ve como esperás.</p>
+                <p style="margin:10px 0 0; color:#6ee7b7;">✓ Listo -- revisa el contacto en GHL para confirmar que se ve como esperas.</p>
             @endif
         </div>
     @endisset

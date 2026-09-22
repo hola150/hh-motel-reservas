@@ -128,7 +128,7 @@
         }
         $paymentLines = $bankLines;
         if ($hhPayment['mercadopago_link']) {
-            $paymentLines[] = ($paymentLines ? "\nTambién podés pagar con Mercado Pago:\n" : "Pagá con Mercado Pago:\n").$hhPayment['mercadopago_link'];
+            $paymentLines[] = ($paymentLines ? "\nTambién puedes pagar con Mercado Pago:\n" : "Paga con Mercado Pago:\n").$hhPayment['mercadopago_link'];
         }
 
         $whatsappMessage = "Hola {$booking->customer->name}, tu reserva en HH Motel está creada.\n\n"
@@ -298,7 +298,7 @@
                 <form class="addon-form" method="POST" action="{{ route('addons.store', $booking->code) }}">
                     @csrf
                     <select name="item" required>
-                        <option value="" disabled selected>— Elegí un producto o combo —</option>
+                        <option value="" disabled selected>— Elige un producto o combo —</option>
                         @if ($combos->isNotEmpty())
                             <optgroup label="Combos">
                                 @foreach ($combos as $combo)

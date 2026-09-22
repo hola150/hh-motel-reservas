@@ -46,9 +46,9 @@
                 <form method="POST" action="{{ route('mucamas.login.store') }}">
                     @csrf
                     <input type="hidden" name="next" value="{{ old('next', $next) }}">
-                    <label for="staff_id">¿Quién sos?</label>
+                    <label for="staff_id">¿Quién eres?</label>
                     <select id="staff_id" name="staff_id" required>
-                        <option value="" selected disabled>Elegí tu nombre</option>
+                        <option value="" selected disabled>Elige tu nombre</option>
                         @foreach ($staff as $person)
                             <option value="{{ $person->id }}" @selected(old('staff_id') == $person->id)>{{ $person->name }}</option>
                         @endforeach

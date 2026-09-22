@@ -4,14 +4,14 @@
     @php $t = old('type', $offer->type ?? 'category_upgrade'); @endphp
 
     <h1>{{ $offer->exists ? 'Editar upsell' : 'Nuevo upsell' }}</h1>
-    <p class="sub">Precio fijo, estilo "¿querés agrandar?". Se ofrece al reservar y al check-in.</p>
+    <p class="sub">Precio fijo, estilo "¿quieres agrandar?". Se ofrece al reservar y al check-in.</p>
 
     <form method="POST" action="{{ $offer->exists ? route('admin.upsells.update', $offer) : route('admin.upsells.store') }}">
         @csrf
         @if ($offer->exists) @method('PUT') @endif
 
         <label>Nombre (lo ve recepción)</label>
-        <input type="text" name="name" value="{{ old('name', $offer->name) }}" placeholder="Ej. Subí a MAX · 3 horas más · Pack 2 cervezas" required>
+        <input type="text" name="name" value="{{ old('name', $offer->name) }}" placeholder="Ej. Sube a MAX · 3 horas más · Pack 2 cervezas" required>
 
         <label>Tipo</label>
         <select name="type" id="type-select" onchange="hhToggleType()">

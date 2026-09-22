@@ -177,7 +177,7 @@
     <div class="page-inner">
     <div class="page-head">
         <h1>Nueva reserva</h1>
-        <p class="sub">Recepción · completá la estadía y los datos del cliente</p>
+        <p class="sub">Recepción · completa la estadía y los datos del cliente</p>
     </div>
 
     @if ($errors->any())
@@ -206,7 +206,7 @@
                     </div>
                 @endif
                 <select name="room_id" id="room-select" required>
-                    <option value="" @selected(! $selectedRoomId) disabled>— Elegí una habitación —</option>
+                    <option value="" @selected(! $selectedRoomId) disabled>— Elige una habitación —</option>
                     @foreach ($rooms as $room)
                         @php
                             $occ = $room->current_status['occupancy'];
@@ -245,7 +245,7 @@
                         <input type="hidden" name="date" id="date-input" value="{{ $oldDate }}">
                     </div>
                     <div>
-                        <label>Hora <span class="hint" style="margin:0;">— girá la rueda del mouse sobre el número</span></label>
+                        <label>Hora <span class="hint" style="margin:0;">— gira la rueda del mouse sobre el número</span></label>
                         @php
                             $oldHour = old('time_hour', now()->timezone('America/Santiago')->format('G'));
                             $oldMinute = old('time_minute', (int) floor(now()->timezone('America/Santiago')->minute / 5) * 5);
@@ -290,7 +290,7 @@
                 <div class="form-col-head">El cliente</div>
 
                 <label>Teléfono / WhatsApp</label>
-                <input type="text" name="customer_phone" id="customer-phone" placeholder="Pegá el número del cliente — +56 9 ..." value="{{ old('customer_phone') }}" autocomplete="off" required>
+                <input type="text" name="customer_phone" id="customer-phone" placeholder="Pega el número del cliente — +56 9 ..." value="{{ old('customer_phone') }}" autocomplete="off" required>
                 <div class="cust-badge" id="cust-badge" hidden></div>
                 <div class="hint">Es la identidad del cliente. Si ya reservó antes, se completan solos el nombre y el email.</div>
 
@@ -332,7 +332,7 @@
                         <option value="Uruguaya">Uruguaya</option>
                         <option value="">Otra…</option>
                     </select>
-                    <input type="text" id="nationality-other" placeholder="Escribí la nacionalidad" hidden style="margin-top:8px;">
+                    <input type="text" id="nationality-other" placeholder="Escribe la nacionalidad" hidden style="margin-top:8px;">
                     <input type="hidden" name="nationality" id="customer-nationality" value="{{ old('nationality', 'Chilena') }}">
 
                     <label>Fecha de nacimiento</label>
@@ -368,7 +368,7 @@
                             <option value="rut" @selected(old('document_type') === 'rut')>RUT</option>
                             <option value="pasaporte" @selected(old('document_type') === 'pasaporte')>Pasaporte</option>
                         </select>
-                        <input type="text" name="document_number" id="document-number" placeholder="Elegí el tipo primero" value="{{ old('document_number') }}" disabled required>
+                        <input type="text" name="document_number" id="document-number" placeholder="Elige el tipo primero" value="{{ old('document_number') }}" disabled required>
                     </div>
                     <div class="hint" id="document-hint">&nbsp;</div>
                 </div>
@@ -455,7 +455,7 @@
                 <div class="upsell-title">💡 ¿Le ofreciste algo al cliente?</div>
                 <button type="button" class="upsell-x" onclick="hhCloseUpsell()">✕</button>
             </div>
-            <p class="upsell-sub">Ofrecé siempre — subir de categoría, más tiempo o un pack. Es venta fácil.</p>
+            <p class="upsell-sub">Ofrece siempre — subir de categoría, más tiempo o un pack. Es venta fácil.</p>
             <div class="upsell-list" id="upsell-list"></div>
             <button type="button" class="upsell-add" onclick="hhConfirmUpsell(true)">Agregar lo elegido y crear reserva</button>
             <button type="button" class="upsell-skip" onclick="hhConfirmUpsell(false)">El cliente no quiere nada — crear igual</button>
@@ -712,7 +712,7 @@
             box.hidden = false;
             if (!room || !date || h === '' || m === '' || !dur) {
                 box.className = 'price-box';
-                box.innerHTML = '<div class="p-wait">Elegí habitación, fecha, hora y duración para ver el precio.</div>';
+                box.innerHTML = '<div class="p-wait">Elige habitación, fecha, hora y duración para ver el precio.</div>';
                 return;
             }
             const params = new URLSearchParams({ room_id: room, date: date, time_hour: h, time_minute: m, duration_minutes: dur });
@@ -870,7 +870,7 @@
             const bar = document.getElementById('room-cat-quick');
             if (!sel || !bar) return;
 
-            // La primera opción (value vacío) es el placeholder "— Elegí una
+            // La primera opción (value vacío) es el placeholder "— Elige una
             // habitación —" y siempre queda arriba de todo.
             const roomOptions = Array.from(sel.options)
                 .filter(o => o.value !== '')
@@ -879,7 +879,7 @@
 
             window.hhFilterRooms = function (cat) {
                 const keep = sel.value;
-                sel.innerHTML = '<option value="" disabled>— Elegí una habitación —</option>';
+                sel.innerHTML = '<option value="" disabled>— Elige una habitación —</option>';
                 roomOptions
                     .filter(o => cat === 'todas' || o.cat === cat)
                     .forEach(o => {
@@ -1047,7 +1047,7 @@
                             hhSetNationality('Chilena'); hhSetBirthDate('');
                             autofilled = false;
                         }
-                        showBadge('nuevo', 'Cliente nuevo — no hay nadie con este número. Completá los datos.');
+                        showBadge('nuevo', 'Cliente nuevo — no hay nadie con este número. Completa los datos.');
                         showEditableFields();
                     }
                 } catch (e) { /* silencioso: si falla la búsqueda, se carga a mano */ }
@@ -1087,7 +1087,7 @@
             if (!type.value) {
                 number.disabled = true;
                 number.value = '';
-                number.placeholder = 'Elegí el tipo primero';
+                number.placeholder = 'Elige el tipo primero';
                 hint.innerHTML = '&nbsp;';
                 return;
             }
@@ -1108,7 +1108,7 @@
             } else {
                 number.className = 'doc-invalid';
                 hint.className = 'err';
-                hint.textContent = 'RUT inválido — revisá el dígito verificador';
+                hint.textContent = 'RUT inválido — revisa el dígito verificador';
             }
         }
         // Si recepción elige el tipo de documento a mano, esa elección

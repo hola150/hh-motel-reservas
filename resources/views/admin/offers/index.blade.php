@@ -64,7 +64,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" style="color:#666;">Todavía no hay ofertas. Creá una para que aparezcan Playrooms con precio especial al reservar.</td></tr>
+                    <tr><td colspan="5" style="color:#666;">Todavía no hay ofertas. Crea una para que aparezcan Playrooms con precio especial al reservar.</td></tr>
                 @endforelse
             </tbody>
         </table>

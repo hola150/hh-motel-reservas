@@ -236,7 +236,7 @@
     </div>
 
     @if ($staffByRole->isEmpty())
-        <p class="sub">Primero <a class="link" href="{{ route('admin.staff.index') }}">agregá personal</a> para poder cargar turnos.</p>
+        <p class="sub">Primero <a class="link" href="{{ route('admin.staff.index') }}">agrega personal</a> para poder cargar turnos.</p>
     @else
         <div class="card add-shift-card">
             <h2>Agregar turno</h2>

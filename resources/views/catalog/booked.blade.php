@@ -40,7 +40,7 @@
     <div class="wrap">
         <div class="check">✓</div>
         <h1>¡Reserva creada!</h1>
-        <p class="sub">Guardá el código — te lo vamos a pedir al llegar.</p>
+        <p class="sub">Guarda el código — te lo vamos a pedir al llegar.</p>
 
         <div class="card">
             <div class="row"><span class="muted">Código</span><span class="code">{{ $booking->code }}</span></div>
@@ -62,7 +62,7 @@
             <ul>
                 <li>Todavía no cobramos nada — el pago se hace al llegar al motel.</li>
                 <li>Esta reserva queda pendiente hasta que la confirmemos por WhatsApp.</li>
-                <li>Presentá tu documento de identidad al llegar.</li>
+                <li>Presenta tu documento de identidad al llegar.</li>
             </ul>
         </div>
 

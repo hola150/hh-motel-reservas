@@ -77,7 +77,7 @@
     <div class="wrap">
         <a class="back" href="{{ route('catalog.index') }}">← Volver al catálogo</a>
         <div class="brand">HH MOTEL</div>
-        <h1>Reservá tu Playroom</h1>
+        <h1>Reserva tu Playroom</h1>
         <p class="sub">Elige tu fecha y horario. Te mostraremos una opción disponible y recibirás la confirmación al finalizar.</p>
 
         @if ($errors->any())
@@ -189,7 +189,7 @@
 
             <div class="summary" id="booking-summary" aria-live="polite"><strong>Resumen de tu reserva</strong><small>Selecciona Playroom, fecha, hora y duración para ver el detalle.</small></div>
             <button class="submit" type="submit">Solicitar reserva</button>
-            <p class="legal">Al reservar aceptás presentar tu documento de identidad al llegar. HH se reserva el derecho de admisión.</p>
+            <p class="legal">Al reservar aceptas presentar tu documento de identidad al llegar. HH se reserva el derecho de admisión.</p>
         </form>
         </div>
     </div>
@@ -283,7 +283,7 @@
                             status.textContent = '✓ Hay disponibilidad para ese horario';
                         } else {
                             status.className = 'avail-status show no';
-                            status.textContent = '✗ No hay disponibilidad para ese horario — probá otra fecha, hora o duración';
+                            status.textContent = '✗ No hay disponibilidad para ese horario — prueba otra fecha, hora o duración';
                         }
                     })
                     .catch(() => { if (mySeq === hhAvailSeq) status.classList.remove('show'); });

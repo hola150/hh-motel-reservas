@@ -54,7 +54,7 @@
 
         <label for="payment-method">Medio de pago</label>
         <select id="payment-method" name="payment_method_id" required>
-            <option value="" disabled selected>— Elegí un medio —</option>
+            <option value="" disabled selected>— Elige un medio —</option>
             @foreach ($methods as $method)
                 <option value="{{ $method->id }}" data-code="{{ $method->code }}" @selected(old('payment_method_id') == $method->id)>{{ $method->name }}</option>
             @endforeach

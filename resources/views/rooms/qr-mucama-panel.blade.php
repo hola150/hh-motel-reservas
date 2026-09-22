@@ -108,7 +108,7 @@
 
         <section class="upcoming">
             <h2>◷ Próximas a llegar <span class="count">{{ $upcoming->count() }}</span></h2>
-            <p class="section-hint">Tocá una para confirmar que quedó en condiciones antes de que llegue el huésped.</p>
+            <p class="section-hint">Toca una para confirmar que quedó en condiciones antes de que llegue el huésped.</p>
             @forelse ($upcoming as $entry)
                 @php $checked = $entry['status']['next_booking']->room_checked_at; @endphp
                 <a class="row" href="{{ route('rooms.qr.show', $entry['room']) }}" style="text-decoration:none;">

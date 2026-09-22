@@ -51,7 +51,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" style="color:#666;">Sin upsells todavía. Creá uno para que aparezca al reservar.</td></tr>
+                    <tr><td colspan="5" style="color:#666;">Sin upsells todavía. Crea uno para que aparezca al reservar.</td></tr>
                 @endforelse
             </tbody>
         </table>

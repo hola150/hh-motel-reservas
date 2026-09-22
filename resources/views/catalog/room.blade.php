@@ -229,7 +229,7 @@
             const input = document.getElementById('room-link');
             const btn = document.getElementById('room-link-copy');
             const show = (ok) => {
-                btn.textContent = ok ? '¡Copiado!' : 'No se pudo — mantené tocado el link';
+                btn.textContent = ok ? '¡Copiado!' : 'No se pudo — mantén tocado el link';
                 setTimeout(() => { btn.textContent = 'Copiar'; }, 2000);
             };
             if (navigator.clipboard && window.isSecureContext) {

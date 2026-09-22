@@ -67,7 +67,7 @@
     <div class="card">
         Actualmente: <b>{{ $booking->room->name }}</b> · {{ $booking->starts_at->timezone('America/Santiago')->format('d/m/Y H:i') }} · {{ $booking->duration_minutes / 60 }} h · precio final <b>${{ number_format($booking->price_final, 0, ',', '.') }}</b>
         @if ($booking->checked_in_at)
-            <div class="hint" style="margin-top:8px;">Check-in real: <strong>{{ $booking->checked_in_at->timezone('America/Santiago')->format('d/m/Y H:i') }}</strong> — si el huésped llegó antes, ajustá la fecha/hora de abajo para que coincida.</div>
+            <div class="hint" style="margin-top:8px;">Check-in real: <strong>{{ $booking->checked_in_at->timezone('America/Santiago')->format('d/m/Y H:i') }}</strong> — si el huésped llegó antes, ajusta la fecha/hora de abajo para que coincida.</div>
         @endif
     </div>
 

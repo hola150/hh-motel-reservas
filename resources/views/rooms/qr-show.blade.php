@@ -78,7 +78,7 @@
                     </form>
                     <p class="info">Recepción confirma después de este aviso -- la habitación no vuelve a disponible sola.</p>
                 @else
-                    <p class="info">Iniciá sesión con tu PIN para poder reportar el aseo de esta habitación.</p>
+                    <p class="info">Inicia sesión con tu PIN para poder reportar el aseo de esta habitación.</p>
                     <a class="submit" style="display:block; text-align:center; text-decoration:none;" href="{{ route('mucamas.login', ['next' => route('rooms.qr.show', $room)]) }}">Iniciar sesión →</a>
                 @endif
             @elseif ($room->operational_status === 'activa' && $nextBooking)
@@ -94,7 +94,7 @@
                         <button class="submit" type="submit">Confirmar que está en condiciones →</button>
                     </form>
                 @else
-                    <p class="info">Hay una reserva a las <strong>{{ $nextBooking->starts_at->timezone('America/Santiago')->format('H:i') }}</strong> -- iniciá sesión con tu PIN para confirmar que la habitación está en condiciones.</p>
+                    <p class="info">Hay una reserva a las <strong>{{ $nextBooking->starts_at->timezone('America/Santiago')->format('H:i') }}</strong> -- inicia sesión con tu PIN para confirmar que la habitación está en condiciones.</p>
                     <a class="submit" style="display:block; text-align:center; text-decoration:none;" href="{{ route('mucamas.login', ['next' => route('rooms.qr.show', $room)]) }}">Iniciar sesión →</a>
                 @endif
             @else
