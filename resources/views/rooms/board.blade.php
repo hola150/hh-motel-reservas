@@ -21,21 +21,27 @@
         /* Reservas nuevas en PENDIENTE_PAGO -- lo primero que hay que ver al
            entrar o al recibir el turno, por eso va arriba de todo el
            tablero, no mezclado con las secciones de habitaciones. */
-        .pending-panel { background:#241a10; border:1px solid #7a4a1f; border-radius:11px; padding:16px 18px; margin-bottom: 26px; }
+        {{-- El resto del tablero se ve claro en la práctica: partials.navbar
+             inyecta public/css/hh-theme.css, que pisa (con !important) los
+             colores oscuros que este archivo define más abajo. Ese stylesheet
+             no conoce estas clases nuevas, así que hay que definirlas ya en
+             el tono claro de una vez, no en el oscuro que "parece" el resto
+             de este <style>. --}}
+        .pending-panel { background:#fff; border:1px solid #f0d9b8; border-left:4px solid #e8a23f; border-radius:11px; padding:16px 18px; margin-bottom: 26px; box-shadow: 0 3px 10px #1011120b; }
         .pending-head { display:flex; align-items:baseline; gap:10px; margin-bottom:12px; }
-        .pending-head h2 { font-size:14px; margin:0; text-transform:uppercase; letter-spacing:.05em; color:#ffb078; }
-        .pending-head .count { font-family: ui-monospace, monospace; font-size:12px; color:#c99a6b; }
-        .pending-empty { color:#c99a6b; font-size:13px; }
-        .pending-row { display:grid; grid-template-columns: 90px 1fr auto auto 20px; align-items:center; gap:14px; padding:10px 0; border-top:1px solid #4a341c; text-decoration:none; color:inherit; }
+        .pending-head h2 { font-size:14px; margin:0; text-transform:uppercase; letter-spacing:.05em; color:#956009; }
+        .pending-head .count { font-family: ui-monospace, monospace; font-size:12px; color:#8a7256; }
+        .pending-empty { color:#6b7280; font-size:13px; }
+        .pending-row { display:grid; grid-template-columns: 90px 1fr auto auto 20px; align-items:center; gap:14px; padding:10px 0; border-top:1px solid #f0e6d8; text-decoration:none; color:#202124; }
         .pending-row:first-child { border-top:none; }
-        .pending-row:hover { color:#ffb078; }
-        .pending-row .pcode { font-family: ui-monospace, monospace; font-size:12px; color:#c99a6b; }
+        .pending-row:hover { color:#b64c0a; }
+        .pending-row .pcode { font-family: ui-monospace, monospace; font-size:12px; color:#8a7256; }
         .pending-row .pinfo strong { display:block; font-size:13.5px; }
-        .pending-row .pinfo small { color:#c9a97e; font-size:11.5px; }
-        .pending-row .page { font-size:11.5px; color:#c99a6b; white-space:nowrap; }
+        .pending-row .pinfo small { color:#6b7280; font-size:11.5px; }
+        .pending-row .page { font-size:11.5px; color:#8a7256; white-space:nowrap; }
         .pending-row .ptag { font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:20px; white-space:nowrap; }
-        .pending-row .ptag.sent { background:#123a28; color:#6ee7b7; }
-        .pending-row .ptag.unsent { background:#3a1c10; color:#ffb078; border:1px solid #7a4a1f; }
+        .pending-row .ptag.sent { background:#e7f7ef; color:#0e9f6e; }
+        .pending-row .ptag.unsent { background:#fdecdc; color:#b64c0a; border:1px solid #f0c89a; }
         @media (max-width:700px) { .pending-row { grid-template-columns: 1fr auto; grid-template-areas:"info tag" "code page"; } .pending-row .pinfo { grid-area:info; } .pending-row .ptag { grid-area:tag; } .pending-row .pcode { grid-area:code; } .pending-row .page { grid-area:page; } .pending-row .arrow { display:none; } }
 
         .summary { display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 30px; }
