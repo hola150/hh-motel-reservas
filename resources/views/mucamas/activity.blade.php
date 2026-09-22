@@ -83,8 +83,8 @@
                 </div>
             </div>
             @php $route = $routesByStaff->get($mucama->id); @endphp
-            @if ($route && $route->count() > 1)
-                <div class="route-trail">Ruta de hoy: {{ $route->map(fn ($stop) => $stop['room'].' ('.$stop['at'].')')->implode(' → ') }}</div>
+            @if ($route && $route->isNotEmpty())
+                <div class="route-trail">Historial de hoy: {{ $route->map(fn ($stop) => $stop['room'].' '.$stop['icon'].' '.$stop['label'].' ('.$stop['at'].')')->implode(' → ') }}</div>
             @endif
         </div>
     @empty

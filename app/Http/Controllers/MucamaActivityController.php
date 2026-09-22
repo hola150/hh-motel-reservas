@@ -56,27 +56,37 @@ class MucamaActivityController extends Controller
     }
 
     /**
-     * Ruta de habitaciones que cada mucama recorrió hoy (AuditLog
-     * habitacion.qr_visita, escrito por RoomQrController::show() solo
-     * cuando cambia de habitación) -- de más antigua a más nueva.
+     * Historial de hoy por mucama: no solo POR DÓNDE pasó (qr_visita,
+     * "entrada"), sino también qué DEJÓ ENTREGADO ahí -- aseo_reportado
+     * (limpieza lista) y revision_previa (habitación confirmada para una
+     * próxima reserva). Los tres eventos comparten room_id/staff_id en
+     * new_value, así que se mezclan en una sola línea de tiempo por orden
+     * de hora real, cada uno con su propia etiqueta.
      *
      * @return \Illuminate\Support\Collection<int, \Illuminate\Support\Collection>
      */
     private function todaysRoutes(\Carbon\Carbon $today): \Illuminate\Support\Collection
     {
-        $roomIds = [];
-        $logs = AuditLog::where('action', 'habitacion.qr_visita')
+        $labels = [
+            'habitacion.qr_visita' => ['icon' => '🚪', 'text' => 'entrada'],
+            'habitacion.aseo_reportado' => ['icon' => '✓', 'text' => 'aseo entregado'],
+            'habitacion.revision_previa' => ['icon' => '✓', 'text' => 'revisión confirmada'],
+        ];
+
+        $logs = AuditLog::whereIn('action', array_keys($labels))
             ->where('created_at', '>=', $today)
             ->orderBy('created_at')
-            ->get()
-            ->each(function (AuditLog $log) use (&$roomIds) { $roomIds[] = (int) $log->entity_id; });
+            ->get();
 
-        $roomNames = Room::whereIn('id', array_unique($roomIds))->pluck('name', 'id');
+        $roomIds = $logs->map(fn (AuditLog $log) => (int) $log->entity_id)->unique();
+        $roomNames = Room::whereIn('id', $roomIds)->pluck('name', 'id');
 
         return $logs->groupBy(fn (AuditLog $log) => $log->new_value['staff_id'] ?? 0)
             ->map(fn ($group) => $group->map(fn (AuditLog $log) => [
                 'room' => $roomNames[(int) $log->entity_id] ?? '?',
                 'at' => $log->created_at->timezone('America/Santiago')->format('H:i'),
+                'icon' => $labels[$log->action]['icon'],
+                'label' => $labels[$log->action]['text'],
             ]));
     }
 }

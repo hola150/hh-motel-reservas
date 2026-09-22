@@ -65,7 +65,10 @@ class RoomQrController extends Controller
         $mucama = $request->attributes->get('mucama');
 
         $next->update(['room_checked_at' => now(), 'room_checked_by' => $mucama->name]);
-        AuditLog::record(null, 'habitacion.revision_previa', 'Booking', $next->id, null, $next->only(['room_checked_at', 'room_checked_by']));
+        AuditLog::record(null, 'habitacion.revision_previa', 'Room', $room->id, null, [
+            ...$next->only(['room_checked_at', 'room_checked_by']),
+            'staff_id' => $mucama->id,
+        ]);
 
         return redirect()->route('rooms.qr.show', $room)->with('status', '¡Gracias, '.$mucama->name.'! Quedó confirmada para la próxima reserva.');
     }
@@ -112,7 +115,10 @@ class RoomQrController extends Controller
 
         $old = $room->only(['aseo_reported_by', 'aseo_reported_at']);
         $room->update(['aseo_reported_by' => $mucama->name, 'aseo_reported_at' => now()]);
-        AuditLog::record(null, 'habitacion.aseo_reportado', 'Room', $room->id, $old, $room->only(['aseo_reported_by', 'aseo_reported_at']));
+        AuditLog::record(null, 'habitacion.aseo_reportado', 'Room', $room->id, $old, [
+            ...$room->only(['aseo_reported_by', 'aseo_reported_at']),
+            'staff_id' => $mucama->id,
+        ]);
 
         return redirect()->route('rooms.qr.show', $room)->with('status', '¡Gracias, '.$mucama->name.'! Recepción ya puede confirmarlo.');
     }
