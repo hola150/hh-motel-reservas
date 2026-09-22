@@ -21,8 +21,14 @@ class MucamaActivityController extends Controller
 {
     public function index(): View
     {
+        // orderByDesc a secas ordena distinto según el motor: en Postgres los
+        // NULL quedan PRIMERO en DESC (al revés que en MySQL/SQLite), así que
+        // una mucama que nunca escaneó aparecería arriba de una que sí lo
+        // hizo hace un rato -- se fuerza el orden explícito para que sea el
+        // mismo sin importar el motor.
         $mucamas = Staff::where('role', 'Mucama')->where('is_active', true)
             ->with(['lastQrRoom.category', 'shiftLogs' => fn ($q) => $q->whereNull('ended_at')])
+            ->orderByRaw('last_qr_seen_at IS NULL')
             ->orderByDesc('last_qr_seen_at')
             ->get();
 

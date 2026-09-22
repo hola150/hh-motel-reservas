@@ -55,6 +55,10 @@ class RoomQrController extends Controller
      */
     public function confirmRoomReady(Request $request, Room $room, RoomBoardService $board): RedirectResponse
     {
+        if ($room->operational_status !== 'activa') {
+            return back()->withErrors(['pin' => 'Esta habitación pasó a '.$room->operational_status.' -- no se puede confirmar como lista todavía.']);
+        }
+
         $next = $board->statusFor($room)['next_booking'];
 
         if (! $next) {

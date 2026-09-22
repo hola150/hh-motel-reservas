@@ -42,6 +42,10 @@
         <h1>¡Reserva creada!</h1>
         <p class="sub">Guarda el código — te lo vamos a pedir al llegar.</p>
 
+        @if (session('warning'))
+            <div class="next-steps" style="background:#3a2a12; border-color:#7a5a1f; color:#ffd699;">{{ session('warning') }}</div>
+        @endif
+
         <div class="card">
             <div class="row"><span class="muted">Código</span><span class="code">{{ $booking->code }}</span></div>
             <div class="row"><span class="muted">Estado</span><span class="status-badge">Pendiente de pago</span></div>

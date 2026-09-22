@@ -145,31 +145,47 @@ class PublicBookingController extends Controller
         // Los extras se vuelven a resolver desde la base de datos: el navegador
         // solo envía IDs y cantidades, nunca precios. Se guardan como consumo
         // de la reserva y el stock se descuenta con la misma lógica de recepción.
-        try {
-            $productQuantities = collect($validated['quantities'] ?? [])
-                ->mapWithKeys(fn ($quantity, $id) => [(int) $id => (int) $quantity])
-                ->filter(fn ($quantity) => $quantity > 0);
-            $products = Product::where('is_active', true)->whereIn('id', $productQuantities->keys())->get()->keyBy('id');
-            foreach ($productQuantities as $productId => $quantity) {
-                if (! isset($products[$productId])) {
-                    continue;
-                }
-                $consumption->addProduct($booking, $products[$productId], $quantity, null);
-            }
+        // Cada ítem se intenta por separado -- que uno se haya agotado justo
+        // antes de enviar no debe tumbar los demás que sí tenían stock.
+        $soldOut = false;
 
-            $comboQuantities = collect($validated['combo_quantities'] ?? [])
-                ->mapWithKeys(fn ($quantity, $id) => [(int) $id => (int) $quantity])
-                ->filter(fn ($quantity) => $quantity > 0);
-            $combos = Combo::with('items.product')->where('is_active', true)->whereIn('id', $comboQuantities->keys())->get()->keyBy('id');
-            foreach ($comboQuantities as $comboId => $quantity) {
-                if (! isset($combos[$comboId]) || $combos[$comboId]->isOutOfStock()) {
-                    continue;
-                }
-                $consumption->addCombo($booking, $combos[$comboId], $quantity, null);
+        $productQuantities = collect($validated['quantities'] ?? [])
+            ->mapWithKeys(fn ($quantity, $id) => [(int) $id => (int) $quantity])
+            ->filter(fn ($quantity) => $quantity > 0);
+        $products = Product::where('is_active', true)->whereIn('id', $productQuantities->keys())->get()->keyBy('id');
+        foreach ($productQuantities as $productId => $quantity) {
+            if (! isset($products[$productId])) {
+                continue;
             }
-        } catch (InsufficientStockException $e) {
+            try {
+                $consumption->addProduct($booking, $products[$productId], $quantity, null);
+            } catch (InsufficientStockException $e) {
+                $soldOut = true;
+            }
+        }
+
+        $comboQuantities = collect($validated['combo_quantities'] ?? [])
+            ->mapWithKeys(fn ($quantity, $id) => [(int) $id => (int) $quantity])
+            ->filter(fn ($quantity) => $quantity > 0);
+        $combos = Combo::with('items.product')->where('is_active', true)->whereIn('id', $comboQuantities->keys())->get()->keyBy('id');
+        foreach ($comboQuantities as $comboId => $quantity) {
+            if (! isset($combos[$comboId]) || $combos[$comboId]->isOutOfStock()) {
+                if (isset($combos[$comboId])) {
+                    $soldOut = true;
+                }
+                continue;
+            }
+            try {
+                $consumption->addCombo($booking, $combos[$comboId], $quantity, null);
+            } catch (InsufficientStockException $e) {
+                $soldOut = true;
+            }
+        }
+
+        if ($soldOut) {
             // La reserva ya tiene su habitación bloqueada; informamos para que
-            // recepción pueda agregar el extra disponible manualmente.
+            // recepción pueda agregar el extra disponible manualmente. Los
+            // demás extras que sí tenían stock ya quedaron agregados arriba.
             return redirect()->route('catalog.booked', $booking->code)
                 ->with('warning', 'La reserva quedó creada, pero uno de los extras seleccionados se agotó. Recepción podrá ofrecerte otra alternativa.');
         }
