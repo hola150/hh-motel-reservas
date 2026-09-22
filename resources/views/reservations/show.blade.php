@@ -40,6 +40,7 @@
         a.board-btn:hover { border-color:#ff7918; color:#ff7918; }
         a.pay-btn { display:block; text-align:center; background:#ff7918; color:#fff; padding:13px; border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; }
         a.pay-btn-inline { margin-top:14px; }
+        a.whatsapp-btn { display:inline-block; background:#25d366; border:1px solid #25d366; color:#0b2816; padding:8px 14px; border-radius:7px; font-size:12.5px; font-weight:700; text-decoration:none; }
         table.payments { width:100%; border-collapse: collapse; font-size: 13px; }
         table.payments th { text-align:left; color:#888; font-weight:500; font-size:11px; text-transform:uppercase; padding-bottom:6px; }
         table.payments td { padding: 6px 0; border-top: 1px solid #292929; }
@@ -104,6 +105,27 @@
             </details>
         @endunless
     </div>
+
+    @php
+        $whatsappMessage = "Hola {$booking->customer->name}, tu reserva en HH Motel está creada.\n\n"
+            ."Código: {$booking->code}\n"
+            ."Playroom: {$booking->room->name}\n"
+            ."Fecha: ".$booking->starts_at->timezone('America/Santiago')->format('d/m/Y')."\n"
+            ."Horario: ".$booking->starts_at->timezone('America/Santiago')->format('H:i')." a ".$booking->ends_at->timezone('America/Santiago')->format('H:i')."\n"
+            ."Monto pendiente: $".number_format($booking->balanceDue(), 0, ',', '.')."\n\n"
+            ."Datos para transferencia:\n"
+            ."Titular: Turismo Ruta Verde LTDA\n"
+            ."RUT: 76.006.660-5\n"
+            ."Banco: BCI / MACHBANK\n"
+            ."Cuenta corriente: 29322383\n"
+            ."Correo: hhmotel@hhh.cl\n\n"
+            ."Envíanos el comprobante por este mismo WhatsApp.\n\n"
+            ."Pase de reserva: ".url(route('bookings.pass.pdf', $booking->code));
+        $whatsappPaymentUrl = 'https://wa.me/'.preg_replace('/[^0-9]/', '', $booking->customer->phone_e164).'?text='.rawurlencode($whatsappMessage);
+    @endphp
+    @if ($booking->balanceDue() > 0)
+        <div style="text-align:right; margin:-4px 0 16px;"><a class="whatsapp-btn" href="{{ $whatsappPaymentUrl }}" target="_blank" rel="noopener">Enviar instrucciones por WhatsApp</a></div>
+    @endif
 
     @if (session('status'))
         <div class="banner ok">{{ session('status') }}</div>
