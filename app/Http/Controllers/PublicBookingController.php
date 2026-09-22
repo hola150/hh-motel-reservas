@@ -14,6 +14,7 @@ use App\Services\Booking\AvailabilityChecker;
 use App\Services\Booking\BookingService;
 use App\Support\Phone;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -92,14 +93,7 @@ class PublicBookingController extends Controller
         $startsAt = Carbon::parse($validated['date'].' '.sprintf('%02d:%02d', $validated['time_hour'], $validated['time_minute']));
         $endsAt = $startsAt->copy()->addMinutes((int) $validated['duration_minutes']);
 
-        $operationalSetting = \App\Models\OperationalSetting::current();
-        $roomQuery = Room::where('room_category_id', $validated['room_category_id'])
-            ->where('operational_status', 'activa')
-            ->floorWingEnabled($operationalSetting);
-        if (!empty($validated['room_id'])) {
-            $roomQuery->whereKey($validated['room_id']);
-        }
-        $room = $roomQuery->orderBy('name')->get()->first(fn (Room $r) => $availability->isAvailable($r, $startsAt, $endsAt));
+        $room = $this->findAvailableRoom($validated['room_category_id'], $validated['room_id'] ?? null, $startsAt, $endsAt, $availability);
 
         if (! $room) {
             return back()->withInput()->withErrors(['duration_minutes' => 'No hay habitaciones libres de ese tipo para ese horario — probá otra fecha, hora o duración.']);
@@ -142,5 +136,48 @@ class PublicBookingController extends Controller
         $booking = \App\Models\Booking::with(['room.category'])->where('code', $code)->firstOrFail();
 
         return view('catalog.booked', ['booking' => $booking]);
+    }
+
+    /**
+     * Chequeo en vivo desde el formulario -- antes el cliente solo se
+     * enteraba de que no había disponibilidad DESPUÉS de llenar sus datos
+     * de contacto y enviar todo. Usa la misma búsqueda que store(), así que
+     * "disponible" acá nunca contradice el resultado real del envío (salvo
+     * que otra reserva tome el horario justo entre medio).
+     */
+    public function checkAvailability(Request $request, AvailabilityChecker $availability): JsonResponse
+    {
+        $validated = $request->validate([
+            'room_category_id' => ['required', 'exists:room_categories,id'],
+            'room_id' => ['nullable', 'integer', 'exists:rooms,id'],
+            'date' => ['required', 'date', 'after_or_equal:today'],
+            'time_hour' => ['required', 'integer', 'min:0', 'max:23'],
+            'time_minute' => ['required', 'integer', 'min:0', 'max:59'],
+            'duration_minutes' => ['required', 'integer'],
+        ]);
+
+        $startsAt = Carbon::parse($validated['date'].' '.sprintf('%02d:%02d', $validated['time_hour'], $validated['time_minute']));
+        $endsAt = $startsAt->copy()->addMinutes((int) $validated['duration_minutes']);
+
+        if ($startsAt->lt(now()->subMinutes(5))) {
+            return response()->json(['available' => false]);
+        }
+
+        $room = $this->findAvailableRoom($validated['room_category_id'], $validated['room_id'] ?? null, $startsAt, $endsAt, $availability);
+
+        return response()->json(['available' => (bool) $room]);
+    }
+
+    private function findAvailableRoom(int $categoryId, ?int $roomId, Carbon $startsAt, Carbon $endsAt, AvailabilityChecker $availability): ?Room
+    {
+        $operationalSetting = \App\Models\OperationalSetting::current();
+        $roomQuery = Room::where('room_category_id', $categoryId)
+            ->where('operational_status', 'activa')
+            ->floorWingEnabled($operationalSetting);
+        if (!empty($roomId)) {
+            $roomQuery->whereKey($roomId);
+        }
+
+        return $roomQuery->orderBy('name')->get()->first(fn (Room $r) => $availability->isAvailable($r, $startsAt, $endsAt));
     }
 }

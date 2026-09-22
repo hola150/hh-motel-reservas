@@ -25,6 +25,12 @@
         .row:last-child { border-bottom:none; }
         .row span.muted { color:#c1c3c7; }
         .code { font-family: ui-monospace, monospace; color:var(--hh-accent); font-size: 16px; font-weight:700; }
+        .status-badge { display:inline-flex; background:#3a2a12; color:#ffd699; border:1px solid #7a5a1f; border-radius:20px; padding:3px 10px; font-size:11.5px; font-weight:700; }
+        .discount-row span:last-child { color:#6ee7b7; }
+        .next-steps { background:#fff; border:1px solid #e2e2df; border-radius:10px; padding:14px 16px; margin-bottom:20px; text-align:left; font-size:13px; color:#42464e; }
+        .next-steps strong { display:block; margin-bottom:6px; font-size:13.5px; }
+        .next-steps ul { margin:0; padding-left:18px; }
+        .next-steps li { margin-bottom:4px; }
         a.btn { display:block; background:var(--hh-accent); color:#21170e; text-decoration:none; padding: 13px; border-radius: 9px; font-weight:750; font-size:14.5px; }
         a.btn:hover { background:var(--hh-accent-hover); }
         a.back { display:block; margin-top:14px; color:#62656c; text-decoration:none; font-size:13px; }
@@ -34,14 +40,27 @@
     <div class="wrap">
         <div class="check">✓</div>
         <h1>¡Reserva creada!</h1>
-        <p class="sub">Te esperamos — presentá tu documento de identidad al llegar.</p>
+        <p class="sub">Guardá el código — te lo vamos a pedir al llegar.</p>
 
         <div class="card">
             <div class="row"><span class="muted">Código</span><span class="code">{{ $booking->code }}</span></div>
-            <div class="row"><span class="muted">Habitación</span><span>{{ $booking->room->category->name }}</span></div>
+            <div class="row"><span class="muted">Estado</span><span class="status-badge">Pendiente de pago</span></div>
+            <div class="row"><span class="muted">Habitación</span><span>{{ $booking->room->name }} · {{ $booking->room->category->name }}</span></div>
             <div class="row"><span class="muted">Fecha</span><span>{{ $booking->starts_at->timezone('America/Santiago')->locale('es')->isoFormat('D [de] MMMM, HH:mm') }}</span></div>
             <div class="row"><span class="muted">Duración</span><span>{{ $booking->duration_minutes >= 60 ? intdiv($booking->duration_minutes, 60).' h' : $booking->duration_minutes.' min' }}</span></div>
-            <div class="row"><span class="muted">Total</span><span>${{ number_format($booking->price_final, 0, ',', '.') }}</span></div>
+            @if ($booking->discount_amount > 0)
+                <div class="row discount-row"><span class="muted">Descuento aplicado{{ $booking->coupon_code_snapshot ? ' ('.$booking->coupon_code_snapshot.')' : '' }}</span><span>-${{ number_format($booking->discount_amount, 0, ',', '.') }}</span></div>
+            @endif
+            <div class="row"><span class="muted">Total a pagar</span><span>${{ number_format($booking->price_final, 0, ',', '.') }}</span></div>
+        </div>
+
+        <div class="next-steps">
+            <strong>¿Qué sigue ahora?</strong>
+            <ul>
+                <li>Todavía no cobramos nada — el pago se hace al llegar al motel.</li>
+                <li>Esta reserva queda pendiente hasta que la confirmemos por WhatsApp.</li>
+                <li>Presentá tu documento de identidad al llegar.</li>
+            </ul>
         </div>
 
         <a class="btn" href="https://wa.me/56977683108?text={{ rawurlencode('Hola! Tengo la reserva '.$booking->code.' en HH.') }}" target="_blank" rel="noopener">Avisar por WhatsApp que ya reservé →</a>

@@ -41,6 +41,7 @@ Route::get('/', function () {
 Route::get('/catalogo', [CatalogController::class, 'index'])->name('catalog.index');
 Route::get('/catalogo/habitacion/{room}', [CatalogController::class, 'room'])->name('catalog.room');
 Route::get('/catalogo/reservar', [PublicBookingController::class, 'create'])->name('catalog.reserve');
+Route::get('/catalogo/reservar/disponibilidad', [PublicBookingController::class, 'checkAvailability'])->middleware('throttle:30,1')->name('catalog.reserve.availability');
 Route::post('/catalogo/reservar', [PublicBookingController::class, 'store'])->middleware('throttle:8,1')->name('catalog.reserve.store');
 Route::get('/catalogo/reservado/{code}', [PublicBookingController::class, 'booked'])->name('catalog.booked');
 

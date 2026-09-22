@@ -212,7 +212,11 @@
                                 @endforeach
                             @else
                                 <div class="deal-card is-offer">
-                                    <div class="deal-thumb-empty">{{ $entry['category']->name }}</div>
+                                    @if ($entry['photos']->isNotEmpty())
+                                        <img class="deal-thumb" src="{{ $entry['photos']->first() }}" alt="{{ $entry['category']->name }}">
+                                    @else
+                                        <div class="deal-thumb-empty">{{ $entry['category']->name }}</div>
+                                    @endif
                                     <div class="deal-body">
                                         <strong class="deal-title">{{ $entry['category']->name }}{{ $entry['offer']['durationLabel'] ? ' · '.$entry['offer']['durationLabel'] : '' }}</strong>
                                         {!! $offerPriceRow($entry['offer']) !!}

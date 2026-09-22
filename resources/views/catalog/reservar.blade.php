@@ -52,6 +52,13 @@
         .coupon-applied a { color:#9edaff; text-decoration:underline; flex:none; font-size:12px; }
         .coupon-warning { display:none; background:#3a2a12; border:1px solid #7a5a1f; color:#ffd699; border-radius:9px; padding:11px 14px; font-size:12.5px; margin-top:10px; }
         .coupon-warning.show { display:block; }
+        .avail-status { display:none; align-items:center; gap:7px; font-size:12.5px; margin-top:10px; padding:9px 12px; border-radius:8px; }
+        .avail-status.show { display:flex; }
+        .avail-status.checking { background:#242527; color:#c1c3c7; }
+        .avail-status.ok { background:#1c2f1c; border:1px solid #2e5a2e; color:#8fe0ad; }
+        .avail-status.no { background:#3a1c1c; border:1px solid #7a2d2d; color:#f3b8b8; }
+        .avail-status .spin { width:11px; height:11px; border-radius:50%; border:2px solid currentColor; border-top-color:transparent; animation:hh-spin .7s linear infinite; flex:none; }
+        @keyframes hh-spin { to { transform:rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -117,6 +124,7 @@
 
             <label for="duration_minutes">¿Cuánto tiempo quieres quedarte?</label>
             <select id="duration_minutes" name="duration_minutes" required></select>
+            <div class="avail-status" id="avail-status" aria-live="polite"></div>
 
             <label for="guests_count">Cantidad de personas</label>
             <input type="number" id="guests_count" name="guests_count" min="1" max="10" value="{{ old('guests_count', 2) }}" required>
@@ -201,6 +209,51 @@
             }
         }
 
+        // Antes el cliente solo se enteraba de que no había disponibilidad
+        // DESPUÉS de completar nombre/teléfono/email y enviar todo el
+        // formulario -- ahora se chequea en vivo apenas elige categoría,
+        // fecha, hora y duración, con un debounce para no pegarle al
+        // servidor en cada tecla/cambio.
+        let hhAvailTimer = null;
+        let hhAvailSeq = 0;
+        function hhCheckAvailability() {
+            const status = document.getElementById('avail-status');
+            const catId = document.getElementById('room_category_id').value;
+            const date = document.getElementById('date').value;
+            const duration = document.getElementById('duration_minutes').value;
+            const timeHour = document.getElementById('time_hour').value;
+            const timeMinute = document.getElementById('time_minute').value;
+            clearTimeout(hhAvailTimer);
+            if (!catId || !date || !duration || timeHour === '' || timeMinute === '') {
+                status.classList.remove('show');
+                return;
+            }
+            const mySeq = ++hhAvailSeq;
+            status.className = 'avail-status show checking';
+            status.innerHTML = '<span class="spin"></span> Verificando disponibilidad…';
+            hhAvailTimer = setTimeout(() => {
+                const params = new URLSearchParams({
+                    room_category_id: catId, date, duration_minutes: duration,
+                    time_hour: timeHour, time_minute: timeMinute,
+                });
+                const roomId = document.querySelector('input[name="room_id"]').value;
+                if (roomId) params.set('room_id', roomId);
+                fetch('{{ route('catalog.reserve.availability') }}?' + params.toString(), { headers: { 'Accept': 'application/json' } })
+                    .then((r) => r.ok ? r.json() : Promise.reject())
+                    .then((data) => {
+                        if (mySeq !== hhAvailSeq) return;
+                        if (data.available) {
+                            status.className = 'avail-status show ok';
+                            status.textContent = '✓ Hay disponibilidad para ese horario';
+                        } else {
+                            status.className = 'avail-status show no';
+                            status.textContent = '✗ No hay disponibilidad para ese horario — probá otra fecha, hora o duración';
+                        }
+                    })
+                    .catch(() => { if (mySeq === hhAvailSeq) status.classList.remove('show'); });
+            }, 450);
+        }
+
         function hhUpdateSummary() {
             const cat = document.getElementById('room_category_id');
             const date = document.getElementById('date').value;
@@ -213,10 +266,11 @@
         }
 
         document.getElementById('reserve-form').addEventListener('submit', hhSyncTime);
-        ['room_category_id','date','time-hour12','time-minute','time-period','duration_minutes'].forEach(id => document.getElementById(id).addEventListener('change', () => { hhSyncTime(); hhUpdateSummary(); hhCheckCouponWindow(); }));
+        ['room_category_id','date','time-hour12','time-minute','time-period','duration_minutes'].forEach(id => document.getElementById(id).addEventListener('change', () => { hhSyncTime(); hhUpdateSummary(); hhCheckCouponWindow(); hhCheckAvailability(); }));
         hhUpdateDurations();
         hhUpdateSummary();
         hhCheckCouponWindow();
+        hhCheckAvailability();
     </script>
 </body>
 </html>

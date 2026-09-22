@@ -112,6 +112,37 @@ class CatalogController extends Controller
     {
         $room->load('category', 'furniture');
 
+        $prices = $this->pricesFromRows(
+            $room->category->rateRulePrices()->whereHas('rateRule', fn ($r) => $r->where('is_active', true))->with('rateRule')->get()
+        );
+
+        // Misma oferta que se ve en el catálogo general, pero mirando esta
+        // habitación puntual -- offerLiveFor ya filtra por fecha/día/alcance
+        // (rooms o categoría), acá solo se le suma el precio antes/después.
+        $today = Carbon::today();
+        $offerCoupon = Coupon::offers()->where('is_active', true)
+            ->with(['rooms:id', 'roomCategories:id'])
+            ->get()
+            ->first(fn (Coupon $c) => $c->offerLiveFor($room, $today));
+        $referencePrice = $prices->first()['hh'] ?? null;
+        $offer = null;
+        if ($offerCoupon && $referencePrice !== null) {
+            $offerPrice = match ($offerCoupon->discount_type) {
+                'percentage' => (int) round($referencePrice * (1 - $offerCoupon->discount_value / 100)),
+                'precio_fijo' => (int) $offerCoupon->discount_value,
+                default => null,
+            };
+            if ($offerPrice !== null) {
+                $offer = [
+                    'name' => $offerCoupon->internal_name,
+                    'originalPrice' => $referencePrice,
+                    'offerPrice' => $offerPrice,
+                    'savePct' => $referencePrice > 0 ? round((1 - $offerPrice / $referencePrice) * 100) : 0,
+                    'durationLabel' => $prices->first() ? ($prices->first()['duration'] >= 60 ? intdiv($prices->first()['duration'], 60).' h' : $prices->first()['duration'].' min') : null,
+                ];
+            }
+        }
+
         return view('catalog.room', [
             'room' => $room,
             'category' => $room->category,
@@ -121,9 +152,8 @@ class CatalogController extends Controller
             // Solo lo operativo -- si algo está en reparación o fuera de uso
             // no se le puede ofrecer al cliente, aunque siga cargado acá.
             'equipment' => $room->furniture->where('pivot.condition', 'operativo')->values(),
-            'prices' => $this->pricesFromRows(
-                $room->category->rateRulePrices()->whereHas('rateRule', fn ($r) => $r->where('is_active', true))->with('rateRule')->get()
-            ),
+            'prices' => $prices,
+            'offer' => $offer,
         ]);
     }
 

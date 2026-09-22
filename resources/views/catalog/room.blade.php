@@ -47,6 +47,13 @@
         .cap { font-size: 14px; color: #d5d8de; margin-bottom: 14px; }
         .sales-tip { display:flex; gap:8px; align-items:flex-start; background:#262729; border:1px solid #56585d; color:#f0d18a; border-radius:9px; padding:9px 11px; margin:0 0 14px; font-size:12.5px; line-height:1.35; }
         .sales-tip::before { content:'✦'; color:var(--hh-accent); font-weight:800; }
+        .room-offer { background:#191a1c; border:1px solid #ff7918; border-radius:9px; padding:12px 14px; margin:0 0 16px; }
+        .room-offer-label { display:inline-flex; align-items:center; gap:6px; background:#3a1c10; border:1px solid #ff7918; color:#ffb078; border-radius:20px; padding:3px 9px; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; margin-bottom:8px; }
+        .room-offer-price { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+        .room-offer-price .old { color:#8a8d93; text-decoration:line-through; font-size:13.5px; }
+        .room-offer-price .new { color:#6ee7b7; font-weight:800; font-size:20px; }
+        .room-offer-price .save { background:#123a28; color:#6ee7b7; border-radius:6px; padding:2px 7px; font-size:11px; font-weight:800; }
+        .room-offer small { display:block; color:#c9cbd0; margin-top:4px; }
         .features { display:flex; flex-wrap:wrap; gap: 7px; margin-bottom: 18px; }
         .features span { display:inline-block; font-family: ui-monospace, monospace; background:#262729; border:1px solid #56585d; color:#e0e2e5; font-size: 11px; font-weight:600; padding: 3px 11px; border-radius: 20px; }
         .equip-label { font-size: 11px; color:#9edaff; font-weight:700; text-transform:uppercase; letter-spacing:.03em; margin: 4px 0 8px; }
@@ -110,6 +117,18 @@
                 <div class="cat-label">Categoría {{ $category->name }}</div>
                 <div class="cap">Hasta {{ $category->base_capacity }} personas{{ $category->extra_guest_from ? ' · desde la '.$category->extra_guest_from.'ª persona, cargo adicional' : '' }}</div>
 
+                @if ($offer)
+                    <div class="room-offer">
+                        <span class="room-offer-label">✦ Oferta activa</span>
+                        <div class="room-offer-price">
+                            <span class="old">${{ number_format($offer['originalPrice'], 0, ',', '.') }}</span>
+                            <span class="new">${{ number_format($offer['offerPrice'], 0, ',', '.') }}</span>
+                            @if ($offer['savePct'] > 0)<span class="save">-{{ $offer['savePct'] }}%</span>@endif
+                        </div>
+                        <small>{{ $offer['name'] }}{{ $offer['durationLabel'] ? ' · '.$offer['durationLabel'] : '' }} — precio ya reflejado al reservar esta habitación.</small>
+                    </div>
+                @endif
+
                 @if ($salesTip)
                     <div class="sales-tip">{{ $salesTip }}</div>
                 @endif
@@ -165,7 +184,7 @@
                 @endif
 
                 <div class="btn-row">
-                    <a class="btn primary" href="{{ route('catalog.reserve', ['categoria' => $category->id]) }}" style="flex:none; width:100%;">Reservar online →</a>
+                    <a class="btn primary" href="{{ route('catalog.reserve', ['categoria' => $category->id, 'room_id' => $room->id]) }}" style="flex:none; width:100%;">Reservar online →</a>
                 </div>
             </div>
         </section>
