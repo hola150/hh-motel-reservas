@@ -42,7 +42,7 @@
     <div class="wrap">
         <div class="brand">HH MOTEL</div>
         <h1>Panel de mucamas</h1>
-        <p class="sub">Se actualiza solo cada 60s · sin datos de clientes ni de dinero</p>
+        <p class="sub">Se actualiza solo cada 60s</p>
 
         <section class="pending">
             <h2>⚠ Pendientes de aseo <span class="count">{{ $pendingAseo->count() }}</span></h2>
