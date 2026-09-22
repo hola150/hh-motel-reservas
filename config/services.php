@@ -35,4 +35,18 @@ return [
         ],
     ],
 
+    // Datos reales de la cuenta para el mensaje de WhatsApp de "instrucciones
+    // de pago" (ver reservations/show.blade.php) -- sin esto configurado, ese
+    // mensaje NO incluye datos de transferencia (para no mandarle a un
+    // cliente una cuenta inventada o de otro negocio).
+    'hh_payment' => [
+        'bank_titular' => env('HH_BANK_TITULAR'),
+        'bank_rut' => env('HH_BANK_RUT'),
+        'bank_name' => env('HH_BANK_NAME'),
+        'bank_account_type' => env('HH_BANK_ACCOUNT_TYPE'),
+        'bank_account_number' => env('HH_BANK_ACCOUNT_NUMBER'),
+        'bank_email' => env('HH_BANK_EMAIL'),
+        'mercadopago_link' => env('HH_MERCADOPAGO_LINK'),
+    ],
+
 ];

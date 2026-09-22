@@ -107,19 +107,30 @@
     </div>
 
     @php
+        $hhPayment = config('services.hh_payment');
+        $paymentLines = [];
+        // Sin esto configurado (HH_BANK_* / HH_MERCADOPAGO_LINK en .env), el
+        // mensaje simplemente no incluye ninguna instrucción de pago -- mejor
+        // que mandarle al cliente una cuenta inventada o equivocada.
+        if ($hhPayment['bank_titular'] && $hhPayment['bank_account_number']) {
+            $paymentLines[] = "Datos para transferencia:";
+            $paymentLines[] = "Titular: {$hhPayment['bank_titular']}";
+            if ($hhPayment['bank_rut']) $paymentLines[] = "RUT: {$hhPayment['bank_rut']}";
+            if ($hhPayment['bank_name']) $paymentLines[] = "Banco: {$hhPayment['bank_name']}";
+            $paymentLines[] = trim(($hhPayment['bank_account_type'] ?: 'Cuenta').": {$hhPayment['bank_account_number']}");
+            if ($hhPayment['bank_email']) $paymentLines[] = "Correo: {$hhPayment['bank_email']}";
+        }
+        if ($hhPayment['mercadopago_link']) {
+            $paymentLines[] = ($paymentLines ? "\nTambién podés pagar con Mercado Pago:\n" : "Pagá con Mercado Pago:\n").$hhPayment['mercadopago_link'];
+        }
+
         $whatsappMessage = "Hola {$booking->customer->name}, tu reserva en HH Motel está creada.\n\n"
             ."Código: {$booking->code}\n"
             ."Playroom: {$booking->room->name}\n"
             ."Fecha: ".$booking->starts_at->timezone('America/Santiago')->format('d/m/Y')."\n"
             ."Horario: ".$booking->starts_at->timezone('America/Santiago')->format('H:i')." a ".$booking->ends_at->timezone('America/Santiago')->format('H:i')."\n"
             ."Monto pendiente: $".number_format($booking->balanceDue(), 0, ',', '.')."\n\n"
-            ."Datos para transferencia:\n"
-            ."Titular: Turismo Ruta Verde LTDA\n"
-            ."RUT: 76.006.660-5\n"
-            ."Banco: BCI / MACHBANK\n"
-            ."Cuenta corriente: 29322383\n"
-            ."Correo: hhmotel@hhh.cl\n\n"
-            ."Envíanos el comprobante por este mismo WhatsApp.\n\n"
+            .($paymentLines ? implode("\n", $paymentLines)."\n\nEnvíanos el comprobante por este mismo WhatsApp.\n\n" : '')
             ."Pase de reserva: ".url(route('bookings.pass.pdf', $booking->code));
         $whatsappPaymentUrl = 'https://wa.me/'.preg_replace('/[^0-9]/', '', $booking->customer->phone_e164).'?text='.rawurlencode($whatsappMessage);
     @endphp
