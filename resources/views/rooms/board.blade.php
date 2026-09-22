@@ -87,6 +87,9 @@
         .cat-filter button.active { border-color: currentColor; background:#242424; }
         .cat-filter button[data-cat="new-lite"].active { background:#3a3216; }
         .cat-hidden { display:none !important; }
+        .upcoming-filter { background:#2a2410; border:1px solid #6b5a1e; color:#f0c95f; }
+        .upcoming-filter.active { border-color:#f0c95f; background:#3a3216; }
+        .upcoming-filter:hover { border-color:#f0c95f; }
 
         .sidebar { position:sticky; top:20px; }
         .sidebar-title { display:flex; align-items:baseline; gap:8px; margin-bottom:12px; }
@@ -183,8 +186,8 @@
         a.checkout-btn.pending-balance { background:#2a2010; border-color:#6b5a1e; color:#e8a23f; }
         a.checkout-btn.pending-balance:hover { border-color:#e8a23f; color:#ffcf7a; }
         .bookings-btn { display:block; width:100%; box-sizing:border-box; text-align:center; margin-top:8px; text-decoration:none; padding:8px; border-radius:7px; font-size:12.5px; font-weight:600; background:none; font-family:inherit; cursor:pointer; }
-        .bookings-btn.has-bookings { background:#1c2f3a; border:1px solid #3a5a72; color:#7fbcdc; }
-        .bookings-btn.has-bookings:hover { border-color:#7fbcdc; }
+        .bookings-btn.has-bookings { background:#2a2410; border:1px solid #8a6f1e; color:#f0c95f; font-weight:800; }
+        .bookings-btn.has-bookings:hover { border-color:#f0c95f; background:#352c12; }
         .bookings-btn.empty { background:transparent; border:1px dashed #333; color:#666; font-weight:500; }
         .bookings-btn.empty:hover { border-color:#555; color:#999; }
         .copy-link-btn { display:block; width:100%; box-sizing:border-box; text-align:center; margin-top:8px; padding:8px; border-radius:7px; font-size:12.5px; font-weight:600; font-family:inherit; cursor:pointer; background:#1c2f3a; border:1px solid #3a5a72; color:#7fbcdc; }
@@ -357,14 +360,15 @@
                         ->concat($grouped['proximas'])->concat($grouped['fuera_de_servicio'])
                         ->pluck('room.category')->unique('id')->sortBy('display_order')->values();
                 @endphp
-                @if ($boardCategories->count() > 1)
-                    <div class="cat-filter" id="cat-filter">
+                <div class="cat-filter" id="cat-filter">
+                    @if ($boardCategories->count() > 1)
                         <button type="button" data-cat="todas" onclick="hhFilterCategory('todas')">Todas</button>
                         @foreach ($boardCategories as $cat)
                             <button type="button" data-cat="{{ Str::slug($cat->name) }}" onclick="hhFilterCategory('{{ Str::slug($cat->name) }}')">{{ $cat->name }}</button>
                         @endforeach
-                    </div>
-                @endif
+                    @endif
+                    <button type="button" class="upcoming-filter" id="upcoming-filter-btn" onclick="hhToggleUpcomingFilter()">🔮 Con reservas futuras</button>
+                </div>
                 @if ($grouped['disponibles']->isEmpty())
                     <p class="section-empty">No hay habitaciones disponibles ahora mismo.</p>
                 @else
@@ -482,6 +486,13 @@
             localStorage.setItem('hh-board-category', cat);
             hhApplyCategoryFilter();
         }
+        // Segundo filtro, independiente de la categoría: mostrar solo las
+        // disponibles que YA tienen una reserva futura encima -- para no
+        // ofrecérselas de largada a un walk-in sin fijarse.
+        function hhToggleUpcomingFilter() {
+            localStorage.setItem('hh-board-only-upcoming', localStorage.getItem('hh-board-only-upcoming') === '1' ? '0' : '1');
+            hhApplyCategoryFilter();
+        }
         function hhApplyCategoryFilter() {
             const grid = document.getElementById('disponibles-grid');
             const filterBar = document.getElementById('cat-filter');
@@ -490,20 +501,25 @@
             if (cat !== 'todas' && !filterBar.querySelector('button[data-cat="' + cat + '"]')) {
                 cat = 'todas';
             }
-            filterBar.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+            filterBar.querySelectorAll('button[data-cat]').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+
+            const onlyUpcoming = localStorage.getItem('hh-board-only-upcoming') === '1';
+            const upcomingBtn = document.getElementById('upcoming-filter-btn');
+            if (upcomingBtn) upcomingBtn.classList.toggle('active', onlyUpcoming);
 
             const countEl = document.getElementById('disponibles-count');
             if (!grid) { return; }
 
             let shown = 0;
             grid.querySelectorAll('.card').forEach(card => {
-                const match = cat === 'todas' || card.classList.contains('cat-' + cat);
+                const match = (cat === 'todas' || card.classList.contains('cat-' + cat))
+                    && (!onlyUpcoming || card.classList.contains('has-upcoming'));
                 card.classList.toggle('cat-hidden', !match);
                 if (match) shown++;
             });
 
             const total = grid.dataset.total;
-            if (countEl) countEl.textContent = cat === 'todas' ? total : (shown + ' de ' + total);
+            if (countEl) countEl.textContent = (cat === 'todas' && !onlyUpcoming) ? total : (shown + ' de ' + total);
             const none = document.getElementById('disponibles-none');
             if (none) none.classList.toggle('cat-hidden', shown > 0);
         }

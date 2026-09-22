@@ -139,7 +139,11 @@
             ."Monto pendiente: $".number_format($booking->balanceDue(), 0, ',', '.')."\n\n"
             .($paymentLines ? implode("\n", $paymentLines)."\n\nEnvíanos el comprobante por este mismo WhatsApp.\n\n" : '')
             ."Pase de reserva: ".url(route('bookings.pass.pdf', $booking->code));
-        $whatsappPaymentUrl = 'https://wa.me/'.preg_replace('/[^0-9]/', '', $booking->customer->phone_e164).'?text='.rawurlencode($whatsappMessage);
+        // Sin ?text= a propósito -- solo abre el chat con el cliente. El
+        // mensaje armado arriba se copia aparte ("Copiar texto") y se pega a
+        // mano, para poder revisarlo/editarlo dentro de WhatsApp antes de
+        // mandarlo en vez de que salga prellenado.
+        $whatsappContactUrl = 'https://wa.me/'.preg_replace('/[^0-9]/', '', $booking->customer->phone_e164);
     @endphp
     @if ($booking->balanceDue() > 0)
         <textarea id="whatsapp-message-text" class="visually-hidden" readonly>{{ $whatsappMessage }}</textarea>
@@ -154,7 +158,7 @@
                 <button type="button" class="copy-btn" onclick="hhCopyText('bank-details-text', this); hhMarkInstructionsSent();">Copiar datos de cuenta</button>
             @endif
             <button type="button" class="copy-btn" onclick="hhCopyText('whatsapp-message-text', this); hhMarkInstructionsSent();">Copiar texto</button>
-            <a class="whatsapp-btn" href="{{ $whatsappPaymentUrl }}" target="_blank" rel="noopener" onclick="hhMarkInstructionsSent();">Enviar instrucciones por WhatsApp</a>
+            <a class="whatsapp-btn" href="{{ $whatsappContactUrl }}" target="_blank" rel="noopener">Contactar por WhatsApp</a>
         </div>
     @endif
 
