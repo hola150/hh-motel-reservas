@@ -202,8 +202,10 @@
            la de acá, así que gana igual sin importar qué tan abajo esté
            este bloque. Hace falta una especificidad mayor de verdad
            (calificado por .card), no solo igualarla. */
-        .card a.bookings-btn.has-bookings { background:#2a2410; border:1px solid #8a6f1e; color:#f0c95f; font-weight:800; }
-        .card a.bookings-btn.has-bookings:hover { border-color:#f0c95f; background:#352c12; }
+        /* Mismo tono que .pill-aseo (ya probado en el resto del tablero) en
+           vez de un ámbar más saturado/duro. */
+        .card a.bookings-btn.has-bookings { background:#3a331c; border:1px solid #6b5f30; color:#e8c76f; font-weight:800; }
+        .card a.bookings-btn.has-bookings:hover { border-color:#e8c76f; background:#463d20; }
         .bookings-btn.empty { background:transparent; border:1px dashed #333; color:#666; font-weight:500; }
         .bookings-btn.empty:hover { border-color:#555; color:#999; }
         .copy-link-btn { display:block; width:100%; box-sizing:border-box; text-align:center; margin-top:8px; padding:8px; border-radius:7px; font-size:12.5px; font-weight:600; font-family:inherit; cursor:pointer; background:#1c2f3a; border:1px solid #3a5a72; color:#7fbcdc; }
