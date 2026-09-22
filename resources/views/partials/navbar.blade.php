@@ -24,8 +24,12 @@
     .hh-subnav a.hh-active, .hh-subnav a:hover { background:#222; color:#eee; }
     .hh-subnav-group { display:flex; align-items:center; gap:4px; }
     .hh-subnav-sep { width:1px; height:16px; background:#2e2e2e; margin:0 8px; flex:none; }
-    .hh-navbar a.hh-danger { color:#a87878; }
-    .hh-navbar a.hh-danger:hover { background:#2e1c1c; color:#e88a8a; }
+    /* Antes era "a.hh-danger", pero el botón de Salir es un <button>, no un
+       <a> -- ese selector nunca calzaba, así que heredaba el --hh-ink casi
+       negro que hh-theme.css fuerza en el body (pensado para fondo claro),
+       invisible sobre el fondo oscuro del navbar. */
+    .hh-navbar .hh-danger { color:#a87878; }
+    .hh-navbar .hh-danger:hover { background:#2e1c1c; color:#e88a8a; }
 </style>
 {{-- Se incrusta el CSS en vez de enlazarlo: al ser un archivo externo, la
      latencia de red (notoria en Render) dejaba una fraccion de segundo con
@@ -61,7 +65,7 @@
         @stack('nav-actions')
         <a class="hh-new-btn" href="{{ route('reservations.create') }}">+ Nueva reserva</a>
         @auth
-            <span style="color:#777; font-size:12.5px; padding:0 4px;">{{ auth()->user()->name }}</span>
+            <span style="color:#aaa; font-size:12.5px; padding:0 4px;">{{ auth()->user()->name }}</span>
             <form method="POST" action="{{ route('logout') }}" style="display:inline;">
                 @csrf
                 <button type="submit" class="hh-danger" style="background:none; border:none; cursor:pointer; font:inherit;">Salir</button>
