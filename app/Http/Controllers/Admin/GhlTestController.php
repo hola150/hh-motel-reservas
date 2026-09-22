@@ -42,8 +42,8 @@ class GhlTestController extends Controller
             $contactId = $client->upsertContact($phone, $validated['name']);
             $log[] = "Contacto en GHL: {$contactId}";
 
-            $tag = 'Reservó:'.now()->timezone('America/Santiago')->toDateString();
-            $client->replaceTagWithPrefix($contactId, 'Reservó:', $tag);
+            $tag = \App\Services\Integrations\GhlBookingSync::TAG_PREFIX.now()->timezone('America/Santiago')->toDateString();
+            $client->replaceTagWithPrefix($contactId, \App\Services\Integrations\GhlBookingSync::TAG_PREFIX, $tag);
             $log[] = "Tag aplicado: {$tag}";
 
             $tags = $client->getTags($contactId);

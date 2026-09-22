@@ -26,7 +26,7 @@ class RoomQrController extends Controller
     public function show(Request $request, Room $room, RoomBoardService $board): View
     {
         $mucamaId = $request->session()->get('mucama_staff_id');
-        $mucama = $mucamaId ? Staff::where('role', 'Mucama')->where('is_active', true)->find($mucamaId) : null;
+        $mucama = $mucamaId ? Staff::activeMucamas()->find($mucamaId) : null;
 
         // "Dónde anda cada mucama ahora" para recepción -- se actualiza con
         // cada visita a un QR de habitación, no solo al reportar aseo listo,

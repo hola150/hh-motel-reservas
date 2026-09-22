@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -17,6 +18,17 @@ class Staff extends Model
             'pin' => 'hashed',
             'last_qr_seen_at' => 'datetime',
         ];
+    }
+
+    /**
+     * "Mucama activa" se repetía como Staff::where('role','Mucama')->where
+     * ('is_active', true) en medio docena de sitios (login, middleware,
+     * paneles) -- centralizado acá para que una regla futura (ej. que el rol
+     * no distinga mayúsculas) se cambie en un solo lugar.
+     */
+    public function scopeActiveMucamas(Builder $query): Builder
+    {
+        return $query->where('role', 'Mucama')->where('is_active', true);
     }
 
     public function shifts(): HasMany

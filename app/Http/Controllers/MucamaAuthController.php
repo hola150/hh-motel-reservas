@@ -24,7 +24,7 @@ class MucamaAuthController extends Controller
     public function showLogin(Request $request): View
     {
         return view('mucamas.login', [
-            'staff' => Staff::where('role', 'Mucama')->where('is_active', true)->orderBy('name')->get(),
+            'staff' => Staff::activeMucamas()->orderBy('name')->get(),
             'next' => $request->query('next', route('rooms.qr.mucama_panel')),
         ]);
     }
@@ -40,7 +40,7 @@ class MucamaAuthController extends Controller
             'pin.digits' => 'El PIN tiene 4 dígitos.',
         ]);
 
-        $staff = Staff::where('role', 'Mucama')->where('is_active', true)->find($validated['staff_id']);
+        $staff = Staff::activeMucamas()->find($validated['staff_id']);
 
         if (! $staff || ! $staff->pin || ! Hash::check($validated['pin'], $staff->pin)) {
             return back()->withErrors(['pin' => 'PIN incorrecto -- pedile a recepción que te lo revise en Personal.'])->withInput();
@@ -52,23 +52,37 @@ class MucamaAuthController extends Controller
         // Si ya tenía un turno abierto (por ejemplo, volvió a loguearse sin
         // haber cerrado sesión antes) no se abre uno nuevo -- un login =
         // un turno, no uno por cada vez que entra a mirar algo.
-        if (! StaffShiftLog::where('staff_id', $staff->id)->whereNull('ended_at')->exists()) {
+        if (! $staff->openShiftLog()) {
             StaffShiftLog::create(['staff_id' => $staff->id, 'started_at' => now()]);
         }
 
-        return redirect()->to($validated['next'] ?? route('rooms.qr.mucama_panel'));
+        return redirect()->to($this->safeNext($validated['next'] ?? null));
     }
 
     public function logout(Request $request): RedirectResponse
     {
         $staffId = $request->session()->get('mucama_staff_id');
         if ($staffId) {
-            StaffShiftLog::where('staff_id', $staffId)->whereNull('ended_at')
-                ->latest('started_at')->first()?->update(['ended_at' => now()]);
+            Staff::find($staffId)?->openShiftLog()?->update(['ended_at' => now()]);
         }
 
         $request->session()->forget('mucama_staff_id');
 
         return redirect()->route('mucamas.login');
+    }
+
+    /**
+     * "next" llega por query string (el QR de cada habitación arma el link
+     * con ?next=...) -- sin esto, un link armado a mano con un dominio
+     * externo (?next=https://otro-sitio) mandaría a la mucama fuera del
+     * sistema justo después de loguearse con su PIN real.
+     */
+    private function safeNext(?string $next): string
+    {
+        if ($next && str_starts_with($next, '/') && ! str_starts_with($next, '//')) {
+            return $next;
+        }
+
+        return route('rooms.qr.mucama_panel');
     }
 }

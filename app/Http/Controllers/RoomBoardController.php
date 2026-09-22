@@ -238,7 +238,7 @@ class RoomBoardController extends Controller
      */
     private function cleaningStaffNames(): \Illuminate\Support\Collection
     {
-        return Staff::where('role', 'Mucama')->where('is_active', true)->orderBy('name')->pluck('name');
+        return Staff::activeMucamas()->orderBy('name')->pluck('name');
     }
 
     public function markAseoReady(Request $request, Room $room): RedirectResponse

@@ -27,7 +27,7 @@ use Throwable;
  */
 class GhlBookingSync
 {
-    private const TAG_PREFIX = 'Reservó:';
+    public const TAG_PREFIX = 'Reservó:';
 
     public function __construct(private readonly GhlClient $client)
     {

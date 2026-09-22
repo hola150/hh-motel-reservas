@@ -26,15 +26,19 @@ class MucamaActivityController extends Controller
         // una mucama que nunca escaneó aparecería arriba de una que sí lo
         // hizo hace un rato -- se fuerza el orden explícito para que sea el
         // mismo sin importar el motor.
-        $mucamas = Staff::where('role', 'Mucama')->where('is_active', true)
+        $mucamas = Staff::activeMucamas()
             ->with(['lastQrRoom.category', 'shiftLogs' => fn ($q) => $q->whereNull('ended_at')])
             ->orderByRaw('last_qr_seen_at IS NULL')
             ->orderByDesc('last_qr_seen_at')
             ->get();
 
         $today = now('America/Santiago')->startOfDay();
+        // Además de "empezó hoy", incluye cualquier turno que siga abierto
+        // aunque haya empezado ayer -- si no, una mucama que entró antes de
+        // medianoche y sigue trabajando desaparece de esta tabla mientras
+        // el turno no se cierre.
         $todayLogs = StaffShiftLog::with('staff')
-            ->where('started_at', '>=', $today)
+            ->where(fn ($q) => $q->where('started_at', '>=', $today)->orWhereNull('ended_at'))
             ->orderByDesc('started_at')
             ->get();
 
@@ -50,7 +54,7 @@ class MucamaActivityController extends Controller
      */
     public function status(): JsonResponse
     {
-        $mucamas = Staff::where('role', 'Mucama')->where('is_active', true)->get(['id', 'name', 'last_qr_room_id', 'last_qr_seen_at']);
+        $mucamas = Staff::activeMucamas()->get(['id', 'name', 'last_qr_room_id', 'last_qr_seen_at']);
         $roomNames = Room::whereIn('id', $mucamas->pluck('last_qr_room_id')->filter())->pluck('name', 'id');
 
         return response()->json($mucamas->map(fn (Staff $m) => [

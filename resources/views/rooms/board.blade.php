@@ -106,9 +106,13 @@
            oscuro, texto apagado), prendido "enciende" con borde+fondo+texto
            ámbar y negrita -- antes ambos estados eran casi del mismo color
            ámbar y no se notaba cuál estaba activo. */
-        .upcoming-filter { background:#1c1c1c; border:1px solid #333; color:#a68a4a; }
-        .upcoming-filter:hover { border-color:#f0c95f; color:#f0c95f; }
-        .upcoming-filter.active { border-color:#f0c95f; background:#3a3216; color:#f0c95f; font-weight:800; }
+        /* .cat-filter button (arriba) es más específico (clase + elemento)
+           que .upcoming-filter sola -- sin calificar con .cat-filter acá
+           también, el botón queda siempre gris en reposo, el mismo bug de
+           especificidad que ".bookings-btn.has-bookings" antes. */
+        .cat-filter .upcoming-filter { background:#1c1c1c; border:1px solid #333; color:#a68a4a; }
+        .cat-filter .upcoming-filter:hover { border-color:#f0c95f; color:#f0c95f; }
+        .cat-filter .upcoming-filter.active { border-color:#f0c95f; background:#3a3216; color:#f0c95f; font-weight:800; }
 
         .sidebar { position:sticky; top:20px; }
         .sidebar-title { display:flex; align-items:baseline; gap:8px; margin-bottom:12px; }

@@ -17,7 +17,7 @@ class EnsureMucamaSession
     public function handle(Request $request, Closure $next): Response
     {
         $staffId = $request->session()->get('mucama_staff_id');
-        $staff = $staffId ? Staff::where('role', 'Mucama')->where('is_active', true)->find($staffId) : null;
+        $staff = $staffId ? Staff::activeMucamas()->find($staffId) : null;
 
         if (! $staff) {
             $request->session()->forget('mucama_staff_id');
