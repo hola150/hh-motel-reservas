@@ -31,6 +31,12 @@ class CalendarController extends Controller
         $previous = $date->copy()->sub($view === 'month' ? '1 month' : ($view === 'week' ? '1 week' : '1 day'))->toDateString();
         $next = $date->copy()->add($view === 'month' ? '1 month' : ($view === 'week' ? '1 week' : '1 day'))->toDateString();
 
-        return view('calendar.index', compact('view', 'date', 'rangeStart', 'rangeEnd', 'bookings', 'days', 'previous', 'next'));
+        // Separadas para que se distinga de un vistazo qué ya pasó de qué
+        // todavía no llega -- antes era una sola lista "Historial" mezclando
+        // ambas, sin ningún indicio de cuáles ya sucedieron.
+        $now = now();
+        [$pastBookings, $upcomingBookings] = $bookings->partition(fn ($booking) => $booking->starts_at->lt($now));
+
+        return view('calendar.index', compact('view', 'date', 'rangeStart', 'rangeEnd', 'bookings', 'days', 'previous', 'next', 'pastBookings', 'upcomingBookings'));
     }
 }

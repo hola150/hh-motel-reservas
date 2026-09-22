@@ -5,7 +5,12 @@
 .calendar-history{margin-top:20px}.calendar-history h2{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:#888;display:flex;align-items:baseline;gap:10px}
 .hist-count{font-size:11px;text-transform:none;letter-spacing:0;color:#aaa;font-weight:500}
 .calendar-history .booking-row{grid-template-columns:70px 1fr 170px 25px}
-.calendar-history{max-height:520px;overflow-y:auto}
+.calendar-history{max-height:420px;overflow-y:auto}
+.calendar-split{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px}
+@media(max-width:900px){.calendar-split{grid-template-columns:1fr}}
+.calendar-split .calendar-history{margin-top:0}
+.calendar-split .calendar-card.upcoming h2{color:#1c9169}
+.calendar-split .calendar-card.past h2{color:#888}
 </style>
 </head><body>
 @include('partials.navbar')
@@ -43,13 +48,23 @@
      $bookings de "Historial" de más abajo, mostrada dos veces con menos
      información (sin fecha por fila, ambigua en vista semana). --}}
 
-<section class="calendar-card calendar-history">
- <h2>Historial {{ $view==='month' ? 'del mes' : ($view==='week' ? 'de la semana' : 'del día') }} <span class="hist-count">{{ $bookings->count() }} {{ Str::plural('reserva', $bookings->count()) }}</span></h2>
- @forelse ($bookings as $booking)
-  <a class="booking-row" href="{{ route('reservations.show',$booking->code) }}"><div class="booking-time"><b>{{ $booking->starts_at->locale('es')->isoFormat('D MMM') }}</b><span>{{ $booking->starts_at->format('H:i') }}</span></div><div><strong>{{ $booking->room->name }}</strong><small>{{ $booking->room->category->name }} · {{ $booking->customer->name }}</small></div><div class="booking-status">{{ str_replace('_',' ', $booking->booking_status) }}</div><span class="arrow">→</span></a>
- @empty
-  <p class="empty">No hay reservas en este período.</p>
- @endforelse
-</section>
+<div class="calendar-split">
+ <section class="calendar-card upcoming calendar-history">
+  <h2>◷ Próximas {{ $view==='month' ? 'del mes' : ($view==='week' ? 'de la semana' : 'del día') }} <span class="hist-count">{{ $upcomingBookings->count() }} {{ Str::plural('reserva', $upcomingBookings->count()) }}</span></h2>
+  @forelse ($upcomingBookings as $booking)
+   <a class="booking-row" href="{{ route('reservations.show',$booking->code) }}"><div class="booking-time"><b>{{ $booking->starts_at->locale('es')->isoFormat('D MMM') }}</b><span>{{ $booking->starts_at->format('H:i') }}</span></div><div><strong>{{ $booking->room->name }}</strong><small>{{ $booking->room->category->name }} · {{ $booking->customer->name }}</small></div><div class="booking-status">{{ str_replace('_',' ', $booking->booking_status) }}</div><span class="arrow">→</span></a>
+  @empty
+   <p class="empty">No hay reservas todavía por llegar en este período.</p>
+  @endforelse
+ </section>
+ <section class="calendar-card past calendar-history">
+  <h2>✓ Historial {{ $view==='month' ? 'del mes' : ($view==='week' ? 'de la semana' : 'del día') }} <span class="hist-count">{{ $pastBookings->count() }} {{ Str::plural('reserva', $pastBookings->count()) }}</span></h2>
+  @forelse ($pastBookings->sortByDesc('starts_at') as $booking)
+   <a class="booking-row" href="{{ route('reservations.show',$booking->code) }}"><div class="booking-time"><b>{{ $booking->starts_at->locale('es')->isoFormat('D MMM') }}</b><span>{{ $booking->starts_at->format('H:i') }}</span></div><div><strong>{{ $booking->room->name }}</strong><small>{{ $booking->room->category->name }} · {{ $booking->customer->name }}</small></div><div class="booking-status">{{ str_replace('_',' ', $booking->booking_status) }}</div><span class="arrow">→</span></a>
+  @empty
+   <p class="empty">Todavía no pasó ninguna reserva en este período.</p>
+  @endforelse
+ </section>
+</div>
 </main>
 </body></html>
