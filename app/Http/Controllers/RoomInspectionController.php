@@ -33,6 +33,7 @@ class RoomInspectionController extends Controller
             'defects' => ['nullable', 'string', 'max:1000'],
             'photos' => ['nullable', 'array', 'max:6'],
             'photos.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'from_ronda' => ['nullable', 'boolean'],
         ]);
 
         // Cada ítem del checklist fijo tiene que venir marcado -- si falta
@@ -62,10 +63,15 @@ class RoomInspectionController extends Controller
 
         AuditLog::record(auth()->id(), 'habitacion.inspeccionar', 'Room', $room->id, null, $inspection->toArray());
 
-        return redirect()->route('rooms.board')
-            ->with('status', $needsMaintenance
-                ? 'Inspección guardada — '.$room->name.' necesita mantención.'
-                : 'Inspección guardada — '.$room->name.' está en buen estado.');
+        $statusMessage = $needsMaintenance
+            ? 'Inspección guardada — '.$room->name.' necesita mantención.'
+            : 'Inspección guardada — '.$room->name.' está en buen estado.';
+
+        if ($request->boolean('from_ronda')) {
+            return redirect()->route('shift_round.index')->with('status', $statusMessage);
+        }
+
+        return redirect()->route('rooms.board')->with('status', $statusMessage);
     }
 
     /**

@@ -1,0 +1,36 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Room;
+use App\Services\Booking\RoomBoardService;
+use Illuminate\View\View;
+
+/**
+ * "Ronda de turno" -- protocolo del motel: al tomar el turno, el anfitrión
+ * recorre todas las Playrooms que tiene a disposición (activas y libres en
+ * este momento -- una ocupada no se puede inspeccionar) y llena la pauta de
+ * inspección (rooms.inspections, ya existente) en cada una. Esta pantalla es
+ * solo la lista/checklist de la ronda; el formulario en sí se reutiliza tal
+ * cual -- ver RoomInspectionController.
+ */
+class ShiftRoundController extends Controller
+{
+    public function index(RoomBoardService $board): View
+    {
+        $today = now('America/Santiago')->startOfDay();
+
+        // board() ya trae room.category y room.latestInspection cargados --
+        // solo filtramos a lo "disponible ahora" (activa y libre; una
+        // ocupada no se puede inspeccionar con el huésped adentro).
+        $rooms = collect($board->board())
+            ->filter(fn (array $e) => $e['room']->operational_status === 'activa' && $e['status']['occupancy'] === 'libre')
+            ->map(fn (array $e) => $e['room'])
+            ->values();
+
+        $pending = $rooms->filter(fn (Room $r) => ! $r->latestInspection || $r->latestInspection->created_at->lt($today))->values();
+        $done = $rooms->filter(fn (Room $r) => $r->latestInspection && $r->latestInspection->created_at->gte($today))->values();
+
+        return view('rooms.shift-round', ['pending' => $pending, 'done' => $done, 'total' => $rooms->count()]);
+    }
+}

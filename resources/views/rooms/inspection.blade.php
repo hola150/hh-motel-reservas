@@ -50,7 +50,7 @@
 <body>
     @include('partials.navbar')
     <div class="page-inner">
-    <a class="back-btn" href="{{ route('rooms.board') }}">← Volver al tablero</a>
+    <a class="back-btn" href="{{ request('ronda') ? route('shift_round.index') : route('rooms.board') }}">← {{ request('ronda') ? 'Volver a la ronda' : 'Volver al tablero' }}</a>
     <h1>Inspeccionar Playroom {{ $room->name }}</h1>
     <p class="sub">Categoría {{ $room->category->name }} · completa la pauta real de habitación y mobiliario antes de liberarla.</p>
 
@@ -75,6 +75,9 @@
 
     <form method="POST" enctype="multipart/form-data" action="{{ route('rooms.inspections.store', $room) }}">
         @csrf
+        @if (request('ronda'))
+            <input type="hidden" name="from_ronda" value="1">
+        @endif
         <div class="top-fields">
             <div class="field"><label class="field-label">Recepcionista</label><input type="text" name="inspected_by" value="{{ old('inspected_by') }}" placeholder="Nombre de quien revisa" required></div>
             <div class="field"><label class="field-label">Turno</label><select name="shift" required><option value="">Seleccionar</option>@foreach(['Mañana','Tarde','Noche','Madrugada'] as $shift)<option value="{{ $shift }}" @selected(old('shift') === $shift)>{{ $shift }}</option>@endforeach</select></div>
