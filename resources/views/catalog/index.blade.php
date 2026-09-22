@@ -55,39 +55,48 @@
         .cat-max h2 { color:#f7b06a; }
         .cat-new-lite h2 { color:#f0d98a; }
         .offer-badge { display:inline-flex; background:#ff7918; color:#21170e; border-radius:999px; padding:6px 11px; font-size:11px; font-weight:800; margin-bottom:10px; }
-        .featured-offers { background:#191a1c; color:#fff; border:1px solid #ff7918; border-radius:14px; padding:16px; margin:0 0 26px; }
-        .featured-offers-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin:0 0 10px; }
-        .featured-offers h2 { color:#ffb078; font-size:16px; margin:0; }
+        .sales-tip { display:flex; gap:8px; align-items:flex-start; background:#242527; border:1px solid #505257; color:#f0d18a; border-radius:9px; padding:9px 11px; margin:10px 0 14px; font-size:12px; line-height:1.35; }
+        .sales-tip::before { content:'✦'; color:var(--hh-accent); font-weight:800; }
+
+        /* Carrusel único de "Ofertas y cupones" -- antes eran dos bloques
+           apilados (ofertas en filas horizontales, cupones en grilla), acá
+           se combinan en una sola fila deslizable (swipe en el celular,
+           flechas en desktop) para que se sienta como un solo módulo. */
+        .deals-carousel { margin: 0 0 26px; }
+        .deals-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin:0 0 10px; }
+        .deals-head h2 { font-size:16px; margin:0; color:#242527; }
         .limited-badge { display:inline-flex; align-items:center; gap:6px; background:#3a1c10; border:1px solid #ff7918; color:#ffb078; border-radius:20px; padding:4px 10px; font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; }
         .limited-badge .dot { width:6px; height:6px; border-radius:50%; background:#ff7918; animation: hh-pulse 1.6s ease-in-out infinite; }
         @keyframes hh-pulse { 0%, 100% { opacity:1; } 50% { opacity:.25; } }
-        .featured-offer { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-top:1px solid #ffffff22; }
-        .featured-offer-info { display:flex; align-items:center; gap:10px; text-decoration:none; flex:1; min-width:0; border-radius:8px; margin:-6px; padding:6px; -webkit-tap-highlight-color:transparent; }
-        .featured-offer-text { flex:1; min-width:0; }
-        .featured-offer-info:hover, .featured-offer-info:active, .featured-offer-info:focus-visible { background:#ffffff14; }
-        .featured-offer-info:hover strong { text-decoration:underline; }
-        .featured-offer-thumb { width:58px; height:48px; border-radius:7px; object-fit:cover; background:#303136; border:1px solid #ffffff33; flex:none; }
-        .featured-offer strong { display:block; font-size:15px; margin-bottom:3px; }
-        .featured-offer small { color:#c9cbd0; }
+
+        .deals-track-wrap { position:relative; }
+        .deals-track { display:flex; gap:12px; overflow-x:auto; scroll-snap-type:x mandatory; padding:2px 2px 12px; margin:0 -2px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+        .deals-track::-webkit-scrollbar { display:none; }
+        .deal-card { scroll-snap-align:start; flex:0 0 78%; max-width:290px; display:flex; flex-direction:column; border-radius:14px; overflow:hidden; text-decoration:none; color:inherit; -webkit-tap-highlight-color:transparent; }
+        @media (min-width:600px) { .deal-card { flex-basis:300px; } }
+        .deal-card.is-offer { background:#191a1c; border:1px solid #ff7918; }
+        .deal-card.is-coupon { background:#111214; border:1px solid #3a5a72; }
+        .deal-card.is-coupon:hover, .deal-card.is-coupon:active, .deal-card.is-coupon:focus-visible { border-color:#9edaff; }
+        .deal-thumb { width:100%; aspect-ratio:16/10; object-fit:cover; background:#303136; display:block; }
+        .deal-thumb-empty { width:100%; aspect-ratio:16/10; background:#242527; display:flex; align-items:center; justify-content:center; color:#8a8c90; font-size:12px; }
+        .deal-body { padding:13px 15px 15px; display:flex; flex-direction:column; flex:1; }
+        .deal-body strong.deal-title { display:block; font-size:15px; color:#fff; margin-bottom:3px; }
+        .deal-sub-link { color:#c9cbd0; font-size:12px; text-decoration:none; display:inline-block; margin-top:2px; }
+        .deal-sub-link:hover { text-decoration:underline; }
         .offer-price-row { display:flex; align-items:baseline; gap:7px; margin:2px 0 3px; flex-wrap:wrap; }
         .offer-price-old { color:#8a8d93; text-decoration:line-through; font-size:12.5px; }
         .offer-price-new { color:#6ee7b7; font-weight:800; font-size:16px; }
         .offer-save-badge { background:#123a28; color:#6ee7b7; border-radius:6px; padding:2px 6px; font-size:10.5px; font-weight:800; }
         .offer-viewers { display:block; color:#ffb078; font-size:11px; margin-top:3px; min-height:14px; }
-        .featured-offer-cta { flex:none; background:#ff7918; color:#21170e; border-radius:8px; padding:9px 12px; text-decoration:none; font-size:12px; font-weight:800; }
-        @media (max-width:560px) { .featured-offer { align-items:flex-start; flex-direction:column; } .featured-offer-cta { width:100%; text-align:center; } }
-        .sales-tip { display:flex; gap:8px; align-items:flex-start; background:#242527; border:1px solid #505257; color:#f0d18a; border-radius:9px; padding:9px 11px; margin:10px 0 14px; font-size:12px; line-height:1.35; }
-        .sales-tip::before { content:'✦'; color:var(--hh-accent); font-weight:800; }
-
-        .coupons-section { background:#191a1c; border:1px solid #3a5a72; border-radius:14px; padding:16px; margin:0 0 26px; }
-        .coupons-section h2 { color:#9edaff; font-size:16px; margin:0 0 10px; }
-        .coupons-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; }
-        .coupon-card { display:block; background:#111214; border:1px solid #3a5a72; border-radius:12px; padding:14px 16px; text-decoration:none; color:inherit; -webkit-tap-highlight-color:transparent; }
-        .coupon-card:hover, .coupon-card:active, .coupon-card:focus-visible { border-color:#9edaff; }
-        .coupon-benefit { color:#9edaff; font-size:20px; font-weight:800; }
-        .coupon-name { color:#fff; font-size:13.5px; font-weight:700; margin-top:2px; }
-        .coupon-hint { color:#8a8d93; font-size:11px; margin-top:4px; }
-        .coupon-cta { display:block; color:#9edaff; font-size:12px; font-weight:700; margin-top:8px; }
+        .deal-coupon-benefit { color:#9edaff; font-size:22px; font-weight:800; }
+        .deal-coupon-hint { color:#8a8d93; font-size:11px; margin-top:4px; }
+        .deal-cta-btn { display:block; text-align:center; margin-top:auto; padding-top:12px; }
+        .deal-cta-btn span { display:block; background:#ff7918; color:#21170e; border-radius:8px; padding:10px 12px; font-size:12.5px; font-weight:800; }
+        .deal-card.is-coupon .deal-cta-btn { color:#9edaff; font-size:12px; font-weight:700; padding-top:10px; }
+        .deals-nav { display:none; align-items:center; justify-content:center; position:absolute; top:50%; transform:translateY(-50%); width:32px; height:32px; border-radius:50%; background:#fff; border:1px solid #d9dadd; box-shadow:0 2px 8px #0002; cursor:pointer; font-size:14px; z-index:2; padding:0; }
+        .deals-nav.prev { left:-8px; }
+        .deals-nav.next { right:-8px; }
+        @media (hover:hover) and (min-width:760px) { .deals-nav { display:flex; } }
 
         .cat-gallery { display:grid; gap:3px; background:#202122; padding:3px; }
         .cat-gallery.gallery-4 { grid-template-columns:2fr 1fr 1fr; grid-template-rows:repeat(2, minmax(92px, 1fr)); aspect-ratio:16/7; }
@@ -169,55 +178,62 @@
                 return '<div class="offer-price-row"><span class="offer-price-new">'.e($offer['label']).'</span></div>';
             };
         @endphp
-        @if ($categories->contains(fn ($entry) => $entry['offer']))
-            <section class="featured-offers">
-                <div class="featured-offers-head">
-                    <h2>✦ Ofertas activas</h2>
-                    <span class="limited-badge"><span class="dot"></span> Por tiempo limitado</span>
-                </div>
-                @foreach ($categories->filter(fn ($entry) => $entry['offer']) as $entry)
-                    @if (count($entry['offer']['rooms']))
-                        @foreach ($entry['offer']['rooms'] as $offerRoom)
-                            <div class="featured-offer">
-                                <a class="featured-offer-info" href="{{ route('catalog.room', $offerRoom['id']) }}">
-                                    @if ($offerRoom['photo'])<img class="featured-offer-thumb" src="{{ $offerRoom['photo'] }}" alt="{{ $offerRoom['name'] }}">@endif
-                                    <div class="featured-offer-text">
-                                        <strong>{{ $offerRoom['name'] }}{{ $entry['offer']['durationLabel'] ? ' · '.$entry['offer']['durationLabel'] : '' }}</strong>
-                                        {!! $offerPriceRow($entry['offer']) !!}
-                                        <small>{{ $entry['category']->name }} · Ver ficha y fotos →</small>
-                                        <span class="offer-viewers" data-hh-viewers></span>
-                                    </div>
-                                </a>
-                                <a class="featured-offer-cta" href="{{ route('catalog.reserve', ['categoria' => $entry['category']->id, 'room_id' => $offerRoom['id']]) }}">Reservar oferta →</a>
-                            </div>
-                        @endforeach
-                    @else
-                        <div class="featured-offer">
-                            <div class="featured-offer-text">
-                                <strong>{{ $entry['category']->name }}{{ $entry['offer']['durationLabel'] ? ' · '.$entry['offer']['durationLabel'] : '' }}</strong>
-                                {!! $offerPriceRow($entry['offer']) !!}
-                                <small>Disponible en esta categoría</small>
-                                <span class="offer-viewers" data-hh-viewers></span>
-                            </div>
-                            <a class="featured-offer-cta" href="{{ route('catalog.reserve', ['categoria' => $entry['category']->id]) }}">Reservar oferta →</a>
-                        </div>
+        @php $hasOffers = $categories->contains(fn ($entry) => $entry['offer']); @endphp
+        @if ($hasOffers || $coupons->isNotEmpty())
+            <section class="deals-carousel">
+                <div class="deals-head">
+                    <h2>✦ Ofertas y cupones</h2>
+                    @if ($hasOffers)
+                        <span class="limited-badge"><span class="dot"></span> Por tiempo limitado</span>
                     @endif
-                @endforeach
-            </section>
-        @endif
-
-        @if ($coupons->isNotEmpty())
-            <section class="coupons-section">
-                <h2>🏷️ Cupones disponibles</h2>
-                <div class="coupons-grid">
-                    @foreach ($coupons as $coupon)
-                        <a class="coupon-card" href="{{ route('catalog.reserve', ['cupon' => $coupon['code']]) }}">
-                            <div class="coupon-benefit">{{ $coupon['benefit'] }}</div>
-                            <div class="coupon-name">{{ $coupon['name'] }}</div>
-                            @if ($coupon['hint'])<div class="coupon-hint">{{ $coupon['hint'] }}</div>@endif
-                            <span class="coupon-cta">Usar este cupón →</span>
-                        </a>
-                    @endforeach
+                </div>
+                <div class="deals-track-wrap">
+                    <button type="button" class="deals-nav prev" aria-label="Ver anterior">‹</button>
+                    <div class="deals-track" id="deals-track">
+                        @foreach ($categories->filter(fn ($entry) => $entry['offer']) as $entry)
+                            @if (count($entry['offer']['rooms']))
+                                @foreach ($entry['offer']['rooms'] as $offerRoom)
+                                    <div class="deal-card is-offer">
+                                        <a href="{{ route('catalog.room', $offerRoom['id']) }}">
+                                            @if ($offerRoom['photo'])
+                                                <img class="deal-thumb" src="{{ $offerRoom['photo'] }}" alt="{{ $offerRoom['name'] }}">
+                                            @else
+                                                <div class="deal-thumb-empty">Foto próximamente</div>
+                                            @endif
+                                        </a>
+                                        <div class="deal-body">
+                                            <strong class="deal-title">{{ $offerRoom['name'] }}{{ $entry['offer']['durationLabel'] ? ' · '.$entry['offer']['durationLabel'] : '' }}</strong>
+                                            {!! $offerPriceRow($entry['offer']) !!}
+                                            <a class="deal-sub-link" href="{{ route('catalog.room', $offerRoom['id']) }}">{{ $entry['category']->name }} · Ver ficha y fotos →</a>
+                                            <span class="offer-viewers" data-hh-viewers></span>
+                                            <a class="deal-cta-btn" href="{{ route('catalog.reserve', ['categoria' => $entry['category']->id, 'room_id' => $offerRoom['id']]) }}"><span>Reservar oferta →</span></a>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @else
+                                <div class="deal-card is-offer">
+                                    <div class="deal-thumb-empty">{{ $entry['category']->name }}</div>
+                                    <div class="deal-body">
+                                        <strong class="deal-title">{{ $entry['category']->name }}{{ $entry['offer']['durationLabel'] ? ' · '.$entry['offer']['durationLabel'] : '' }}</strong>
+                                        {!! $offerPriceRow($entry['offer']) !!}
+                                        <span class="offer-viewers" data-hh-viewers></span>
+                                        <a class="deal-cta-btn" href="{{ route('catalog.reserve', ['categoria' => $entry['category']->id]) }}"><span>Reservar oferta →</span></a>
+                                    </div>
+                                </div>
+                            @endif
+                        @endforeach
+                        @foreach ($coupons as $coupon)
+                            <a class="deal-card is-coupon" href="{{ route('catalog.reserve', ['cupon' => $coupon['code']]) }}">
+                                <div class="deal-body">
+                                    <div class="deal-coupon-benefit">{{ $coupon['benefit'] }}</div>
+                                    <strong class="deal-title">{{ $coupon['name'] }}</strong>
+                                    @if ($coupon['hint'])<div class="deal-coupon-hint">{{ $coupon['hint'] }}</div>@endif
+                                    <span class="deal-cta-btn">Usar este cupón →</span>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                    <button type="button" class="deals-nav next" aria-label="Ver siguiente">›</button>
                 </div>
             </section>
         @endif
@@ -336,6 +352,17 @@
             closePhoto();
             closeVideo();
         });
+
+        const dealsTrack = document.getElementById('deals-track');
+        if (dealsTrack) {
+            const scrollByCard = (dir) => {
+                const card = dealsTrack.querySelector('.deal-card');
+                const step = (card ? card.getBoundingClientRect().width : 280) + 12;
+                dealsTrack.scrollBy({ left: dir * step, behavior: 'smooth' });
+            };
+            document.querySelector('.deals-nav.prev')?.addEventListener('click', () => scrollByCard(-1));
+            document.querySelector('.deals-nav.next')?.addEventListener('click', () => scrollByCard(1));
+        }
 
         // "Viendo esto ahora" en las ofertas -- la mayoría de las veces no
         // muestra nada; cuando aparece es 1 o 2 personas, y cada tarjeta
