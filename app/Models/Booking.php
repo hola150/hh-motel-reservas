@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'rate_rule_id', 'rate_rule_name_snapshot', 'price_original', 'extra_guests_fee',
     'coupon_id', 'coupon_code_snapshot', 'discount_amount', 'price_final', 'deposit_amount',
     'notes', 'expires_at', 'consumption_offered_at', 'consumption_offered_by',
-    'checked_in_at', 'checked_out_at',
+    'checked_in_at', 'checked_out_at', 'payment_instructions_sent_at',
 ])]
 class Booking extends Model
 {
@@ -29,6 +29,7 @@ class Booking extends Model
             'consumption_offered_at' => 'datetime',
             'checked_in_at' => 'datetime',
             'checked_out_at' => 'datetime',
+            'payment_instructions_sent_at' => 'datetime',
         ];
     }
 

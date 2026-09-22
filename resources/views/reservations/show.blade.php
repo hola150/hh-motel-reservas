@@ -2,6 +2,7 @@
 <html lang="es" style="background:#111;color:#eee">
 <head>
     <meta charset="utf-8"><meta name="color-scheme" content="dark">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Reserva {{ $booking->code }} — HH Motel</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
@@ -44,6 +45,7 @@
         .payment-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; margin:-4px 0 16px; }
         button.copy-btn { background:#2a2a2a; border:1px solid #444; color:#eee; padding:8px 14px; border-radius:7px; font-size:12.5px; font-weight:700; cursor:pointer; font-family:inherit; }
         button.copy-btn:hover { border-color:#ff7918; color:#ff7918; }
+        .sent-tag { display:flex; align-items:center; color:#6ee7b7; font-size:12px; font-weight:600; margin-right:auto; }
         .visually-hidden { position:absolute; left:-9999px; top:-9999px; }
         table.payments { width:100%; border-collapse: collapse; font-size: 13px; }
         table.payments th { text-align:left; color:#888; font-weight:500; font-size:11px; text-transform:uppercase; padding-bottom:6px; }
@@ -145,11 +147,14 @@
             <textarea id="bank-details-text" class="visually-hidden" readonly>{{ implode("\n", $bankLines) }}</textarea>
         @endif
         <div class="payment-actions">
-            @if ($bankLines)
-                <button type="button" class="copy-btn" onclick="hhCopyText('bank-details-text', this)">Copiar datos de cuenta</button>
+            @if ($booking->payment_instructions_sent_at)
+                <span class="sent-tag" id="instructions-sent-tag">✓ Instrucciones enviadas {{ $booking->payment_instructions_sent_at->timezone('America/Santiago')->diffForHumans() }}</span>
             @endif
-            <button type="button" class="copy-btn" onclick="hhCopyText('whatsapp-message-text', this)">Copiar texto</button>
-            <a class="whatsapp-btn" href="{{ $whatsappPaymentUrl }}" target="_blank" rel="noopener">Enviar instrucciones por WhatsApp</a>
+            @if ($bankLines)
+                <button type="button" class="copy-btn" onclick="hhCopyText('bank-details-text', this); hhMarkInstructionsSent();">Copiar datos de cuenta</button>
+            @endif
+            <button type="button" class="copy-btn" onclick="hhCopyText('whatsapp-message-text', this); hhMarkInstructionsSent();">Copiar texto</button>
+            <a class="whatsapp-btn" href="{{ $whatsappPaymentUrl }}" target="_blank" rel="noopener" onclick="hhMarkInstructionsSent();">Enviar instrucciones por WhatsApp</a>
         </div>
     @endif
 
@@ -358,6 +363,34 @@
     <a class="back" href="{{ route('reservations.create') }}">+ Nueva reserva</a>
     </div>
     <script>
+        // Deja constancia de que recepción ya le mandó los datos de pago al
+        // cliente (por WhatsApp o copiando el texto) -- así el panel de
+        // "Pendientes de gestionar" del tablero puede distinguir una reserva
+        // recién llegada de una que ya se gestionó y solo falta que el
+        // cliente transfiera. Silencioso: si falla, no interrumpe el flujo
+        // real (enviar el WhatsApp o copiar el texto), solo no se actualiza
+        // el tag hasta la próxima carga de la página.
+        let hhInstructionsMarked = false;
+        function hhMarkInstructionsSent() {
+            if (hhInstructionsMarked) return;
+            hhInstructionsMarked = true;
+            fetch('{{ route('bookings.payment_instructions', $booking->code) }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+            }).then((r) => r.ok ? r.json() : Promise.reject()).then(() => {
+                if (!document.getElementById('instructions-sent-tag')) {
+                    const tag = document.createElement('span');
+                    tag.className = 'sent-tag';
+                    tag.id = 'instructions-sent-tag';
+                    tag.textContent = '✓ Instrucciones enviadas recién';
+                    document.querySelector('.payment-actions').prepend(tag);
+                }
+            }).catch(() => { hhInstructionsMarked = false; });
+        }
+
         // navigator.clipboard falla callado en varios navegadores/contextos
         // sin HTTPS -- con execCommand('copy') como respaldo, y mostrando el
         // resultado real (no el optimista), igual que en catalog/room.

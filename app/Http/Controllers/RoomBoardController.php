@@ -67,7 +67,23 @@ class RoomBoardController extends Controller
             'nextOpeningLabel' => $nextOpening ? $this->formatCountdown($now, $nextOpening) : null,
             'cleaningStaff' => $this->cleaningStaffNames(),
             'dailySummary' => $this->dailySummary(),
+            'pendingBookings' => $this->pendingBookings(),
         ]);
+    }
+
+    /**
+     * Reservas nuevas que todavía no quedaron resueltas -- en PENDIENTE_PAGO,
+     * de más antigua a más nueva. Es la lista de "esto queda por hacer" que
+     * un turno le deja al siguiente: a cada una se le nota si ya se le
+     * mandaron los datos de pago (payment_instructions_sent_at) o si todavía
+     * nadie la tocó desde que se creó.
+     */
+    private function pendingBookings(): \Illuminate\Support\Collection
+    {
+        return Booking::with(['room.category', 'customer'])
+            ->where('booking_status', 'PENDIENTE_PAGO')
+            ->orderBy('created_at')
+            ->get();
     }
 
     /**

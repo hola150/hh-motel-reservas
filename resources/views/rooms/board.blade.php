@@ -18,6 +18,26 @@
         .sub { color:#999; font-size: 13px; margin:0; }
         .sub a { color:#ff7918; text-decoration:none; }
 
+        /* Reservas nuevas en PENDIENTE_PAGO -- lo primero que hay que ver al
+           entrar o al recibir el turno, por eso va arriba de todo el
+           tablero, no mezclado con las secciones de habitaciones. */
+        .pending-panel { background:#241a10; border:1px solid #7a4a1f; border-radius:11px; padding:16px 18px; margin-bottom: 26px; }
+        .pending-head { display:flex; align-items:baseline; gap:10px; margin-bottom:12px; }
+        .pending-head h2 { font-size:14px; margin:0; text-transform:uppercase; letter-spacing:.05em; color:#ffb078; }
+        .pending-head .count { font-family: ui-monospace, monospace; font-size:12px; color:#c99a6b; }
+        .pending-empty { color:#c99a6b; font-size:13px; }
+        .pending-row { display:grid; grid-template-columns: 90px 1fr auto auto 20px; align-items:center; gap:14px; padding:10px 0; border-top:1px solid #4a341c; text-decoration:none; color:inherit; }
+        .pending-row:first-child { border-top:none; }
+        .pending-row:hover { color:#ffb078; }
+        .pending-row .pcode { font-family: ui-monospace, monospace; font-size:12px; color:#c99a6b; }
+        .pending-row .pinfo strong { display:block; font-size:13.5px; }
+        .pending-row .pinfo small { color:#c9a97e; font-size:11.5px; }
+        .pending-row .page { font-size:11.5px; color:#c99a6b; white-space:nowrap; }
+        .pending-row .ptag { font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:20px; white-space:nowrap; }
+        .pending-row .ptag.sent { background:#123a28; color:#6ee7b7; }
+        .pending-row .ptag.unsent { background:#3a1c10; color:#ffb078; border:1px solid #7a4a1f; }
+        @media (max-width:700px) { .pending-row { grid-template-columns: 1fr auto; grid-template-areas:"info tag" "code page"; } .pending-row .pinfo { grid-area:info; } .pending-row .ptag { grid-area:tag; } .pending-row .pcode { grid-area:code; } .pending-row .page { grid-area:page; } .pending-row .arrow { display:none; } }
+
         .summary { display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 30px; }
         .summary .chip { display:flex; align-items:baseline; gap:7px; background:#1c1c1c; border:1px solid #333; border-radius:8px; padding:9px 14px; }
         .summary .chip b { font-size:18px; font-family: ui-monospace, monospace; }
@@ -247,6 +267,27 @@
     {{-- Los interruptores de Ala Sur / categoría / piso se movieron al panel
          de administración (Categorías) -- no es responsabilidad de quien
          está en el tablero prender o apagar disponibilidad. --}}
+
+    <div class="pending-panel">
+        <div class="pending-head"><h2>⚠ Pendientes de gestionar</h2><span class="count">{{ $pendingBookings->count() }}</span></div>
+        @if ($pendingBookings->isEmpty())
+            <p class="pending-empty">No hay reservas nuevas esperando confirmación de pago.</p>
+        @else
+            @foreach ($pendingBookings as $booking)
+                <a class="pending-row" href="{{ route('reservations.show', $booking->code) }}">
+                    <span class="pcode">{{ $booking->code }}</span>
+                    <span class="pinfo"><strong>{{ $booking->customer->name }}</strong><small>{{ $booking->room->name }} · {{ $booking->room->category->name }} · llegó {{ $booking->created_at->timezone('America/Santiago')->diffForHumans() }}</small></span>
+                    <span class="page">{{ $booking->starts_at->timezone('America/Santiago')->isToday() ? 'hoy '.$booking->starts_at->timezone('America/Santiago')->format('H:i') : $booking->starts_at->timezone('America/Santiago')->format('d/m H:i') }}</span>
+                    @if ($booking->payment_instructions_sent_at)
+                        <span class="ptag sent">✓ Ya se le avisó</span>
+                    @else
+                        <span class="ptag unsent">Sin contactar</span>
+                    @endif
+                    <span class="arrow">→</span>
+                </a>
+            @endforeach
+        @endif
+    </div>
 
     <div class="summary">
         <div class="chip ocupadas"><b>{{ $grouped['ocupadas']->count() }}</b><span>Ocupadas</span></div>
