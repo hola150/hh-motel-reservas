@@ -94,6 +94,7 @@ Route::get('/habitaciones/{room}/reservas', [RoomBoardController::class, 'bookin
 Route::post('/habitaciones/{room}/estado', [RoomBoardController::class, 'updateStatus'])->name('rooms.status');
 Route::post('/habitaciones/{room}/aseo-listo', [RoomBoardController::class, 'markAseoReady'])->name('rooms.aseo_ready');
 Route::get('/mucamas/actividad', [\App\Http\Controllers\MucamaActivityController::class, 'index'])->name('mucamas.activity');
+Route::get('/mucamas/actividad/estado', [\App\Http\Controllers\MucamaActivityController::class, 'status'])->name('mucamas.activity.status');
 Route::get('/mantencion', [RoomInspectionController::class, 'panel'])->name('rooms.inspections.panel');
 Route::get('/habitaciones/{room}/inspeccion', [RoomInspectionController::class, 'create'])->name('rooms.inspections.create');
 Route::post('/habitaciones/{room}/inspeccion', [RoomInspectionController::class, 'store'])->name('rooms.inspections.store');

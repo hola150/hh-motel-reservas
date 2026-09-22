@@ -30,8 +30,14 @@ class RoomQrController extends Controller
 
         // "Dónde anda cada mucama ahora" para recepción -- se actualiza con
         // cada visita a un QR de habitación, no solo al reportar aseo listo,
-        // así se ve también cuando recién llegó a mirar una pieza.
+        // así se ve también cuando recién llegó a mirar una pieza. La ruta
+        // del día (AuditLog) solo agrega una entrada cuando CAMBIA de
+        // habitación -- si refresca la misma página varias veces no infla
+        // la ruta con la misma parada repetida.
         if ($mucama) {
+            if ($mucama->last_qr_room_id !== $room->id) {
+                AuditLog::record(null, 'habitacion.qr_visita', 'Room', $room->id, null, ['staff_id' => $mucama->id, 'staff_name' => $mucama->name]);
+            }
             $mucama->update(['last_qr_room_id' => $room->id, 'last_qr_seen_at' => now()]);
         }
 
