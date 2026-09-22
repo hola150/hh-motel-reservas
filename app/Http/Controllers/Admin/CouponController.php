@@ -43,6 +43,7 @@ class CouponController extends Controller
         $validated = $request->validate([
             'code' => ['required', 'string', 'max:50', 'unique:coupons,code,'.$coupon->id],
             'internal_name' => ['required', 'string', 'max:100'],
+            'image_url' => ['nullable', 'url', 'max:500'],
             'discount_type' => ['required', 'in:percentage,fixed'],
             'discount_value' => ['required', 'integer', 'min:0'],
             'min_amount' => ['nullable', 'integer', 'min:0'],

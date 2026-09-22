@@ -40,6 +40,7 @@ class CatalogController extends Controller
                 return [
                     'code' => $c->code,
                     'name' => $c->internal_name,
+                    'image' => $c->image_url,
                     'benefit' => $benefit,
                     'hint' => implode(' · ', $hints),
                     'needsBirthDate' => (bool) $c->min_age,

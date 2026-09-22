@@ -23,6 +23,9 @@
             </div>
         </div>
 
+        <label>Imagen del banner (opcional, para el carrusel del catálogo)</label>
+        <input type="text" name="image_url" value="{{ old('image_url', $coupon->image_url) }}" placeholder="https://...">
+
         <div class="row2">
             <div>
                 <label>Tipo de descuento</label>

@@ -224,6 +224,9 @@
                         @endforeach
                         @foreach ($coupons as $coupon)
                             <a class="deal-card is-coupon" href="{{ route('catalog.reserve', ['cupon' => $coupon['code']]) }}">
+                                @if ($coupon['image'])
+                                    <img class="deal-thumb" src="{{ $coupon['image'] }}" alt="{{ $coupon['name'] }}">
+                                @endif
                                 <div class="deal-body">
                                     <div class="deal-coupon-benefit">{{ $coupon['benefit'] }}</div>
                                     <strong class="deal-title">{{ $coupon['name'] }}</strong>
