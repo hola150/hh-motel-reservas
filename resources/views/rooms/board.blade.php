@@ -42,6 +42,15 @@
         .pending-row .ptag { font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:20px; white-space:nowrap; }
         .pending-row .ptag.sent { background:#e7f7ef; color:#0e9f6e; }
         .pending-row .ptag.unsent { background:#fdecdc; color:#b64c0a; border:1px solid #f0c89a; }
+        /* Temporizador de atención: recién llegada se ve neutra, a los 3
+           minutos pasa a amarillo y a los 5 a rojo -- para que una reserva
+           nueva nunca quede sin que alguien la mire. Se recalcula solo cada
+           30s (el <meta refresh> de la página), no hace falta JS. */
+        .pending-row.age-warn { background:#fffaf0; border-top-color:#f5d99a; }
+        .pending-row.age-warn .pcode, .pending-row.age-warn .pinfo small { color:#a3690a; }
+        .pending-row.age-urgent { background:#fdf0f0; border-top-color:#f0b8b8; }
+        .pending-row.age-urgent .pcode, .pending-row.age-urgent .pinfo small { color:#c0392b; font-weight:700; }
+        .pending-row.age-urgent .pinfo strong { color:#c0392b; }
         @media (max-width:700px) { .pending-row { grid-template-columns: 1fr auto; grid-template-areas:"info tag" "code page"; } .pending-row .pinfo { grid-area:info; } .pending-row .ptag { grid-area:tag; } .pending-row .pcode { grid-area:code; } .pending-row .page { grid-area:page; } .pending-row .arrow { display:none; } }
 
         .summary { display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 30px; }
@@ -296,7 +305,8 @@
             <p class="pending-empty">No hay reservas nuevas esperando confirmación de pago.</p>
         @else
             @foreach ($pendingBookings as $booking)
-                <a class="pending-row" href="{{ route('reservations.show', $booking->code) }}">
+                @php $ageMinutes = $booking->created_at->diffInMinutes(now()); @endphp
+                <a class="pending-row {{ $ageMinutes >= 5 ? 'age-urgent' : ($ageMinutes >= 3 ? 'age-warn' : '') }}" href="{{ route('reservations.show', $booking->code) }}">
                     <span class="pcode">{{ $booking->code }}</span>
                     <span class="pinfo"><strong>{{ $booking->customer->name }}</strong><small>{{ $booking->room->name }} · {{ $booking->room->category->name }} · llegó {{ $booking->created_at->timezone('America/Santiago')->diffForHumans() }}</small></span>
                     <span class="page">{{ $booking->starts_at->timezone('America/Santiago')->isToday() ? 'hoy '.$booking->starts_at->timezone('America/Santiago')->format('H:i') : $booking->starts_at->timezone('America/Santiago')->format('d/m H:i') }}</span>
