@@ -9,9 +9,11 @@ use Throwable;
 
 /**
  * Conecta una reserva del sistema con el contacto de GHL del cliente: lo
- * crea/actualiza y le pone un tag con la fecha de esta reserva, sacándole
+ * crea/actualiza, le pone un tag con la fecha de esta reserva (sacándole
  * cualquier tag de "última reserva" anterior -- así el tag queda siempre
- * único y refleja lo más reciente, en vez de acumular uno por reserva.
+ * único y refleja lo más reciente, en vez de acumular uno por reserva), y le
+ * agrega una nota con el detalle -- el tag/campos actualizados por API no
+ * mueven la columna "Última actividad" de GHL, pero una nota sí cuenta.
  *
  * Se dispara al CREAR la reserva (no al pagar) para captar al cliente lo
  * antes posible para remarketing, aunque después cancele o no pague -- es
@@ -47,7 +49,7 @@ class GhlBookingSync
 
     private function attemptSync(Booking $booking): void
     {
-        $booking->loadMissing('customer');
+        $booking->loadMissing(['customer', 'room.category']);
         $customer = $booking->customer;
 
         $outbox = IntegrationOutbox::create([
@@ -69,6 +71,14 @@ class GhlBookingSync
             $contactId = $this->client->upsertContact($customer->phone_e164, $customer->name, $customer->email);
             $tag = self::TAG_PREFIX.$booking->starts_at->timezone('America/Santiago')->toDateString();
             $this->client->replaceTagWithPrefix($contactId, self::TAG_PREFIX, $tag);
+            $this->client->addNote($contactId, sprintf(
+                'Reserva %s: %s (%s) · %s · $%s',
+                $booking->code,
+                $booking->room->name,
+                $booking->room->category->name,
+                $booking->starts_at->timezone('America/Santiago')->locale('es')->isoFormat('D [de] MMMM, HH:mm'),
+                number_format($booking->price_final, 0, ',', '.')
+            ));
 
             if (! $customer->ghl_contact_id) {
                 $customer->update(['ghl_contact_id' => $contactId, 'ghl_synced_at' => now()]);

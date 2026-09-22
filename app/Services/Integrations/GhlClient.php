@@ -95,6 +95,16 @@ class GhlClient
         return (string) $response->json('contact.id');
     }
 
+    /**
+     * Agrega una nota al contacto -- a diferencia de actualizar campos o
+     * tags, esto sí cuenta como "actividad" en la vista de contactos de
+     * GHL (esa columna no se mueve solo con PUT /contacts o tags).
+     */
+    public function addNote(string $contactId, string $body): void
+    {
+        $this->http()->post("/contacts/{$contactId}/notes", ['body' => $body])->throw();
+    }
+
     public function getTags(string $contactId): array
     {
         $response = $this->http()->get("/contacts/{$contactId}")->throw();
