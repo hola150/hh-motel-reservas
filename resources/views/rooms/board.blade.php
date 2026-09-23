@@ -12,7 +12,7 @@
         .page-inner { max-width: 1700px; width:100%; margin: 0; padding: 24px 24px 60px; }
         .flash-status { background:#0f2b22; border:1px solid #1c9169; color:#6ee7b7; padding:12px 16px; border-radius:9px; font-size:14px; font-weight:600; margin-bottom:20px; }
         .topline { margin-bottom: 26px; display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; }
-        .topline-toolbar { display:flex; gap:8px; flex-wrap:wrap; flex:none; }
+        .topline-toolbar { display:flex; gap:8px; flex-wrap:wrap; min-width:0; }
         a.compact-toggle { text-decoration:none; display:inline-flex; align-items:center; }
         h1 { font-size: 18px; letter-spacing: .04em; margin-bottom: 2px; }
         .sub { color:#999; font-size: 13px; margin:0; }
