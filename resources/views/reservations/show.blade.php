@@ -260,7 +260,7 @@
                 <div class="row"><span class="muted">Pagado</span><span>${{ number_format($booking->paidAmount(), 0, ',', '.') }}</span></div>
                 <div class="row total balance"><span>Saldo</span><span>${{ number_format($booking->balanceDue(), 0, ',', '.') }}</span></div>
                 @if ($booking->balanceDue() > 0)
-                    <a class="pay-btn pay-btn-inline" href="{{ route('payments.create', $booking->code) }}">Registrar pago del saldo →</a>
+                    <a class="pay-btn pay-btn-inline" href="{{ route('payments.create', $booking->code) }}">Registrar pago (abono o total) →</a>
                 @endif
             </div>
 
