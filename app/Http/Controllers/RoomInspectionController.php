@@ -17,7 +17,7 @@ class RoomInspectionController extends Controller
      * formulario sin apuro, corto para que no sirva de shortcut permanente
      * guardando el link.
      */
-    private const SCAN_VALID_SECONDS = 600;
+    public const SCAN_VALID_SECONDS = 600;
 
     public function create(Request $request, Room $room): View|RedirectResponse
     {

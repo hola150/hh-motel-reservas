@@ -42,12 +42,15 @@ class RoomQrController extends Controller
         }
 
         $status = $board->statusFor($room);
+        $scannedAt = $request->session()->get('qr_scanned_at.'.$room->id);
+        $hasValidScan = $scannedAt && (now()->timestamp - $scannedAt) <= RoomInspectionController::SCAN_VALID_SECONDS;
 
         return view('rooms.qr-show', [
             'room' => $room,
             'mucama' => $mucama,
             'nextBooking' => $status['next_booking'],
             'occupancy' => $status['occupancy'],
+            'hasValidScan' => $hasValidScan,
         ]);
     }
 

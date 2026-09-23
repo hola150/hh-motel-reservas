@@ -88,7 +88,7 @@
             <input type="hidden" name="from_qr" value="1">
         @endif
         <div class="top-fields">
-            <div class="field"><label class="field-label">Recepcionista</label><input type="text" name="inspected_by" value="{{ old('inspected_by') }}" placeholder="Nombre de quien revisa" required></div>
+            <div class="field"><label class="field-label">Anfitrión</label><input type="text" name="inspected_by" value="{{ old('inspected_by', auth()->user()->name) }}" placeholder="Nombre de quien revisa" required></div>
             <div class="field"><label class="field-label">Turno</label><select name="shift" required><option value="">Seleccionar</option>@foreach(['Mañana','Tarde','Noche','Madrugada'] as $shift)<option value="{{ $shift }}" @selected(old('shift') === $shift)>{{ $shift }}</option>@endforeach</select></div>
             <div class="field"><label class="field-label">Fecha</label><input class="date-readonly" type="text" value="{{ now()->timezone('America/Santiago')->format('d/m/Y') }}" readonly></div>
         </div>

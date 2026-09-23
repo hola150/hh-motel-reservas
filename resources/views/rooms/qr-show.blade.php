@@ -130,8 +130,10 @@
                                 {{ request('ronda') ? 'Marcar ocupada y seguir la ronda →' : 'Marcar como ocupada →' }}
                             </button>
                         </form>
-                    @else
+                    @elseif ($hasValidScan)
                         <a class="primary" href="{{ route('rooms.inspections.create', $room) }}?qr=1{{ request('ronda') ? '&ronda=1' : '' }}">Hacer inspección completa →</a>
+                    @else
+                        <a class="primary" href="{{ route('shift_round.scan') }}{{ request('ronda') ? '?ronda=1' : '' }}">📷 Escanear para inspeccionar →</a>
                     @endif
                     <a href="{{ route('rooms.board') }}">← Ver tablero interno</a>
                 </div>
