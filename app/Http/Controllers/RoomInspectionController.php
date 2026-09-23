@@ -11,8 +11,27 @@ use Illuminate\View\View;
 
 class RoomInspectionController extends Controller
 {
-    public function create(Room $room): View
+    /**
+     * Cuánto dura válida la marca de "escaneó esta habitación" (ver
+     * RoomQrController::confirmScan) -- suficiente para completar el
+     * formulario sin apuro, corto para que no sirva de shortcut permanente
+     * guardando el link.
+     */
+    private const SCAN_VALID_SECONDS = 600;
+
+    public function create(Request $request, Room $room): View|RedirectResponse
     {
+        // Si vino marcado como "desde el QR" (Ronda de turno), exige haber
+        // pasado de verdad por la cámara de escaneo -- si no, no se puede
+        // llegar acá solo con el link guardado o tipeando la URL.
+        if ($request->boolean('qr')) {
+            $scannedAt = $request->session()->get('qr_scanned_at.'.$room->id);
+            if (! $scannedAt || (now()->timestamp - $scannedAt) > self::SCAN_VALID_SECONDS) {
+                return redirect()->route('rooms.qr.show', $room)
+                    ->withErrors(['pin' => 'Tenés que escanear el QR de esta habitación con la cámara antes de inspeccionarla.']);
+            }
+        }
+
         $room->load(['category', 'furniture.category']);
         $lastInspection = $room->inspections()->latest()->first();
 

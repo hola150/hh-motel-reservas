@@ -2,6 +2,7 @@
 <html lang="es" style="background:#111;color:#eee">
 <head>
     <meta charset="utf-8"><meta name="color-scheme" content="dark">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Escanear QR — HH Motel</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
@@ -97,12 +98,27 @@
                     return;
                 }
 
-                statusLine.textContent = '¡Listo! Abriendo la habitación…';
-                const finalUrl = new URL(url.pathname, allowedOrigin);
-                @if (request('ronda'))
-                    finalUrl.searchParams.set('ronda', '1');
-                @endif
-                window.location.href = finalUrl.toString();
+                statusLine.textContent = 'Confirmando escaneo…';
+                const roomId = url.pathname.split('/').pop();
+                fetch('/qr/habitacion/' + roomId + '/confirmar-escaneo', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                }).then(function (r) {
+                    if (!r.ok) throw new Error('confirm-scan failed');
+                    statusLine.textContent = '¡Listo! Abriendo la habitación…';
+                    const finalUrl = new URL(url.pathname, allowedOrigin);
+                    @if (request('ronda'))
+                        finalUrl.searchParams.set('ronda', '1');
+                    @endif
+                    window.location.href = finalUrl.toString();
+                }).catch(function () {
+                    statusLine.textContent = 'No se pudo confirmar el escaneo -- probá de nuevo.';
+                    scanning = true;
+                    rafId = requestAnimationFrame(tick);
+                });
             }
 
             navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })

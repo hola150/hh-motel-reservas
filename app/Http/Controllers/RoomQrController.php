@@ -72,6 +72,22 @@ class RoomQrController extends Controller
     }
 
     /**
+     * Llamado por JS desde la cámara de escaneo (rooms/qr-scan.blade.php)
+     * justo antes de navegar a la habitación decodificada -- deja una marca
+     * en la sesión de que ESTE dispositivo escaneó ESTA habitación hace
+     * poco. RoomInspectionController::create() la exige cuando llega con
+     * ?qr=1, así "Hacer inspección completa" no se puede alcanzar solo
+     * tipeando o guardando el link de la habitación -- hay que haber
+     * pasado por la cámara de verdad.
+     */
+    public function confirmScan(Request $request, Room $room): \Illuminate\Http\JsonResponse
+    {
+        $request->session()->put('qr_scanned_at.'.$room->id, now()->timestamp);
+
+        return response()->json(['ok' => true]);
+    }
+
+    /**
      * Confirma que la habitación quedó revisada/en condiciones ANTES de que
      * llegue el próximo huésped -- distinto de "aseo listo" (que es sobre la
      * limpieza en sí): esto es un último vistazo justo antes de la llegada.

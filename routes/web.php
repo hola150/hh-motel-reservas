@@ -102,6 +102,7 @@ Route::get('/mantencion', [RoomInspectionController::class, 'panel'])->name('roo
 Route::get('/habitaciones/{room}/inspeccion', [RoomInspectionController::class, 'create'])->name('rooms.inspections.create');
 Route::post('/habitaciones/{room}/inspeccion', [RoomInspectionController::class, 'store'])->name('rooms.inspections.store');
 Route::post('/qr/habitacion/{room}/ocupada', [\App\Http\Controllers\RoomQrController::class, 'acknowledgeOccupied'])->name('rooms.qr.acknowledge_occupied');
+Route::post('/qr/habitacion/{room}/confirmar-escaneo', [\App\Http\Controllers\RoomQrController::class, 'confirmScan'])->name('rooms.qr.confirm_scan');
 
 Route::get('/reservas/{code}/pago', [PaymentController::class, 'create'])->name('payments.create');
 Route::post('/reservas/{code}/pago', [PaymentController::class, 'store'])->name('payments.store');
