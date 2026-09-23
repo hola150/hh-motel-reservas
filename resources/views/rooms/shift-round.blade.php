@@ -28,6 +28,8 @@
         .done-card .when { font-size:11.5px; color:#7fa87f; }
         .warn-tag { color:#e88a9a; font-size:11px; font-weight:700; margin-left:8px; }
         .empty { color:#777; padding:20px 0; text-align:center; font-size:14px; }
+        a.scan-btn { display:block; text-align:center; background:#ff7918; color:#21170e; text-decoration:none; font-weight:800; font-size:15px; padding:14px; border-radius:10px; margin-bottom:20px; }
+        a.scan-btn:hover { background:#ee6909; }
     </style>
 </head>
 <body>
@@ -45,6 +47,8 @@
         <div class="big">{{ $done->count() }} de {{ $total }} revisadas</div>
         <div class="progress-bar"><div class="fill" style="width:{{ $total > 0 ? round($done->count() / $total * 100) : 0 }}%;"></div></div>
     </div>
+
+    <a class="scan-btn" href="{{ route('shift_round.scan') }}?ronda=1">📷 Escanear QR de la habitación →</a>
 
     <h2 class="section">Pendientes ({{ $pending->count() }})</h2>
     @forelse ($pending as $room)

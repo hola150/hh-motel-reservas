@@ -33,9 +33,17 @@
         button.submit { width:100%; margin-top:16px; background:var(--hh-accent); color:#21170e; border:none; padding:15px; border-radius:9px; font-size:15.5px; font-weight:800; cursor:pointer; }
         button.submit:hover { background:var(--hh-accent-hover); }
         .info { color:#c1c3c7; font-size:13px; text-align:center; margin-top:6px; }
-        .staff-links { text-align:center; margin-top:18px; }
-        .staff-links a { color:#62656c; text-decoration:none; font-size:13px; display:block; margin-top:8px; }
+        .staff-links { margin-top:20px; display:flex; flex-direction:column; gap:10px; }
+        .staff-links a, .staff-links button.link-btn {
+            display:block; width:100%; box-sizing:border-box; text-align:center; text-decoration:none;
+            padding:13px; border-radius:9px; font-size:14.5px; font-weight:700; cursor:pointer;
+            border:1px solid #62656b; color:#f4f5f7; background:#202123; font-family:inherit;
+        }
+        .staff-links a:hover, .staff-links button.link-btn:hover { border-color:var(--hh-accent); color:var(--hh-accent); }
+        .staff-links a.primary, .staff-links button.link-btn.primary { background:var(--hh-accent); color:#21170e; border-color:var(--hh-accent); }
+        .staff-links a.primary:hover, .staff-links button.link-btn.primary:hover { background:var(--hh-accent-hover); color:#21170e; }
         .reported-box { background:#1c2f1c; border:1px solid #2e5a2e; color:#8fe0ad; border-radius:9px; padding:14px; text-align:center; font-size:14px; }
+        .occupied-box { background:#1c2733; border:1px solid #2e4a5a; color:#8fc7e0; border-radius:9px; padding:14px; text-align:center; font-size:14px; }
     </style>
 </head>
 <body>
@@ -97,6 +105,8 @@
                     <p class="info">Hay una reserva a las <strong>{{ $nextBooking->starts_at->timezone('America/Santiago')->format('H:i') }}</strong> -- inicia sesión con tu PIN para confirmar que la habitación está en condiciones.</p>
                     <a class="submit" style="display:block; text-align:center; text-decoration:none;" href="{{ route('mucamas.login', ['next' => route('rooms.qr.show', $room)]) }}">Iniciar sesión →</a>
                 @endif
+            @elseif ($room->operational_status === 'activa' && $occupancy === 'ocupada')
+                <div class="occupied-box">🔵 Ocupada ahora mismo -- no se puede inspeccionar con el huésped adentro.</div>
             @else
                 <p class="info">Esta habitación no está esperando aseo ni tiene una próxima reserva por confirmar ahora mismo.</p>
             @endif
@@ -110,8 +120,20 @@
 
             @auth
                 <div class="staff-links">
+                    @if ($room->operational_status === 'activa' && $occupancy === 'ocupada')
+                        <form method="POST" action="{{ route('rooms.qr.acknowledge_occupied', $room) }}">
+                            @csrf
+                            @if (request('ronda'))
+                                <input type="hidden" name="from_ronda" value="1">
+                            @endif
+                            <button class="link-btn primary" type="submit">
+                                {{ request('ronda') ? 'Marcar ocupada y seguir la ronda →' : 'Marcar como ocupada →' }}
+                            </button>
+                        </form>
+                    @else
+                        <a class="primary" href="{{ route('rooms.inspections.create', $room) }}?qr=1{{ request('ronda') ? '&ronda=1' : '' }}">Hacer inspección completa →</a>
+                    @endif
                     <a href="{{ route('rooms.board') }}">← Ver tablero interno</a>
-                    <a href="{{ route('rooms.inspections.create', $room) }}?qr=1{{ request('ronda') ? '&ronda=1' : '' }}">Hacer inspección completa →</a>
                 </div>
             @endauth
         </div>

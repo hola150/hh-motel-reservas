@@ -33,4 +33,14 @@ class ShiftRoundController extends Controller
 
         return view('rooms.shift-round', ['pending' => $pending, 'done' => $done, 'total' => $rooms->count()]);
     }
+
+    /**
+     * Cámara para escanear el QR de la puerta -- decodifica en el navegador
+     * (jsQR) y navega directo a esa habitación; no pasa por el servidor
+     * hasta que ya se sabe qué habitación es.
+     */
+    public function scan(): View
+    {
+        return view('rooms.qr-scan');
+    }
 }

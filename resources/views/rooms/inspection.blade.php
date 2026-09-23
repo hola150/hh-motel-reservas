@@ -14,14 +14,14 @@
         a.back-btn { display:inline-block; background:#1c1c1c; border:1px solid #333; color:#ccc; text-decoration:none; padding:8px 13px; border-radius:7px; font-size:12.5px; font-weight:600; margin-bottom:16px; }
         a.back-btn:hover { border-color:#ff7918; color:#ff7918; }
 
-        .last-panel { background:#1c1c1c; border:1px solid #333; border-radius:10px; padding:14px 16px; margin-bottom:20px; font-size:13px; }
+        .last-panel { background:#1c1c1c; color:#ddd; border:1px solid #333; border-radius:10px; padding:14px 16px; margin-bottom:20px; font-size:13px; }
         .last-panel.warn { border-color:#7a2d2d; background:#241419; }
         .last-panel .label { font-size:11px; color:#999; text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px; }
         .last-panel .pill { display:inline-block; font-size:10.5px; padding:2px 8px; border-radius:20px; margin-left:6px; }
         .pill.ok { background:#1c3a2a; color:#6fd39a; }
         .pill.warn { background:#3a1c22; color:#e88a9a; }
 
-        form { background:#1c1c1c; border:1px solid #333; border-radius:12px; padding:18px 20px; }
+        form { background:#1c1c1c; color:#eee; border:1px solid #333; border-radius:12px; padding:18px 20px; }
         label.field-label { display:block; font-size:11px; color:#999; text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px; }
         input[type=text], textarea { width:100%; background:#111; border:1px solid #333; color:#eee; padding:9px 11px; border-radius:8px; font-size:14px; font-family:inherit; }
         input[type=text]:focus, textarea:focus { outline:none; border-color:#ff7918; }

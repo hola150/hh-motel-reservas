@@ -41,11 +41,34 @@ class RoomQrController extends Controller
             $mucama->update(['last_qr_room_id' => $room->id, 'last_qr_seen_at' => now()]);
         }
 
+        $status = $board->statusFor($room);
+
         return view('rooms.qr-show', [
             'room' => $room,
             'mucama' => $mucama,
-            'nextBooking' => $board->statusFor($room)['next_booking'],
+            'nextBooking' => $status['next_booking'],
+            'occupancy' => $status['occupancy'],
         ]);
+    }
+
+    /**
+     * Cuando el anfitrión llega a una habitación de la ronda y la encuentra
+     * ocupada -- no se puede inspeccionar con el huésped adentro. Deja
+     * registro de que se pasó a verla (quién y cuándo) sin crear una
+     * inspección real, y sigue la ronda -- la pieza queda pendiente para
+     * cuando se desocupe, no se pierde de la lista.
+     */
+    public function acknowledgeOccupied(Request $request, Room $room): RedirectResponse
+    {
+        AuditLog::record(auth()->id(), 'habitacion.ronda_ocupada', 'Room', $room->id, null, ['room_name' => $room->name]);
+
+        $statusMessage = $room->name.' está ocupada -- la salteamos, queda pendiente para cuando se desocupe.';
+
+        if ($request->boolean('from_ronda')) {
+            return redirect()->route('shift_round.index')->with('status', $statusMessage);
+        }
+
+        return redirect()->route('rooms.qr.show', $room)->with('status', $statusMessage);
     }
 
     /**

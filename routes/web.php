@@ -97,9 +97,11 @@ Route::post('/habitaciones/{room}/aseo-listo', [RoomBoardController::class, 'mar
 Route::get('/mucamas/actividad', [\App\Http\Controllers\MucamaActivityController::class, 'index'])->name('mucamas.activity');
 Route::get('/mucamas/actividad/estado', [\App\Http\Controllers\MucamaActivityController::class, 'status'])->name('mucamas.activity.status');
 Route::get('/ronda-de-turno', [\App\Http\Controllers\ShiftRoundController::class, 'index'])->name('shift_round.index');
+Route::get('/ronda-de-turno/escanear', [\App\Http\Controllers\ShiftRoundController::class, 'scan'])->name('shift_round.scan');
 Route::get('/mantencion', [RoomInspectionController::class, 'panel'])->name('rooms.inspections.panel');
 Route::get('/habitaciones/{room}/inspeccion', [RoomInspectionController::class, 'create'])->name('rooms.inspections.create');
 Route::post('/habitaciones/{room}/inspeccion', [RoomInspectionController::class, 'store'])->name('rooms.inspections.store');
+Route::post('/qr/habitacion/{room}/ocupada', [\App\Http\Controllers\RoomQrController::class, 'acknowledgeOccupied'])->name('rooms.qr.acknowledge_occupied');
 
 Route::get('/reservas/{code}/pago', [PaymentController::class, 'create'])->name('payments.create');
 Route::post('/reservas/{code}/pago', [PaymentController::class, 'store'])->name('payments.store');
