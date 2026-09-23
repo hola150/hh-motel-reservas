@@ -102,9 +102,6 @@
             @endif
 
             @if ($mucama)
-                <div class="staff-links">
-                    <a href="{{ route('rooms.qr.inspection.create', $room) }}">Hacer inspección completa →</a>
-                </div>
                 <form method="POST" action="{{ route('mucamas.logout') }}" style="text-align:center; margin-top:14px;">
                     @csrf
                     <button type="submit" style="background:none; border:none; color:#62656c; font-size:12.5px; cursor:pointer; text-decoration:underline;">Cerrar sesión ({{ $mucama->name }})</button>
