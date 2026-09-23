@@ -48,6 +48,10 @@
                                 @csrf
                                 <button type="submit" class="toggle-btn">{{ $o->is_active ? 'Pausar' : 'Activar' }}</button>
                             </form>
+                            <form method="POST" action="{{ route('admin.upsells.destroy', $o) }}" class="inline" style="margin-left:8px;" onsubmit="return confirm('¿Eliminar este upsell?');">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="toggle-btn">Eliminar</button>
+                            </form>
                         </td>
                     </tr>
                 @empty

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'name', 'phone_e164', 'email', 'rut', 'document_type', 'passport_number',
     'nationality', 'birth_date', 'ghl_contact_id', 'ghl_synced_at',
     'has_loyalty_card', 'loyalty_card_number', 'loyalty_card_added_at',
+    'blacklist_status', 'blacklist_reason', 'blacklisted_at',
 ])]
 class Customer extends Model
 {
@@ -23,6 +24,7 @@ class Customer extends Model
             'ghl_synced_at' => 'datetime',
             'has_loyalty_card' => 'boolean',
             'loyalty_card_added_at' => 'datetime',
+            'blacklisted_at' => 'datetime',
         ];
     }
 
@@ -108,21 +110,26 @@ class Customer extends Model
         $spanDays = $stays->first()->diffInDays($lastVisit);
         $avgInterval = (int) round($spanDays / ($total - 1));
 
-        $type = match (true) {
-            $daysSinceLast > 120 => 'esporadico',
-            $avgInterval <= 45 => 'frecuente',
-            default => 'ocasional',
-        };
-
-        $label = match ($type) {
-            'esporadico' => 'Esporádico',
-            'frecuente' => 'Alta recurrencia',
-            default => 'Baja recurrencia',
-        };
+        $rules = CustomerSegmentRule::orderByDesc('stars')->orderByDesc('minimum_stays')->get();
+        $type = 'ocasional'; $matched = null;
+        foreach ($rules as $rule) {
+            if ($rule->segment === 'esporadico') continue;
+            $window = $rule->analysis_window_days;
+            $visits = $window ? $stays->filter(fn ($date) => $date->greaterThanOrEqualTo(now()->subDays($window)))->count() : $total;
+            if ($visits >= (int) $rule->minimum_stays) { $type = $rule->segment; $matched = $rule; break; }
+        }
+        if ($matched === null) {
+            $stale = $rules->firstWhere('segment', 'esporadico');
+            if ($stale && $daysSinceLast > ($stale->stale_after_days ?? 120)) { $type = 'esporadico'; $matched = $stale; }
+        }
+        $label = $matched?->label ?? 'Baja recurrencia';
+        $window = $matched?->analysis_window_days;
+        $windowVisits = $window ? $stays->filter(fn ($date) => $date->greaterThanOrEqualTo(now()->subDays($window)))->count() : $total;
 
         return [
             'type' => $type, 'label' => $label, 'total_stays' => $total,
             'last_visit_at' => $lastVisit, 'days_since_last' => $daysSinceLast, 'avg_interval_days' => $avgInterval,
+            'window_days' => $window, 'window_visits' => $windowVisits, 'stars' => (int) ($matched?->stars ?? 0),
         ];
     }
 }

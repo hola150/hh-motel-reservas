@@ -88,4 +88,16 @@ class ComboController extends Controller
 
         return redirect()->route('admin.combos.edit', $combo)->with('status', 'Producto quitado del combo.');
     }
+
+    public function destroy(Combo $combo): RedirectResponse
+    {
+        if ($combo->bookingAddons()->exists()) {
+            return back()->withErrors(['combo' => 'Este combo ya fue vendido en reservas. Déjalo inactivo para conservar el historial.']);
+        }
+        $old = $combo->toArray();
+        $combo->items()->delete();
+        $combo->delete();
+        AuditLog::record(auth()->id(), 'combo.eliminar', 'Combo', $combo->id, $old, null);
+        return redirect()->route('admin.combos.index')->with('status', 'Combo eliminado.');
+    }
 }

@@ -34,7 +34,12 @@
                         </td>
                         <td><span class="pill">{{ $combo->is_active ? 'ACTIVO' : 'INACTIVO' }}</span></td>
                         @if (auth()->user()->isAdministrador())
-                            <td><a class="link" href="{{ route('admin.combos.edit', $combo) }}">Editar</a></td>
+                            <td style="white-space:nowrap;"><a class="link" href="{{ route('admin.combos.edit', $combo) }}">Editar</a>
+                                <form method="POST" action="{{ route('admin.combos.destroy', $combo) }}" class="inline" style="margin-left:8px;" onsubmit="return confirm('¿Eliminar este combo?');">
+                                    @csrf @method('DELETE')
+                                    <button class="link" type="submit" style="background:none;border:0;padding:0;cursor:pointer;">Eliminar</button>
+                                </form>
+                            </td>
                         @endif
                     </tr>
                 @empty

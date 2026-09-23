@@ -9,6 +9,7 @@ use App\Models\Coupon;
 use App\Models\Customer;
 use App\Models\Combo;
 use App\Models\Product;
+use App\Models\UpsellOffer;
 use App\Models\RateRulePrice;
 use App\Models\Room;
 use App\Models\RoomCategory;
@@ -51,9 +52,14 @@ class PublicBookingController extends Controller
             ->groupBy('room_category_id')
             ->map(fn ($rows) => $rows->pluck('duration_minutes')->map(fn ($m) => (int) $m)->unique()->sort()->values());
 
-        $products = Product::where('is_active', true)->orderBy('display_order')->orderBy('name')->get();
-        $combos = Combo::with('items.product')->where('is_active', true)->orderBy('display_order')->orderBy('name')->get()
-            ->filter(fn (Combo $combo) => ! $combo->isOutOfStock())->values();
+        $publicUpsells = UpsellOffer::active()->where('type', 'combo')->with(['combo.items.product'])
+            ->orderBy('display_order')->get()
+            ->filter(fn (UpsellOffer $upsell) => $upsell->combo?->is_active && ! $upsell->combo->isOutOfStock())
+            ->values();
+        $categoryUpsells = UpsellOffer::active()->where('type', 'category_upgrade')
+            ->with(['fromCategory','toCategory'])
+            ->where('from_room_category_id', $selectedCategoryId)
+            ->orderBy('display_order')->get();
 
         return view('catalog.reservar', [
             'categories' => $categories,
@@ -61,8 +67,8 @@ class PublicBookingController extends Controller
             'selectedRoomId' => $selectedRoomId,
             'selectedCoupon' => $selectedCoupon,
             'durationsByCategory' => $durationsByCategory,
-            'products' => $products,
-            'combos' => $combos,
+            'publicUpsells' => $publicUpsells,
+            'categoryUpsells' => $categoryUpsells,
             'couponConstraints' => $selectedCoupon ? [
                 'weekdays' => $selectedCoupon->allowedWeekdaysArray(),
                 'timeStart' => $selectedCoupon->allowed_time_start ? substr($selectedCoupon->allowed_time_start, 0, 5) : null,
@@ -99,6 +105,8 @@ class PublicBookingController extends Controller
             'quantities.*' => ['nullable', 'integer', 'min:0', 'max:10'],
             'combo_quantities' => ['nullable', 'array'],
             'combo_quantities.*' => ['nullable', 'integer', 'min:0', 'max:5'],
+            'accepted_upsells' => ['nullable', 'array'],
+            'accepted_upsells.*' => ['integer', 'exists:upsell_offers,id'],
             // Campo trampa para bots -- invisible para una persona real
             // (oculto por CSS), un bot que autocompleta todo lo llena.
             'website' => ['prohibited'],
@@ -119,6 +127,9 @@ class PublicBookingController extends Controller
             ['phone_e164' => $phone],
             ['name' => $customerName, 'email' => $validated['email'] ?? null, 'birth_date' => $validated['birth_date'] ?? null]
         );
+        if ($customer->blacklist_status === 'blocked') {
+            return back()->withInput()->withErrors(['phone' => 'No es posible solicitar la reserva con los datos ingresados.']);
+        }
         // Cliente ya existía pero le faltaba la fecha de nacimiento (ej.
         // para el cupón de Expertos en Vida) -- se completa ahora.
         if (! empty($validated['birth_date']) && ! $customer->birth_date) {
@@ -159,7 +170,7 @@ class PublicBookingController extends Controller
             }
             try {
                 $consumption->addProduct($booking, $products[$productId], $quantity, null);
-            } catch (InsufficientStockException $e) {
+        } catch (InsufficientStockException $e) {
                 $soldOut = true;
             }
         }
@@ -188,6 +199,19 @@ class PublicBookingController extends Controller
             // demás extras que sí tenían stock ya quedaron agregados arriba.
             return redirect()->route('catalog.booked', $booking->code)
                 ->with('warning', 'La reserva quedó creada, pero uno de los extras seleccionados se agotó. Recepción podrá ofrecerte otra alternativa.');
+        }
+
+        $upgrade = UpsellOffer::active()->where('type', 'category_upgrade')->with('toCategory')
+            ->whereIn('id', $validated['accepted_upsells'] ?? [])->first();
+        if ($upgrade?->to_room_category_id) {
+            $target = Room::where('room_category_id', $upgrade->to_room_category_id)
+                ->where('operational_status', 'activa')->where('id', '!=', $booking->room_id)
+                ->orderBy('name')->get()
+                ->first(fn (Room $candidate) => $availability->isAvailable($candidate, $startsAt, $endsAt));
+            if ($target) {
+                $booking->update(['room_id' => $target->id]);
+                if ((int) $upgrade->price > 0) $consumption->addCustom($booking, $upgrade->name, (int) $upgrade->price, null);
+            }
         }
 
         return redirect()->route('catalog.booked', $booking->code);

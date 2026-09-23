@@ -54,6 +54,33 @@
         <a class="seg-chip esporadico {{ $segmentFilter === 'esporadico' ? 'active' : '' }}" href="{{ route('admin.customers.index', $baseParams + ['segment' => 'esporadico']) }}"><b>{{ $counts['esporadico'] }}</b> Esporádicos</a>
     </div>
 
+    @if(auth()->user()?->role === 'administrador')
+        <details class="card" style="margin-bottom:18px;">
+            <summary style="cursor:pointer;font-weight:700;">Configurar clasificación y lista negra</summary>
+            <form method="POST" action="{{ route('admin.customers.rules.update') }}" style="margin-top:14px;">
+                @csrf
+                <p class="sub">Modifica los días sin tocar el código. La regla se recalcula automáticamente al consultar cada cliente.</p>
+                @foreach($segmentRules as $rule)
+                    <div style="display:grid;grid-template-columns:1.2fr .8fr .8fr .8fr;gap:10px;margin:8px 0;align-items:end;">
+                        <div><label>Etiqueta {{ $rule->segment }}</label><input name="rules[{{ $rule->id }}][label]" value="{{ $rule->label }}"></div>
+                        <div><label>Visitas mínimas</label><input type="number" min="0" name="rules[{{ $rule->id }}][minimum_stays]" value="{{ $rule->minimum_stays }}"></div>
+                        <div><label>Dentro de días</label><input type="number" min="1" name="rules[{{ $rule->id }}][analysis_window_days]" value="{{ $rule->analysis_window_days }}" placeholder="—"></div>
+                        <div><label>Estrellas</label><input type="number" min="0" max="5" name="rules[{{ $rule->id }}][stars]" value="{{ $rule->stars }}"></div>
+                    </div>
+                @endforeach
+                <button class="btn" type="submit">Guardar reglas</button>
+            </form>
+            <hr style="border-color:#333;margin:18px 0;">
+            <form method="POST" action="{{ route('admin.customers.blacklist.import') }}" enctype="multipart/form-data">
+                @csrf
+                <label>Importar lista negra CSV</label>
+                <small style="display:block;color:#aaa;margin:4px 0 8px;">Primera columna: teléfono. Segunda columna opcional: motivo. Solo actualiza clientes que ya existen.</small>
+                <input type="file" name="file" accept=".csv,.txt" required>
+                <button class="btn" type="submit" style="margin-top:10px;">Importar lista negra</button>
+            </form>
+        </details>
+    @endif
+
     <div class="card">
         <table>
             <thead><tr><th>Cliente</th><th>Teléfono</th><th>Segmento</th><th>Estadías</th><th>Última visita</th></tr></thead>
@@ -62,7 +89,7 @@
                     <tr>
                         <td><a class="name-link" href="{{ route('admin.customers.show', $customer) }}">{{ $customer->name }}</a></td>
                         <td>{{ $customer->phone_e164 }}</td>
-                        <td><span class="pill pill-{{ $customer->computed_segment['type'] }}">{{ strtoupper($customer->computed_segment['label']) }}</span></td>
+                        <td><span class="pill pill-{{ $customer->computed_segment['type'] }}">{{ $customer->computed_segment['stars'] ? str_repeat('⭐', $customer->computed_segment['stars']).' ' : '' }}{{ strtoupper($customer->computed_segment['label']) }}</span><small style="display:block;color:#999;margin-top:3px;">{{ $customer->computed_segment['window_visits'] }} visitas{{ $customer->computed_segment['window_days'] ? ' / '.$customer->computed_segment['window_days'].' días' : '' }}</small></td>
                         <td>{{ $customer->computed_segment['total_stays'] }}</td>
                         <td>{{ $customer->computed_segment['last_visit_at']?->timezone('America/Santiago')->format('d/m/Y') ?? '—' }}</td>
                     </tr>

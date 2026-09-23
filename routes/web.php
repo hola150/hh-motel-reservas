@@ -165,6 +165,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/upsells/{upsell}/editar', [UpsellController::class, 'edit'])->name('upsells.edit');
     Route::put('/upsells/{upsell}', [UpsellController::class, 'update'])->name('upsells.update');
     Route::post('/upsells/{upsell}/toggle', [UpsellController::class, 'toggle'])->name('upsells.toggle');
+    Route::delete('/upsells/{upsell}', [UpsellController::class, 'destroy'])->name('upsells.destroy');
 
     Route::get('/cupones', [CouponController::class, 'index'])->name('coupons.index');
     Route::get('/cupones/crear', [CouponController::class, 'create'])->name('coupons.create');
@@ -189,13 +190,17 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::post('/combos', [ComboController::class, 'store'])->name('combos.store');
     Route::get('/combos/{combo}/editar', [ComboController::class, 'edit'])->name('combos.edit');
     Route::put('/combos/{combo}', [ComboController::class, 'update'])->name('combos.update');
+    Route::delete('/combos/{combo}', [ComboController::class, 'destroy'])->name('combos.destroy');
     Route::post('/combos/{combo}/items', [ComboController::class, 'storeItem'])->name('combos.items.store');
     Route::delete('/combos/{combo}/items/{item}', [ComboController::class, 'destroyItem'])->name('combos.items.destroy');
     }); // fin role:administrador
 
+    Route::post('/clientes/reglas', [AdminCustomerController::class, 'updateRules'])->middleware('role:administrador')->name('customers.rules.update');
+    Route::post('/clientes/lista-negra/importar', [AdminCustomerController::class, 'importBlacklist'])->middleware('role:administrador')->name('customers.blacklist.import');
     Route::get('/clientes', [AdminCustomerController::class, 'index'])->name('customers.index');
     Route::get('/clientes/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
     Route::put('/clientes/{customer}', [AdminCustomerController::class, 'update'])->name('customers.update');
+    Route::put('/clientes/{customer}/lista-negra', [AdminCustomerController::class, 'blacklist'])->name('customers.blacklist');
 
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
     Route::get('/analytics/exportar', [AnalyticsController::class, 'export'])->name('analytics.export');

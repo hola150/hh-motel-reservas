@@ -48,6 +48,14 @@ class UpsellController extends Controller
         return redirect()->route('admin.upsells.index');
     }
 
+    public function destroy(UpsellOffer $upsell): RedirectResponse
+    {
+        $old = $upsell->toArray();
+        $upsell->delete();
+        AuditLog::record(auth()->id(), 'upsell.eliminar', 'UpsellOffer', $upsell->id, $old, null);
+        return redirect()->route('admin.upsells.index')->with('status', 'Upsell eliminado.');
+    }
+
     private function formData(UpsellOffer $offer): array
     {
         return [

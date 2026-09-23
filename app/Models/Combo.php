@@ -21,6 +21,11 @@ class Combo extends Model
         return $this->hasMany(ComboItem::class);
     }
 
+    public function bookingAddons(): HasMany
+    {
+        return $this->hasMany(BookingAddon::class);
+    }
+
     /**
      * Cuántas unidades del combo se pueden armar hoy con el stock actual —
      * el mínimo entre los componentes que sí controlan inventario. Null si

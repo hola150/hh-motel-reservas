@@ -21,6 +21,10 @@ class CatalogController extends Controller
     public function index(): View
     {
         $today = Carbon::today();
+        $catalogFallbackPhoto = Room::whereNotNull('photos')->orderBy('name')->get()
+            ->flatMap(fn (Room $room) => $room->photos ?? [])
+            ->filter()
+            ->first();
         // Cupones con código (no las ofertas automáticas) que el cliente
         // puede autoaplicarse desde un banner -- la verificación de
         // identidad/edad la sigue haciendo recepción al check-in, así que
@@ -28,7 +32,7 @@ class CatalogController extends Controller
         $coupons = Coupon::where('auto_apply', false)->where('is_active', true)
             ->get()
             ->filter(fn (Coupon $c) => (!$c->starts_at || $today->greaterThanOrEqualTo($c->starts_at)) && (!$c->ends_at || $today->lessThanOrEqualTo($c->ends_at)))
-            ->map(function (Coupon $c) {
+            ->map(function (Coupon $c) use ($catalogFallbackPhoto) {
                 $benefit = $c->discount_type === 'percentage'
                     ? '-'.$c->discount_value.'%'
                     : '-$'.number_format($c->discount_value, 0, ',', '.');
@@ -40,7 +44,7 @@ class CatalogController extends Controller
                 return [
                     'code' => $c->code,
                     'name' => $c->internal_name,
-                    'image' => $c->image_url,
+                    'image' => $c->image_url ?: $catalogFallbackPhoto,
                     'benefit' => $benefit,
                     'hint' => implode(' · ', $hints),
                     'needsBirthDate' => (bool) $c->min_age,
@@ -89,7 +93,7 @@ class CatalogController extends Controller
                         'originalPrice' => $offerPrice !== null ? $referencePrice : null,
                         'offerPrice' => $offerPrice,
                         'durationLabel' => $prices->first() ? ($prices->first()['duration'] >= 60 ? intdiv($prices->first()['duration'], 60).' h' : $prices->first()['duration'].' min') : null,
-                        'rooms' => $offer->rooms->filter(fn ($room) => $room->room_category_id === $category->id)->map(fn ($room) => ['id' => $room->id, 'name' => $room->name, 'photo' => collect($room->photos ?? [])->first()])->values()->all(),
+                        'rooms' => $offer->rooms->filter(fn ($room) => $room->room_category_id === $category->id)->map(fn ($room) => ['id' => $room->id, 'name' => $room->name, 'photo' => collect($room->photos ?? [])->first() ?: $photos->first()])->values()->all(),
                     ] : null,
                     'salesTip' => $category->sales_tip ?: 'Conoce esta experiencia HH.',
                     'whatsappUrl' => 'https://wa.me/'.self::WHATSAPP_NUMBER.'?text='.rawurlencode("Hola! Tengo una duda sobre el Playroom {$category->name} en HH."),

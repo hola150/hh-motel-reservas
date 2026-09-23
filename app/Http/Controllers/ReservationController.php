@@ -223,6 +223,9 @@ class ReservationController extends Controller
                 'birth_date' => $validated['birth_date'] ?? null,
             ]))->save();
         }
+        if ($customer->blacklist_status === 'blocked') {
+            return back()->withInput()->withErrors(['customer_phone' => 'Cliente bloqueado en lista negra. Revisar con administración antes de reservar.']);
+        }
 
         try {
             $booking = $bookingService->create([

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
+use App\Models\CustomerSegmentRule;
 use App\Services\Integrations\GhlClient;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,7 +44,35 @@ class CustomerController extends Controller
             $customers = $customers->filter(fn (Customer $c) => $c->computed_segment['type'] === $segmentFilter)->values();
         }
 
-        return view('admin.customers.index', ['customers' => $customers, 'query' => $query, 'segmentFilter' => $segmentFilter]);
+        return view('admin.customers.index', ['customers' => $customers, 'query' => $query, 'segmentFilter' => $segmentFilter, 'segmentRules' => CustomerSegmentRule::orderBy('display_order')->get()]);
+    }
+
+    public function updateRules(Request $request): RedirectResponse
+    {
+        foreach ($request->input('rules', []) as $id => $rule) {
+            $model = CustomerSegmentRule::find($id);
+            if ($model) $model->update(['label'=>$rule['label'] ?? $model->label, 'minimum_stays'=>(int)($rule['minimum_stays'] ?? $model->minimum_stays), 'analysis_window_days'=>($rule['analysis_window_days'] ?? '') !== '' ? (int)$rule['analysis_window_days'] : null, 'stars'=>min(5,max(0,(int)($rule['stars'] ?? $model->stars))), 'stale_after_days'=>($rule['stale_after_days'] ?? '') !== '' ? (int)$rule['stale_after_days'] : null]);
+        }
+        return back()->with('status', 'Reglas de clasificación actualizadas.');
+    }
+
+    public function blacklist(Request $request, Customer $customer): RedirectResponse
+    {
+        $data = $request->validate(['blacklist_status'=>['required','in:none,warning,blocked'],'blacklist_reason'=>['nullable','string','max:1000']]);
+        $customer->update($data + ['blacklisted_at' => $data['blacklist_status'] === 'none' ? null : now()]);
+        return back()->with('status', $data['blacklist_status'] === 'none' ? 'Cliente retirado de la lista negra.' : 'Estado de lista negra actualizado.');
+    }
+
+    public function importBlacklist(Request $request): RedirectResponse
+    {
+        $request->validate(['file'=>['required','file','mimes:csv,txt','max:2048']]);
+        $handle = fopen($request->file('file')->getRealPath(), 'r'); $count = 0;
+        while (($row = fgetcsv($handle)) !== false) {
+            $phone = trim((string)($row[0] ?? '')); if (!$phone || !preg_match('/\d{7,}/', preg_replace('/\D/','',$phone))) continue;
+            $customer = Customer::where('phone_e164', 'like', '%'.preg_replace('/\D/','',$phone).'%')->first();
+            if ($customer) { $customer->update(['blacklist_status'=>'blocked','blacklist_reason'=>$row[1] ?? 'Importado desde lista negra','blacklisted_at'=>now()]); $count++; }
+        }
+        fclose($handle); return back()->with('status', "Lista negra procesada: {$count} clientes encontrados.");
     }
 
     public function show(Customer $customer): View
