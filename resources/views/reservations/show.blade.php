@@ -102,10 +102,11 @@
         @unless (in_array($booking->booking_status, ['FINALIZADA', 'CANCELADA', 'EXPIRADA', 'NO_SHOW']))
             <details class="col-cancel">
                 <summary class="col-btn">Cancelar</summary>
-                <form class="cancel-form" method="POST" action="{{ route('bookings.cancel', $booking->code) }}" onsubmit="return confirm('¿Cancelar esta reserva? La habitación queda libre de inmediato.');">
+                <form class="cancel-form" method="POST" action="{{ route('bookings.cancel', $booking->code) }}">
                     @csrf
                     <label style="display:block; font-size:12px; color:#bbb; margin-bottom:6px;">Motivo (opcional)</label>
                     <input type="text" name="reason" placeholder="Cliente no llegó, error de carga, cambio de planes...">
+                    <p style="font-size:11.5px; color:#c47a7a; margin:8px 0 0;">La habitación queda libre de inmediato al confirmar.</p>
                     <button type="submit">Confirmar cancelación</button>
                 </form>
             </details>
