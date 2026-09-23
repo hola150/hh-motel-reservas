@@ -142,7 +142,7 @@
             <label for="guests_count">Cantidad de personas</label>
             <input type="number" id="guests_count" name="guests_count" min="1" max="10" value="{{ old('guests_count', 2) }}" required>
 
-            @if ($publicUpsells->isNotEmpty())
+            @if ($publicUpsells->isNotEmpty() || $categoryUpsells->isNotEmpty())
                 <section class="extras" aria-labelledby="extras-title">
                     <h2 id="extras-title">Aprovecha esta oportunidad exclusiva</h2>
                     <p>Extras y combos con precio preferencial al reservar online. Agrégalos ahora y disfruta más tu experiencia.</p>

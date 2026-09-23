@@ -111,17 +111,29 @@ class Customer extends Model
         $avgInterval = (int) round($spanDays / ($total - 1));
 
         $rules = CustomerSegmentRule::orderByDesc('stars')->orderByDesc('minimum_stays')->get();
-        $type = 'ocasional'; $matched = null;
+        // "nuevo" y "esporadico" no entran a esta comparación por umbral: nuevo
+        // ya se resolvió arriba (total<=1) y no debería volver a matchear acá
+        // (con minimum_stays=0 matchea SIEMPRE, dejando "esporadico" inalcanzable
+        // -- cualquier cliente inactivo hace 200 días terminaba mostrando "Cliente
+        // nuevo" en vez de "Esporádico"). Esporádico se evalúa aparte, por
+        // antigüedad de la última visita, no por cantidad de visitas recientes.
+        $matched = null;
         foreach ($rules as $rule) {
-            if ($rule->segment === 'esporadico') continue;
+            if (in_array($rule->segment, ['esporadico', 'nuevo'], true)) continue;
             $window = $rule->analysis_window_days;
             $visits = $window ? $stays->filter(fn ($date) => $date->greaterThanOrEqualTo(now()->subDays($window)))->count() : $total;
-            if ($visits >= (int) $rule->minimum_stays) { $type = $rule->segment; $matched = $rule; break; }
+            if ($visits >= (int) $rule->minimum_stays) { $matched = $rule; break; }
         }
         if ($matched === null) {
             $stale = $rules->firstWhere('segment', 'esporadico');
-            if ($stale && $daysSinceLast > ($stale->stale_after_days ?? 120)) { $type = 'esporadico'; $matched = $stale; }
+            if ($stale && $daysSinceLast > ($stale->stale_after_days ?? 120)) { $matched = $stale; }
         }
+        // Si ni un umbral de visitas ni el de inactividad calzó (ej. 90-120 días
+        // sin volver), cae al criterio "ocasional" real de la base, no a un
+        // string hardcodeado -- así respeta la etiqueta/estrellas configuradas.
+        $matched ??= $rules->firstWhere('segment', 'ocasional');
+
+        $type = $matched?->segment ?? 'ocasional';
         $label = $matched?->label ?? 'Baja recurrencia';
         $window = $matched?->analysis_window_days;
         $windowVisits = $window ? $stays->filter(fn ($date) => $date->greaterThanOrEqualTo(now()->subDays($window)))->count() : $total;
