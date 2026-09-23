@@ -37,7 +37,7 @@
         table.log-table { width:100%; border-collapse:collapse; font-size:13px; }
         table.log-table th { text-align:left; color:#888; font-weight:500; font-size:11px; text-transform:uppercase; padding:0 10px 8px 0; }
         table.log-table td { padding:8px 10px 8px 0; border-top:1px solid #292929; }
-        table.log-table td.open { color:#6ee7b7; font-weight:700; }
+        table.log-table td.open { color:#1a7a4c; font-weight:700; }
         .route-trail { margin-top:8px; font-size:11.5px; color:#8fbfff; }
         .toast-wrap { position:fixed; top:16px; right:16px; z-index:50; display:flex; flex-direction:column; gap:8px; }
         .toast { background:#1c2f1c; border:1px solid #2e5a2e; color:#8fe0ad; padding:12px 16px; border-radius:9px; font-size:13.5px; box-shadow:0 6px 18px #0006; animation:hh-toast-in .2s ease; max-width:280px; }

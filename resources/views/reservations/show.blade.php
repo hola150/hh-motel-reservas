@@ -45,7 +45,7 @@
         .payment-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; margin:-4px 0 16px; }
         button.copy-btn { background:#2a2a2a; border:1px solid #444; color:#eee; padding:8px 14px; border-radius:7px; font-size:12.5px; font-weight:700; cursor:pointer; font-family:inherit; }
         button.copy-btn:hover { border-color:#ff7918; color:#ff7918; }
-        .sent-tag { display:flex; align-items:center; color:#6ee7b7; font-size:12px; font-weight:600; margin-right:auto; }
+        .sent-tag { display:flex; align-items:center; background:#0f2b22; border:1px solid #1c9169; color:#6ee7b7; font-size:12px; font-weight:600; padding:6px 12px; border-radius:20px; margin-right:auto; }
         .visually-hidden { position:absolute; left:-9999px; top:-9999px; }
         table.payments { width:100%; border-collapse: collapse; font-size: 13px; }
         table.payments th { text-align:left; color:#888; font-weight:500; font-size:11px; text-transform:uppercase; padding-bottom:6px; }
