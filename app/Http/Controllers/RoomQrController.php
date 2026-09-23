@@ -6,6 +6,7 @@ use App\Models\AuditLog;
 use App\Models\Room;
 use App\Models\Staff;
 use App\Services\Booking\RoomBoardService;
+use App\Services\Booking\RoomInspectionService;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Http\RedirectResponse;
@@ -125,6 +126,43 @@ class RoomQrController extends Controller
         ]);
 
         return redirect()->route('rooms.qr.show', $room)->with('status', '¡Gracias, '.$mucama->name.'! Recepción ya puede confirmarlo.');
+    }
+
+    /**
+     * Ronda de turno, pero desde el QR de la puerta en vez de que un
+     * anfitrión la abra por ella -- mismo checklist y mismo modelo
+     * (RoomInspection, vía RoomInspectionService) que usa recepción, solo
+     * que acá "quién" sale de la sesión por PIN, no de un campo de texto
+     * libre. Disponible en cualquier estado de la habitación, no solo
+     * 'aseo' -- es un chequeo general, no atado al ciclo de aseo en sí.
+     */
+    public function inspectionCreate(Room $room): View
+    {
+        $room->load(['category', 'furniture.category']);
+        $lastInspection = $room->inspections()->latest()->first();
+
+        return view('rooms.qr-inspection', ['room' => $room, 'lastInspection' => $lastInspection]);
+    }
+
+    public function inspectionStore(Request $request, Room $room, RoomInspectionService $service): RedirectResponse
+    {
+        $validated = $request->validate($service->validationRules());
+
+        /** @var Staff $mucama */
+        $mucama = $request->attributes->get('mucama');
+
+        $inspection = $service->submit($request, $room, $validated, $mucama->name);
+
+        AuditLog::record(null, 'habitacion.inspeccion_completa', 'Room', $room->id, null, [
+            ...$inspection->only(['id', 'needs_maintenance']),
+            'staff_id' => $mucama->id,
+        ]);
+
+        $statusMessage = $inspection->needs_maintenance
+            ? 'Gracias, '.$mucama->name.' -- quedó registrado que '.$room->name.' necesita mantención.'
+            : 'Gracias, '.$mucama->name.' -- '.$room->name.' quedó registrada en buen estado.';
+
+        return redirect()->route('rooms.qr.show', $room)->with('status', $statusMessage);
     }
 
     /**

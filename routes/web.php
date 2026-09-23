@@ -62,6 +62,8 @@ Route::get('/qr/habitacion/{room}', [\App\Http\Controllers\RoomQrController::cla
 Route::get('/qr/habitacion/{room}/imagen.png', [\App\Http\Controllers\RoomQrController::class, 'image'])->name('rooms.qr.image');
 Route::post('/qr/habitacion/{room}/aseo', [\App\Http\Controllers\RoomQrController::class, 'reportAseo'])->middleware(['throttle:20,1', 'mucama'])->name('rooms.qr.report_aseo');
 Route::post('/qr/habitacion/{room}/confirmar', [\App\Http\Controllers\RoomQrController::class, 'confirmRoomReady'])->middleware(['throttle:20,1', 'mucama'])->name('rooms.qr.confirm_ready');
+Route::get('/qr/habitacion/{room}/inspeccion', [\App\Http\Controllers\RoomQrController::class, 'inspectionCreate'])->middleware('mucama')->name('rooms.qr.inspection.create');
+Route::post('/qr/habitacion/{room}/inspeccion', [\App\Http\Controllers\RoomQrController::class, 'inspectionStore'])->middleware(['throttle:10,1', 'mucama'])->name('rooms.qr.inspection.store');
 Route::get('/qr/mucamas', [\App\Http\Controllers\RoomQrController::class, 'mucamaPanel'])->middleware('mucama')->name('rooms.qr.mucama_panel');
 Route::get('/qr/mucamas/imagen.png', [\App\Http\Controllers\RoomQrController::class, 'mucamaPanelImage'])->name('rooms.qr.mucama_panel_image');
 

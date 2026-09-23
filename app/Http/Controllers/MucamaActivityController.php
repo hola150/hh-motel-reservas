@@ -81,6 +81,7 @@ class MucamaActivityController extends Controller
             'habitacion.qr_visita' => ['icon' => '🚪', 'text' => 'entrada'],
             'habitacion.aseo_reportado' => ['icon' => '✓', 'text' => 'aseo entregado'],
             'habitacion.revision_previa' => ['icon' => '✓', 'text' => 'revisión confirmada'],
+            'habitacion.inspeccion_completa' => ['icon' => '📋', 'text' => 'inspección completa'],
         ];
 
         $logs = AuditLog::whereIn('action', array_keys($labels))
