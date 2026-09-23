@@ -111,7 +111,7 @@
             @auth
                 <div class="staff-links">
                     <a href="{{ route('rooms.board') }}">← Ver tablero interno</a>
-                    <a href="{{ route('rooms.inspections.create', $room) }}">Reportar un desperfecto →</a>
+                    <a href="{{ route('rooms.inspections.create', $room) }}?qr=1{{ request('ronda') ? '&ronda=1' : '' }}">Hacer inspección completa →</a>
                 </div>
             @endauth
         </div>

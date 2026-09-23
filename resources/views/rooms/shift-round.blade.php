@@ -48,12 +48,12 @@
 
     <h2 class="section">Pendientes ({{ $pending->count() }})</h2>
     @forelse ($pending as $room)
-        <a class="room-card" href="{{ route('rooms.inspections.create', $room) }}?ronda=1">
+        <a class="room-card" href="{{ route('rooms.qr.show', $room) }}?ronda=1">
             <div>
                 <div class="name">{{ $room->name }}</div>
                 <div class="cat">{{ $room->category->name }}</div>
             </div>
-            <div class="go">Inspeccionar →</div>
+            <div class="go">Ir a la habitación →</div>
         </a>
     @empty
         <p class="empty">@if($total > 0) ¡Ronda completa! No queda ninguna disponible sin revisar hoy. @else No hay Playrooms disponibles en este momento (todas ocupadas, en aseo o inactivas). @endif</p>

@@ -50,7 +50,13 @@
 <body>
     @include('partials.navbar')
     <div class="page-inner">
-    <a class="back-btn" href="{{ request('ronda') ? route('shift_round.index') : route('rooms.board') }}">← {{ request('ronda') ? 'Volver a la ronda' : 'Volver al tablero' }}</a>
+    @php
+        $backRoute = request('ronda')
+            ? route('shift_round.index')
+            : (request('qr') ? route('rooms.qr.show', $room) : route('rooms.board'));
+        $backLabel = request('ronda') ? 'Volver a la ronda' : (request('qr') ? 'Volver a la habitación' : 'Volver al tablero');
+    @endphp
+    <a class="back-btn" href="{{ $backRoute }}">← {{ $backLabel }}</a>
     <h1>Inspeccionar Playroom {{ $room->name }}</h1>
     <p class="sub">Categoría {{ $room->category->name }} · completa la pauta real de habitación y mobiliario antes de liberarla.</p>
 
@@ -77,6 +83,9 @@
         @csrf
         @if (request('ronda'))
             <input type="hidden" name="from_ronda" value="1">
+        @endif
+        @if (request('qr'))
+            <input type="hidden" name="from_qr" value="1">
         @endif
         <div class="top-fields">
             <div class="field"><label class="field-label">Recepcionista</label><input type="text" name="inspected_by" value="{{ old('inspected_by') }}" placeholder="Nombre de quien revisa" required></div>

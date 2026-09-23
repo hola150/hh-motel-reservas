@@ -26,6 +26,7 @@ class RoomInspectionController extends Controller
             'shift' => ['required', 'in:Mañana,Tarde,Noche,Madrugada'],
             ...$service->validationRules(),
             'from_ronda' => ['nullable', 'boolean'],
+            'from_qr' => ['nullable', 'boolean'],
         ]);
 
         $inspection = $service->submit($request, $room, $validated, $validated['inspected_by']);
@@ -38,6 +39,13 @@ class RoomInspectionController extends Controller
 
         if ($request->boolean('from_ronda')) {
             return redirect()->route('shift_round.index')->with('status', $statusMessage);
+        }
+
+        // Si vino del QR de la puerta (anfitrión escaneando esa habitación en
+        // particular, no navegando desde el tablero), vuelve ahí mismo en vez
+        // de mandarlo al tablero -- sigue en el mismo lugar físico.
+        if ($request->boolean('from_qr')) {
+            return redirect()->route('rooms.qr.show', $room)->with('status', $statusMessage);
         }
 
         return redirect()->route('rooms.board')->with('status', $statusMessage);
