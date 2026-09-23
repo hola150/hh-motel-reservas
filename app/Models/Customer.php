@@ -99,9 +99,15 @@ class Customer extends Model
         $total = $stays->count();
 
         if ($total <= 1) {
+            // Mismo shape que el return de abajo -- a esta vista le faltaban
+            // 'stars'/'window_days'/'window_visits' acá, y la tabla de
+            // clientes tira "Undefined array key stars" apenas hay un
+            // cliente nuevo real (0 o 1 estadía, el caso más común).
+            $nuevo = CustomerSegmentRule::where('segment', 'nuevo')->first();
             return [
-                'type' => 'nuevo', 'label' => 'Cliente nuevo', 'total_stays' => $total,
+                'type' => 'nuevo', 'label' => $nuevo->label ?? 'Cliente nuevo', 'total_stays' => $total,
                 'last_visit_at' => $stays->last(), 'days_since_last' => null, 'avg_interval_days' => null,
+                'window_days' => null, 'window_visits' => $total, 'stars' => (int) ($nuevo->stars ?? 0),
             ];
         }
 
