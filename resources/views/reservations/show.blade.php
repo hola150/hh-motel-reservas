@@ -163,6 +163,20 @@
         </div>
     @endif
 
+    @if ($booking->booking_status === 'FINALIZADA')
+        @php
+            $reviewUrl = url(route('reviews.create', $booking->code));
+            $reviewMessage = "Hola {$booking->customer->name}, gracias por alojarte en HH Motel.\n\n"
+                ."¿Nos regalas 30 segundos para contarnos cómo fue tu experiencia?\n\n"
+                .$reviewUrl;
+        @endphp
+        <textarea id="review-message-text" class="visually-hidden" readonly>{{ $reviewMessage }}</textarea>
+        <div class="payment-actions">
+            <button type="button" class="copy-btn" onclick="hhCopyText('review-message-text', this)">Copiar texto</button>
+            <a class="whatsapp-btn" href="{{ $whatsappContactUrl }}" target="_blank" rel="noopener">Pedir reseña por WhatsApp</a>
+        </div>
+    @endif
+
     @if (session('status'))
         <div class="banner ok">{{ session('status') }}</div>
     @endif

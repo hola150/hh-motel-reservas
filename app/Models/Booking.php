@@ -93,6 +93,11 @@ class Booking extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(GuestReview::class);
+    }
+
     public function couponRedemption(): HasMany
     {
         return $this->hasMany(CouponRedemption::class);

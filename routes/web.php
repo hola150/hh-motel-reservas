@@ -51,6 +51,14 @@ Route::get('/catalogo/reservado/{code}', [PublicBookingController::class, 'booke
 Route::get('/reservas/{code}/pase', [BookingPassController::class, 'preview'])->name('bookings.pass.preview');
 Route::get('/reservas/{code}/pase.pdf', [BookingPassController::class, 'download'])->name('bookings.pass.pdf');
 
+// Opinión del huésped -- 4-5 estrellas va directo a Google, 0-3 se queda
+// adentro (ver GuestReviewController). {code} es opcional: el QR fijo de
+// recepción no viene de una reserva puntual, el link post-check-out sí.
+Route::get('/opinion/{code?}', [\App\Http\Controllers\GuestReviewController::class, 'create'])->name('reviews.create');
+Route::post('/opinion/{code?}', [\App\Http\Controllers\GuestReviewController::class, 'store'])->middleware('throttle:10,1')->name('reviews.store');
+Route::get('/opinion/{review}/comentario', [\App\Http\Controllers\GuestReviewController::class, 'editComment'])->name('reviews.comment.edit');
+Route::post('/opinion/{review}/comentario', [\App\Http\Controllers\GuestReviewController::class, 'updateComment'])->middleware('throttle:10,1')->name('reviews.comment.update');
+
 // QR pegado en la puerta de cada habitación + panel general de mucamas --
 // login liviano por PIN (ver MucamaAuthController), no el guard de auth()
 // del panel interno (Staff no es un usuario del sistema).
@@ -208,6 +216,9 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
     Route::get('/analytics/exportar', [AnalyticsController::class, 'export'])->name('analytics.export');
+
+    Route::get('/opiniones', [\App\Http\Controllers\Admin\GuestReviewController::class, 'index'])->name('reviews.index');
+    Route::get('/opiniones/qr.png', [\App\Http\Controllers\Admin\GuestReviewController::class, 'qrImage'])->name('reviews.qr_image');
 
     Route::middleware('role:administrador')->group(function () {
     Route::get('/personal', [StaffController::class, 'index'])->name('staff.index');

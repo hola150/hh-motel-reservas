@@ -58,4 +58,8 @@ return [
         'mercadopago_link' => env('HH_MERCADOPAGO_LINK'),
     ],
 
+    'hh_reviews' => [
+        'google_review_link' => env('HH_GOOGLE_REVIEW_LINK'),
+    ],
+
 ];
