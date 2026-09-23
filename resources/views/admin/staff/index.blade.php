@@ -5,7 +5,7 @@
 
     <div class="card">
         <h2>Cuentas de acceso al sistema</h2>
-        <p class="sub">Quién puede entrar a este panel (tablero, reservas, caja) con su propio email y contraseña. <b>Administrador</b> ve todo, <b>recepción</b> no entra a Administración (categorías, tarifas, ofertas, personal, etc). Las mucamas no necesitan cuenta acá -- van abajo, en el listado de Personal para turnos.</p>
+        <p class="sub">Quién puede entrar a este panel (tablero, reservas, caja) con su propio email y contraseña. <b>Administrador</b> ve todo, <b>anfitrión</b> no entra a Administración (categorías, tarifas, ofertas, personal, etc). Las mucamas no necesitan cuenta acá -- van abajo, en el listado de Personal para turnos.</p>
         @if (session('status') && str_contains(session('status'), 'contraseña'))
             <div class="pill" style="display:block; padding:10px 14px; margin-bottom:14px; background:#0f2b22; border:1px solid #1c9169; color:#6ee7b7;">{{ session('status') }}</div>
         @endif
@@ -23,7 +23,7 @@
                 <div>
                     <label>Rol</label>
                     <select name="role" required>
-                        <option value="recepcion">Recepción</option>
+                        <option value="recepcion">Anfitrión</option>
                         <option value="administrador">Administrador</option>
                         <option value="marketing">Marketing</option>
                     </select>
@@ -41,7 +41,7 @@
                     <tr>
                         <td>{{ $account->name }}</td>
                         <td>{{ $account->email }}</td>
-                        <td>{{ ucfirst($account->role) }}</td>
+                        <td>{{ $account->role === 'recepcion' ? 'Anfitrión' : ucfirst($account->role) }}</td>
                         <td><span class="pill">{{ $account->is_active ? 'ACTIVA' : 'DESACTIVADA' }}</span></td>
                         <td>
                             <details>
@@ -51,7 +51,7 @@
                                     <input name="name" value="{{ $account->name }}" maxlength="100" required>
                                     <input type="email" name="email" value="{{ $account->email }}" maxlength="255" required>
                                     <select name="role">
-                                        <option value="recepcion" @selected($account->role === 'recepcion')>Recepción</option>
+                                        <option value="recepcion" @selected($account->role === 'recepcion')>Anfitrión</option>
                                         <option value="administrador" @selected($account->role === 'administrador')>Administrador</option>
                                         <option value="marketing" @selected($account->role === 'marketing')>Marketing</option>
                                     </select>
