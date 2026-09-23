@@ -14,8 +14,14 @@
             <div class="sub" style="margin-bottom:2px;">Calificaciones bajas (0-3)</div>
             <div style="font-size:22px; font-weight:800; {{ $lowCount > 0 ? 'color:#e88a9a;' : '' }}">{{ $lowCount }}</div>
         </div>
-        <div style="margin-left:auto; align-self:center;">
-            <a class="link" href="{{ route('admin.reviews.qr_image') }}" target="_blank" rel="noopener">Descargar QR de opinión →</a>
+    </div>
+
+    <div class="card" style="display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
+        <img src="{{ route('admin.reviews.qr_image') }}" alt="QR de opinión del huésped" style="width:150px; height:150px; border-radius:8px; flex:none;">
+        <div>
+            <strong style="display:block; font-size:15px; margin-bottom:4px;">QR para pedir la opinión del huésped</strong>
+            <p class="sub" style="margin-bottom:10px;">Para pegar en recepción o entregar al huésped -- 4-5 estrellas van directo a Google, 0-3 quedan acá con el detalle.</p>
+            <a class="link" href="{{ route('admin.reviews.qr_image') }}" target="_blank" rel="noopener">Descargar →</a>
             &nbsp;·&nbsp;
             <a class="link" href="{{ route('reviews.create') }}" target="_blank" rel="noopener">Ver página →</a>
         </div>

@@ -23,15 +23,6 @@
             &nbsp;·&nbsp;
             <a class="link" href="{{ route('shift_round.index') }}" target="_blank" rel="noopener">Ver ronda →</a>
         </div>
-
-        <div class="qr-sheet-item qr-sheet-featured">
-            <img src="{{ route('admin.reviews.qr_image') }}" alt="QR de opinión del huésped">
-            <strong>Danos tu opinión</strong>
-            <span>Para pegar en recepción o entregar al huésped -- 4-5 estrellas van directo a Google, 0-3 quedan acá con el detalle.</span>
-            <a class="link" href="{{ route('admin.reviews.qr_image') }}" target="_blank" rel="noopener">Descargar →</a>
-            &nbsp;·&nbsp;
-            <a class="link" href="{{ route('reviews.create') }}" target="_blank" rel="noopener">Ver página →</a>
-        </div>
     </div>
 
     <div class="qr-sheet-grid">
