@@ -23,12 +23,15 @@ class Staff extends Model
     /**
      * "Mucama activa" se repetía como Staff::where('role','Mucama')->where
      * ('is_active', true) en medio docena de sitios (login, middleware,
-     * paneles) -- centralizado acá para que una regla futura (ej. que el rol
-     * no distinga mayúsculas) se cambie en un solo lugar.
+     * paneles) -- centralizado acá. El rol se carga como texto libre en
+     * /admin/personal (sin un selector fijo), así que compara sin distinguir
+     * mayúsculas/tildes de más -- "mucama", "Mucama", "MUCAMA " todos deben
+     * calzar, si no la persona queda cargada pero invisible para el login
+     * por PIN sin ningún aviso de por qué.
      */
     public function scopeActiveMucamas(Builder $query): Builder
     {
-        return $query->where('role', 'Mucama')->where('is_active', true);
+        return $query->whereRaw('lower(trim(role)) = ?', ['mucama'])->where('is_active', true);
     }
 
     public function shifts(): HasMany
