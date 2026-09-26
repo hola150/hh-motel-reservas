@@ -39,9 +39,8 @@
         .note { color:#62656c; margin:20px 0 0; font-size:16px; }
         footer { display:flex; justify-content:space-between; border-top:1px solid #d9dadd; margin-top:32px; color:#62656c; font-size:14px; padding-top:16px; }
         footer span { display:block; margin-bottom:5px; }
-        .brand-motto { margin:32px 0 28px; color:var(--hh-ink); text-align:left; }
-        .brand-motto span { display:block; color:#62656c; font-size:16px; line-height:1.45; font-weight:600; margin-bottom:14px; }
-        .brand-motto strong { display:block; font-size:34px; line-height:1.1; letter-spacing:-.045em; font-weight:750; }
+        .brand-motto { margin:32px 0 28px; color:#62656c; text-align:left; font-size:22px; line-height:1.4; letter-spacing:-.02em; font-weight:400; }
+        .brand-motto strong { color:var(--hh-ink); font-weight:750; }
         .banner,.error { padding:12px 15px; border-radius:12px; margin:0 0 22px; font-size:16px; }
         .banner { background:#243c2d; color:#c0e8c9; }
         .error { background:#4e2626; color:#ffd0ca; }
@@ -63,7 +62,7 @@
         <main class="review-content">
             @yield('content')
         </main>
-        <p class="brand-motto"><span>Aquí lo privado</span><strong>se convierte<br>en libertad.</strong></p>
+        <p class="brand-motto">Aquí lo privado<br>se convierte en <strong>libertad.</strong></p>
         <footer><span>HH MOTEL</span><span>Santiago, Chile</span></footer>
     </div>
     @yield('scripts')
