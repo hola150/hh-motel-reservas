@@ -8,7 +8,7 @@
     <div class="card">
         <strong style="display:block; font-size:15px; margin-bottom:12px;">Puntuación real en Google</strong>
         <script type="text/javascript" src="https://link.hhmotel.cl/reputation/assets/review-widget.js"></script>
-        <iframe class="lc_reviews_widget" src="https://link.hhmotel.cl/reputation/widgets/review_widget/ksYYfSiY8nP4YFvkrJFJ" frameborder="0" scrolling="no" style="min-width:100%; width:100%; height:300px; border:none;"></iframe>
+        <iframe class="lc_reviews_widget" src="https://link.hhmotel.cl/reputation/widgets/review_widget/ksYYfSiY8nP4YFvkrJFJ" frameborder="0" scrolling="auto" style="min-width:100%; width:100%; height:560px; border:none;"></iframe>
     </div>
 
     <div class="card" style="display:flex; gap:26px; flex-wrap:wrap;">
