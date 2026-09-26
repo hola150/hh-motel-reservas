@@ -30,16 +30,25 @@ class GhlReviewWebhookController extends Controller
 
         $externalId = $this->pick($payload, ['reviewId', 'id', 'review_id']);
 
+        // La acción "AI Reply" de GHL corre DESPUÉS del trigger en el mismo
+        // Workflow -- si el webhook está configurado para disparar de nuevo
+        // ahí, llega un segundo POST para la misma reseña, esta vez con la
+        // respuesta. Solo se actualizan los campos que sí vinieron en ESTE
+        // POST (array_filter saca los null) para no borrar con vacío lo que
+        // ya se había guardado en el primer POST.
+        $fields = array_filter([
+            'source' => $this->pick($payload, ['source', 'platform', 'reviewSource', 'review_source']),
+            'rating' => $this->normalizeRating($this->pick($payload, ['rating', 'reviewRating', 'starRating', 'review_rating'])),
+            'comment' => $this->pick($payload, ['comment', 'reviewBody', 'review_body', 'text', 'review']),
+            'reply' => $this->pick($payload, ['reply', 'aiReply', 'ai_reply', 'replyText', 'reply_text', 'response']),
+            'reviewer_name' => $this->pick($payload, ['reviewerName', 'reviewer_name', 'authorName', 'author_name', 'name']),
+            'reviewed_at' => $this->pick($payload, ['createTime', 'createdAt', 'created_at', 'reviewDate', 'review_date', 'date']),
+        ], fn ($value) => $value !== null);
+        $fields['raw_payload'] = $payload;
+
         ExternalReview::updateOrCreate(
             ['external_id' => $externalId ?? 'sin-id-'.md5(json_encode($payload))],
-            [
-                'source' => $this->pick($payload, ['source', 'platform', 'reviewSource', 'review_source']),
-                'rating' => $this->normalizeRating($this->pick($payload, ['rating', 'reviewRating', 'starRating', 'review_rating'])),
-                'comment' => $this->pick($payload, ['comment', 'reviewBody', 'review_body', 'text', 'review']),
-                'reviewer_name' => $this->pick($payload, ['reviewerName', 'reviewer_name', 'authorName', 'author_name', 'name']),
-                'reviewed_at' => $this->pick($payload, ['createTime', 'createdAt', 'created_at', 'reviewDate', 'review_date', 'date']),
-                'raw_payload' => $payload,
-            ]
+            $fields
         );
 
         return response()->json(['ok' => true]);
