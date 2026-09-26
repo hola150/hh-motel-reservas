@@ -5,9 +5,15 @@
         <div><h1>Opiniones de huéspedes</h1><p class="sub">4-5 estrellas van directo a Google; 0-3 se quedan acá con el comentario.</p></div>
     </div>
 
+    <div class="card">
+        <strong style="display:block; font-size:15px; margin-bottom:12px;">Puntuación real en Google</strong>
+        <script type="text/javascript" src="https://link.hhmotel.cl/reputation/assets/review-widget.js"></script>
+        <iframe class="lc_reviews_widget" src="https://link.hhmotel.cl/reputation/widgets/review_widget/ksYYfSiY8nP4YFvkrJFJ" frameborder="0" scrolling="no" style="min-width:100%; width:100%; min-height:420px; border:none;"></iframe>
+    </div>
+
     <div class="card" style="display:flex; gap:26px; flex-wrap:wrap;">
         <div>
-            <div class="sub" style="margin-bottom:2px;">Promedio</div>
+            <div class="sub" style="margin-bottom:2px;">Promedio interno (nuestro filtro 1-5)</div>
             <div style="font-size:22px; font-weight:800;">{{ $avgRating ?: '—' }} ★</div>
         </div>
         <div>
