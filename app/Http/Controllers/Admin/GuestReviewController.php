@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ExternalReview;
 use App\Models\GuestReview;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\PngWriter;
@@ -22,6 +23,10 @@ class GuestReviewController extends Controller
             'reviews' => $reviews,
             'lowCount' => GuestReview::where('rating', '<=', 3)->count(),
             'avgRating' => round((float) GuestReview::avg('rating'), 1),
+            // Reseñas públicas reales (Google/Facebook), sincronizadas desde
+            // GHL en tiempo real vía su Workflow "Reviews Received" -- ver
+            // GhlReviewWebhookController.
+            'externalReviews' => ExternalReview::latest('reviewed_at')->limit(50)->get(),
         ]);
     }
 

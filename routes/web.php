@@ -51,6 +51,12 @@ Route::get('/catalogo/reservado/{code}', [PublicBookingController::class, 'booke
 Route::get('/reservas/{code}/pase', [BookingPassController::class, 'preview'])->name('bookings.pass.preview');
 Route::get('/reservas/{code}/pase.pdf', [BookingPassController::class, 'download'])->name('bookings.pass.pdf');
 
+// Webhook saliente del Workflow "Reviews Received" de GHL -- se protege con
+// un token propio en la URL (no hay sesión/CSRF acá, es un POST externo).
+Route::post('/webhooks/ghl/reviews/{token}', [\App\Http\Controllers\GhlReviewWebhookController::class, 'store'])
+    ->middleware('throttle:60,1')
+    ->name('webhooks.ghl.reviews');
+
 // Opinión del huésped -- 4-5 estrellas va directo a Google, 0-3 se queda
 // adentro (ver GuestReviewController). {code} es opcional: el QR fijo de
 // recepción no viene de una reserva puntual, el link post-check-out sí.
