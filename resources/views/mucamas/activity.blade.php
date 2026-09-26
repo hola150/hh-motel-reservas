@@ -96,11 +96,11 @@
         <p class="empty">Todavía no hay entradas registradas hoy.</p>
     @else
         <table class="log-table">
-            <thead><tr><th>Mucama</th><th>Entrada</th><th>Salida</th><th>Duración</th></tr></thead>
+            <thead><tr><th>Quién</th><th>Entrada</th><th>Salida</th><th>Duración</th></tr></thead>
             <tbody>
                 @foreach ($todayLogs as $log)
                     <tr>
-                        <td>{{ $log->staff->name }}</td>
+                        <td>{{ $log->staff->name ?? $log->user->name }}{{ $log->user ? ' (anfitrión)' : '' }}</td>
                         <td>{{ $log->started_at->timezone('America/Santiago')->format('H:i') }}</td>
                         <td class="{{ $log->ended_at ? '' : 'open' }}">{{ $log->ended_at ? $log->ended_at->timezone('America/Santiago')->format('H:i') : 'En turno' }}</td>
                         <td>{{ intdiv($log->durationMinutes(), 60) }}h {{ str_pad($log->durationMinutes() % 60, 2, '0', STR_PAD_LEFT) }}min</td>

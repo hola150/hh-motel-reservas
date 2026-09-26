@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -39,5 +40,15 @@ class User extends Authenticatable
     public function isRecepcion(): bool
     {
         return $this->role === 'recepcion';
+    }
+
+    public function shiftLogs(): HasMany
+    {
+        return $this->hasMany(StaffShiftLog::class);
+    }
+
+    public function openShiftLog(): ?StaffShiftLog
+    {
+        return $this->shiftLogs()->whereNull('ended_at')->latest('started_at')->first();
     }
 }

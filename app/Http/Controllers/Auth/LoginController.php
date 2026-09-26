@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\StaffShiftLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,11 +35,21 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
+        // Mismo registro real de entrada/salida que ya tienen las mucamas
+        // (StaffShiftLog) -- un login = un turno, no uno por cada vez que
+        // vuelve a entrar sin haber cerrado sesión antes.
+        $user = Auth::user();
+        if (! $user->openShiftLog()) {
+            StaffShiftLog::create(['user_id' => $user->id, 'started_at' => now()]);
+        }
+
         return redirect()->intended(route('rooms.board'));
     }
 
     public function destroy(Request $request): RedirectResponse
     {
+        Auth::user()?->openShiftLog()?->update(['ended_at' => now()]);
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['staff_id', 'started_at', 'ended_at'])]
+#[Fillable(['staff_id', 'user_id', 'started_at', 'ended_at'])]
 class StaffShiftLog extends Model
 {
     protected function casts(): array
@@ -20,6 +20,20 @@ class StaffShiftLog extends Model
     public function staff(): BelongsTo
     {
         return $this->belongsTo(Staff::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Mucama (staff_id) o cuenta de acceso (user_id) -- una fila siempre
+     * usa una sola de las dos, nunca ambas.
+     */
+    public function who(): Staff|User|null
+    {
+        return $this->staff ?? $this->user;
     }
 
     public function durationMinutes(): int

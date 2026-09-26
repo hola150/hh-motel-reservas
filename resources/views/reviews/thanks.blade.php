@@ -15,8 +15,9 @@
         }
         * { box-sizing: border-box; }
         body { background:var(--hh-canvas); color:var(--hh-ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; line-height: 1.45; }
-        .wrap { max-width: 440px; margin: 0 auto; padding: 40px 18px 60px; }
-        .brand { font-size: 13px; font-weight: 800; letter-spacing: .1em; color: var(--hh-accent); text-align:center; margin-bottom: 20px; }
+        .wrap { max-width: 440px; margin: 0 auto; padding: 0 18px 60px; }
+        header.hero { text-align:center; padding: 26px 12px 22px; background:#111; border-radius:0 0 20px 20px; margin-bottom: 26px; box-shadow:0 5px 18px #0002; }
+        header.hero img { display:block; width:min(170px, 54vw); max-width:100%; height:auto; margin:0 auto; }
         .card { background:var(--hh-surface); color:#f5f5f5; border-radius:16px; padding:36px 24px; box-shadow: 0 3px 14px #10111214; text-align:center; }
         .check { font-size:40px; margin-bottom:10px; }
         h1 { font-size: 19px; margin: 0 0 8px; }
@@ -24,8 +25,10 @@
     </style>
 </head>
 <body>
+    <header class="hero">
+        <img src="https://assets.cdn.filesafe.space/ksYYfSiY8nP4YFvkrJFJ/media/6aab44cf9f8b31b6ab530587.png" alt="HH Motel">
+    </header>
     <div class="wrap">
-        <div class="brand">HH MOTEL</div>
         <div class="card">
             <div class="check">🙏</div>
             <h1>Gracias por contarnos</h1>

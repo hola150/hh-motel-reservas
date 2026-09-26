@@ -37,7 +37,7 @@ class MucamaActivityController extends Controller
         // aunque haya empezado ayer -- si no, una mucama que entró antes de
         // medianoche y sigue trabajando desaparece de esta tabla mientras
         // el turno no se cierre.
-        $todayLogs = StaffShiftLog::with('staff')
+        $todayLogs = StaffShiftLog::with(['staff', 'user'])
             ->where(fn ($q) => $q->where('started_at', '>=', $today)->orWhereNull('ended_at'))
             ->orderByDesc('started_at')
             ->get();
