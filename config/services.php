@@ -46,10 +46,6 @@ return [
         'private_token' => env('GHL_PRIVATE_TOKEN'),
         'location_id' => env('GHL_LOCATION_ID'),
         'custom_field_pago_id' => env('GHL_CUSTOM_FIELD_PAGO_ID'),
-        // Token propio (no de GHL) para validar el webhook saliente del
-        // Workflow "Reviews Received" -- va como parte de la URL que se
-        // configura del lado de GHL.
-        'review_webhook_token' => env('GHL_REVIEW_WEBHOOK_TOKEN'),
     ],
 
     'hh_payment' => [

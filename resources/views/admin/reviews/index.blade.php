@@ -59,35 +59,4 @@
         </table>
         </div>
     </div>
-
-    <div class="actions" style="justify-content:space-between; margin:32px 0 18px;">
-        <div><h1 style="font-size:16px;">Reseñas públicas (Google / Facebook)</h1><p class="sub">Sincronizadas en tiempo real desde GHL apenas alguien publica una reseña real.</p></div>
-    </div>
-    <div class="card">
-        <div style="max-height:260px; overflow-y:auto;">
-        <table>
-            <thead><tr><th style="position:sticky; top:0; background:#1c1c1c;">Calificación</th><th style="position:sticky; top:0; background:#1c1c1c;">Fuente</th><th style="position:sticky; top:0; background:#1c1c1c;">Autor</th><th style="position:sticky; top:0; background:#1c1c1c;">Comentario</th><th style="position:sticky; top:0; background:#1c1c1c;">Fecha</th></tr></thead>
-            <tbody>
-                @forelse ($externalReviews as $review)
-                    <tr>
-                        <td style="{{ $review->rating && $review->rating <= 3 ? 'color:#e88a9a;' : 'color:#6fd39a;' }} font-weight:700; white-space:nowrap;">
-                            {{ $review->rating ? str_repeat('★', $review->rating).str_repeat('☆', 5 - $review->rating) : '—' }}
-                        </td>
-                        <td class="sub" style="text-transform:capitalize;">{{ $review->source ?? '—' }}</td>
-                        <td>{{ $review->reviewer_name ?? '—' }}</td>
-                        <td style="max-width:320px;">
-                            {{ $review->comment ?? '—' }}
-                            @if ($review->reply)
-                                <div class="sub" style="margin-top:6px; padding-top:6px; border-top:1px solid #333;">↳ <strong style="color:#bbb;">Nuestra respuesta:</strong> {{ $review->reply }}</div>
-                            @endif
-                        </td>
-                        <td class="sub">{{ ($review->reviewed_at ?? $review->created_at)->timezone('America/Santiago')->format('d/m/Y H:i') }}</td>
-                    </tr>
-                @empty
-                    <tr><td colspan="5" style="color:#666;">Todavía no llegó ninguna reseña por GHL -- falta configurar el Workflow "Reviews Received" allá (ver instrucciones).</td></tr>
-                @endforelse
-            </tbody>
-        </table>
-        </div>
-    </div>
 @endsection

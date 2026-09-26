@@ -19,10 +19,6 @@ return Application::configure(basePath: dirname(__DIR__))
         // esos recursos como "Mixed Content".
         $middleware->trustProxies(at: '*');
 
-        // Webhooks externos (ej. GHL) llegan sin token CSRF de sesión --
-        // ese endpoint ya se protege solo con un secreto propio en la URL.
-        $middleware->validateCsrfTokens(except: ['webhooks/*']);
-
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureUserHasRole::class,
             'mucama' => \App\Http\Middleware\EnsureMucamaSession::class,
