@@ -9,8 +9,8 @@
         :root { color-scheme: dark; }
         * { box-sizing: border-box; }
         body { background:#111; color:#eee; font-family: -apple-system, "Segoe UI", sans-serif; margin: 0; }
-        .page-inner { max-width: 1700px; width:100%; margin: 0; padding: 24px 24px 60px; position:relative; }
-        .scan-bridge { position:absolute; top:24px; right:24px; display:flex; align-items:center; gap:10px; background:#1c1c1c; border:1px solid #333; border-radius:10px; padding:8px 12px 8px 8px; z-index:5; }
+        .page-inner { max-width: 1700px; width:100%; margin: 0; padding: 24px 24px 60px; }
+        .scan-bridge { display:flex; align-items:center; gap:10px; background:#1c1c1c; border:1px solid #333; border-radius:10px; padding:8px 12px 8px 8px; width:fit-content; margin:0 0 26px auto; }
         .scan-bridge img { width:64px; height:64px; border-radius:6px; display:block; }
         .scan-bridge span { font-size:11px; color:#999; line-height:1.35; font-weight:600; }
         @media print, (max-width: 720px) { .scan-bridge { display:none; } }
