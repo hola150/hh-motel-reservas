@@ -9,7 +9,11 @@
         :root { color-scheme: dark; }
         * { box-sizing: border-box; }
         body { background:#111; color:#eee; font-family: -apple-system, "Segoe UI", sans-serif; margin: 0; }
-        .page-inner { max-width: 1700px; width:100%; margin: 0; padding: 24px 24px 60px; }
+        .page-inner { max-width: 1700px; width:100%; margin: 0; padding: 24px 24px 60px; position:relative; }
+        .scan-bridge { position:absolute; top:24px; right:24px; display:flex; align-items:center; gap:10px; background:#1c1c1c; border:1px solid #333; border-radius:10px; padding:8px 12px 8px 8px; z-index:5; }
+        .scan-bridge img { width:64px; height:64px; border-radius:6px; display:block; }
+        .scan-bridge span { font-size:11px; color:#999; line-height:1.35; font-weight:600; }
+        @media print, (max-width: 720px) { .scan-bridge { display:none; } }
         .flash-status { background:#0f2b22; border:1px solid #1c9169; color:#6ee7b7; padding:12px 16px; border-radius:9px; font-size:14px; font-weight:600; margin-bottom:20px; }
         .topline { margin-bottom: 26px; display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; }
         .topline-toolbar { display:flex; gap:8px; flex-wrap:wrap; min-width:0; }
@@ -298,6 +302,14 @@
             <button type="button" class="compact-toggle" id="catalog-link-btn" data-room-link="{{ route('catalog.index') }}" onclick="hhCopyRoomLink(this)">Copiar link del catálogo</button>
             <button type="button" class="compact-toggle" id="compact-toggle-btn" onclick="hhToggleCompact()">⊟ Vista compacta</button>
         </div>
+    </div>
+
+    {{-- Puente PC → celular: la cámara para escanear el pase de un huésped
+         está en el celular, no en este monitor -- recepción escanea este QR
+         con su celular y ahí se le abre directo /reservas/escanear. --}}
+    <div class="scan-bridge">
+        <img src="{{ route('reservations.scan_qr_image') }}" alt="QR para escanear reservas desde el celular">
+        <span>📷 Escaneá esto<br>con tu celular</span>
     </div>
 
     {{-- Los interruptores de Ala Sur / categoría / piso se movieron al panel

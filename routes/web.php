@@ -86,6 +86,8 @@ Route::get('/reservar/precio', [ReservationController::class, 'priceQuote'])->mi
 Route::get('/buscar', [ReservationSearchController::class, 'index'])->name('reservations.search');
 Route::get('/calendario', [CalendarController::class, 'index'])->name('calendar.index');
 Route::post('/reservar', [ReservationController::class, 'store'])->name('reservations.store');
+Route::get('/reservas/escanear', [ReservationController::class, 'scan'])->name('reservations.scan');
+Route::get('/reservas/escanear/qr.png', [ReservationController::class, 'scanQrImage'])->name('reservations.scan_qr_image');
 Route::get('/reservas/{code}', [ReservationController::class, 'show'])->name('reservations.show');
 Route::get('/reservas/{code}/editar', [ReservationController::class, 'edit'])->name('reservations.edit');
 Route::put('/reservas/{code}', [ReservationController::class, 'update'])->name('reservations.update');

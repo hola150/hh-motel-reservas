@@ -506,4 +506,36 @@ class ReservationController extends Controller
         $extraHourPrice = (int) (\App\Models\RateRule::where('name', $booking->rate_rule_name_snapshot)->value('extra_hour_price') ?? 0);
         return view('reservations.show', ['booking' => $booking, 'products' => $products, 'combos' => $combos, 'extraHourPrice' => $extraHourPrice]);
     }
+
+    /**
+     * Cámara para escanear el QR del pase de reserva (ver pass-pdf.blade.php)
+     * -- identifica al huésped en recepción sin tener que buscarlo a mano.
+     * Misma mecánica que ShiftRoundController::scan(): decodifica en el
+     * navegador con jsQR y navega directo, validando que la URL decodificada
+     * sea del propio dominio y con el patrón /reservas/{code} antes de
+     * seguirla.
+     */
+    public function scan(): View
+    {
+        return view('reservations.scan');
+    }
+
+    /**
+     * QR "puente" para el tablero (pantalla de PC): la cámara está en el
+     * celular, no en el PC, así que esto se muestra en pantalla para que
+     * recepción lo escanee con su celular y ahí se le abra directo la
+     * cámara de /reservas/escanear -- no requiere tipear nada.
+     */
+    public function scanQrImage(): \Illuminate\Http\Response
+    {
+        $result = (new \Endroid\QrCode\Builder\Builder(
+            writer: new \Endroid\QrCode\Writer\PngWriter(),
+            data: route('reservations.scan'),
+            size: 240,
+            margin: 8,
+            labelText: 'Escanear con el celular',
+        ))->build();
+
+        return response($result->getString(), 200, ['Content-Type' => $result->getMimeType()]);
+    }
 }
