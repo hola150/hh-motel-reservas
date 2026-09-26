@@ -531,9 +531,8 @@ class ReservationController extends Controller
         $result = (new \Endroid\QrCode\Builder\Builder(
             writer: new \Endroid\QrCode\Writer\PngWriter(),
             data: route('reservations.scan'),
-            size: 240,
+            size: 400,
             margin: 8,
-            labelText: 'Escanear con el celular',
         ))->build();
 
         return response($result->getString(), 200, ['Content-Type' => $result->getMimeType()]);
