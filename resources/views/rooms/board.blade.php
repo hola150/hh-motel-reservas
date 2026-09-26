@@ -10,8 +10,9 @@
         * { box-sizing: border-box; }
         body { background:#111; color:#eee; font-family: -apple-system, "Segoe UI", sans-serif; margin: 0; }
         .page-inner { max-width: 1700px; width:100%; margin: 0; padding: 24px 24px 60px; }
-        .scan-bridge { flex:none; display:flex; align-self:flex-start; background:#1c1c1c; border:1px solid #333; border-radius:10px; padding:8px; }
-        .scan-bridge img { width:200px; height:200px; border-radius:6px; display:block; }
+        .scan-bridge { flex:none; display:flex; flex-direction:column; align-items:center; gap:6px; align-self:flex-start; background:#1c1c1c; border:1px solid #333; border-radius:10px; padding:10px 14px; }
+        .scan-bridge .label { font-size:10.5px; font-weight:700; color:#bbb; text-transform:uppercase; letter-spacing:.04em; text-align:center; white-space:nowrap; }
+        .scan-bridge img { width:150px; height:150px; border-radius:6px; display:block; }
         @media print, (max-width: 720px) { .scan-bridge { display:none; } }
         .flash-status { background:#0f2b22; border:1px solid #1c9169; color:#6ee7b7; padding:12px 16px; border-radius:9px; font-size:14px; font-weight:600; margin-bottom:20px; }
         .topline { margin-bottom: 26px; display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; }
@@ -335,6 +336,7 @@
          está en el celular, no en este monitor -- recepción escanea este QR
          con su celular y ahí se le abre directo /reservas/escanear. --}}
     <div class="scan-bridge">
+        <span class="label">Validador de tickets</span>
         <img src="{{ route('reservations.scan_qr_image') }}" alt="Escaneá con el celular para abrir la cámara de reservas">
     </div>
     </div>
