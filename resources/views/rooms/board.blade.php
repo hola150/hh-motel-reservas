@@ -10,7 +10,7 @@
         * { box-sizing: border-box; }
         body { background:#111; color:#eee; font-family: -apple-system, "Segoe UI", sans-serif; margin: 0; }
         .page-inner { max-width: 1700px; width:100%; margin: 0; padding: 24px 24px 60px; }
-        .scan-bridge { display:flex; align-items:center; gap:10px; background:#1c1c1c; border:1px solid #333; border-radius:10px; padding:8px 12px 8px 8px; width:fit-content; margin:0 0 26px auto; }
+        .scan-bridge { flex:none; display:flex; align-items:center; gap:10px; background:#1c1c1c; border:1px solid #333; border-radius:10px; padding:8px 12px; }
         .scan-bridge img { width:64px; height:64px; border-radius:6px; display:block; }
         .scan-bridge span { font-size:11px; color:#999; line-height:1.35; font-weight:600; }
         @media print, (max-width: 720px) { .scan-bridge { display:none; } }
@@ -31,7 +31,8 @@
              no conoce estas clases nuevas, así que hay que definirlas ya en
              el tono claro de una vez, no en el oscuro que "parece" el resto
              de este <style>. --}}
-        .pending-panel { background:#fff; border:1px solid #f0d9b8; border-left:4px solid #e8a23f; border-radius:11px; padding:16px 18px; margin-bottom: 26px; box-shadow: 0 3px 10px #1011120b; }
+        .pending-row-wrap { display:flex; align-items:stretch; gap:16px; margin-bottom: 26px; }
+        .pending-panel { flex:1; min-width:0; background:#fff; border:1px solid #f0d9b8; border-left:4px solid #e8a23f; border-radius:11px; padding:16px 18px; box-shadow: 0 3px 10px #1011120b; }
         .pending-head { display:flex; align-items:baseline; gap:10px; margin-bottom:12px; }
         .pending-head h2 { font-size:14px; margin:0; text-transform:uppercase; letter-spacing:.05em; color:#956009; }
         .pending-head .count { font-family: ui-monospace, monospace; font-size:12px; color:#8a7256; }
@@ -304,18 +305,11 @@
         </div>
     </div>
 
-    {{-- Puente PC → celular: la cámara para escanear el pase de un huésped
-         está en el celular, no en este monitor -- recepción escanea este QR
-         con su celular y ahí se le abre directo /reservas/escanear. --}}
-    <div class="scan-bridge">
-        <img src="{{ route('reservations.scan_qr_image') }}" alt="QR para escanear reservas desde el celular">
-        <span>📷 Escaneá esto<br>con tu celular</span>
-    </div>
-
     {{-- Los interruptores de Ala Sur / categoría / piso se movieron al panel
          de administración (Categorías) -- no es responsabilidad de quien
          está en el tablero prender o apagar disponibilidad. --}}
 
+    <div class="pending-row-wrap">
     <div class="pending-panel">
         <div class="pending-head"><h2>⚠ Pendientes de gestionar</h2><span class="count">{{ $pendingBookings->count() }}</span></div>
         @if ($pendingBookings->isEmpty())
@@ -336,6 +330,15 @@
                 </a>
             @endforeach
         @endif
+    </div>
+
+    {{-- Puente PC → celular: la cámara para escanear el pase de un huésped
+         está en el celular, no en este monitor -- recepción escanea este QR
+         con su celular y ahí se le abre directo /reservas/escanear. --}}
+    <div class="scan-bridge">
+        <img src="{{ route('reservations.scan_qr_image') }}" alt="QR para escanear reservas desde el celular">
+        <span>📷 Escaneá esto<br>con tu celular</span>
+    </div>
     </div>
 
     <div class="summary">
